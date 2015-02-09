@@ -42,7 +42,7 @@ CONTAINS
     INTEGER, PARAMETER                      :: inunit=2
 
     REAL                                    :: dlon,dlat,lat,lata,lato
-  
+ 
      firstdat=year0 
      lastdat=year1 
     

@@ -522,6 +522,7 @@ end do
 ! Define bands 
 CALL define_bands 
 
+print*,'nwl = ', nwl
 !print*, ' size wlE ', size(wlE), ' size wlF ', size(wlF)
 ! ---------------
 
@@ -559,6 +560,10 @@ IF (.NOT.ALLOCATED(opticoef)) ALLOCATE(opticoef(8,nopti))
 OPEN(unit=inunit,file=leaf_file,status='old')
 REWIND inunit
 READ(inunit,*)opticoef
+!DO i=1,nopti
+!    print *,i,opticoef(2,i)
+!ENDDO
+print *,'shape of opticoef(2,:) = ',shape(opticoef(2,:))
 CLOSE(inunit)
 ! ----------------------------------------------------------------------
 
@@ -617,10 +622,11 @@ CLOSE(inunit)
 ! -----------------------------------------------------------------------
 
 ! Call fluspect 
-!print*, ' nwlS ', nwlS 
+print*, ' nwlS ', nwlS 
 !print*, ' nwlP ', nwlP 
 !print*, ' nopti ', nopti 
-nwl = nwlS 
+nwl = nwlS
+print *,'nwlS = ',nwlS 
 IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(nwlS))
 wl =  wlS
 
@@ -881,11 +887,11 @@ INTEGER                                                 :: i
   end do
 !  print*, ' n3 ', n3, ' ntot ', ntot
 
-    
+ ntot = n1      ! Just spectral region 1   
 !    spectral.wlS  = [reg1 reg2 reg3];
-IF (.NOT.ALLOCATED(wlS)) ALLOCATE(wlS(ntot-1))
-IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(ntot-1))
-    wlS = [reg1, reg2, reg3]
+IF (.NOT.ALLOCATED(wlS)) ALLOCATE(wlS(ntot))
+IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(ntot))
+    wlS = [reg1]
      wl =  wlS     
 !print*, ' min max wlS ', minval(wlS), maxval(wlS), sum(wlS)
 !print*, ' wlS ', wlS 
@@ -1196,6 +1202,8 @@ INTEGER                                            :: l,lm
 
 REAL, DIMENSION(nwl)                               :: intexp 
 
+print *,'nwl in fluspect is = ',nwl
+
 !%% parameters
 !% fixed parameters for the fluorescence module
 ndub        = 15
@@ -1228,6 +1236,10 @@ tau_thermal = leafpar(8)
 !print*, ' opticoef ',minval(opticoef(2,:)), maxval(opticoef(2,:))
 
 nr          = opticoef(2,:)
+print *,'shape of nr after opticoef assign = ', shape(nr)
+!print *,'nr = ',nr
+!print *,'minval of nr =',minval(nr)
+!print *,'minloc of nr =',minloc(nr)
 Kdm         = opticoef(3,:)
 Kab         = opticoef(4,:)
 Kw          = opticoef(5,:)
@@ -1581,6 +1593,11 @@ REAL                                :: sa, rd
  
 INTEGER                             :: i
 
+!print *,'nwl is = ',nwl
+!print *, 'nr = ', nr
+!print *,'minval of nr = ',minval(nr)
+print *,'shape of nr within calctav = ',shape(nr)
+
 rd          = pi/180
 n2          = nr**2
 np          = n2+1
@@ -1589,10 +1606,17 @@ a           = (nr+1)*(nr+1)/2
 k           = -(n2-1)*(n2-1)/4
 sa          = sin(alfa*rd)
 
-
+print *,'shape of n2 = ',shape(n2)
+print *,'shape of a = ',shape(a)
 
 !b1          = (alfa~=90)*sqrt((sa**2-np/2)*(sa**2-np/2)+k)
 b1 = 0. 
+!print *, 'sa = ', sa
+!print *, 'np = ', np
+!print *, 'k = ', k
+!print *, 'b1 = ', (sa**2-np/2)*(sa**2-np/2)+k
+!if (np.eq.1) print *,'sa=',sa,'np=',np,'k=',k
+
 if (alfa.ne.90)  b1  = sqrt((sa**2-np/2)*(sa**2-np/2)+k)
 
 b2          = sa**2-np/2
