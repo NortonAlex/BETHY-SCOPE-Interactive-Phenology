@@ -358,7 +358,20 @@ ENDWHERE
 
 
 !%% fluorescence (Replace this part by Magnani or other model if needed
-ps          = po0*Ja/Je     !          % this is the photochemical yield
+!print*,' po0 in biochemical = ',po0
+!print*,' Ja in biochemical = ',Ja
+!print*,' Je in biochemical = ',Je
+!print*,' po0 shape in biochemical = ',shape(po0)
+!print*,' Ja shape in biochemical = ',shape(Ja)
+!print*,' Je shape in biochemical = ',shape(Je)
+ WHERE (Ja == 0.) 
+ ps = 0.
+ ELSEWHERE
+ ps   =   po0*Ja/Je         !          % this is the photochemical yield
+ ENDWHERE
+
+
+!ps          = po0*Ja/Je     !          % this is the photochemical yield
 
 !print*, ' ps ', minval(ps), maxval(ps), sum(ps) 
 

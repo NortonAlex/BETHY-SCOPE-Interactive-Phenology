@@ -545,7 +545,6 @@ REAL                                         :: hm(24)
 
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
-print *, 'Time is = ', ihour
 
 ! When using Faquahar model to compute GPP and Fluo at leaf level 
 gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
@@ -928,9 +927,10 @@ DEALLOCATE(Ciu,Ccu,Tcu)
                         LoF_jl = LoF(ifreq_sat)
 ! IF (isNaN(LoF_jl))     LoF_jl = 0. 
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
-
+        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
 ! GPP
      rgppfluo(iyear,imonth,jj) = rgppfluo(iyear,imonth,jj)+Agtot*frac1
+     print*,'Agtot*frac1 equals: ',Agtot*frac1
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
@@ -950,9 +950,8 @@ endif
 
 END DO  ! Loop on the jd 
 
-print *,'jl is ', jl
-print *,'rfluo is ', rfluo
-print *,'rgppfluo is',rgppfluo
+print *,'shape of rfluo is ', shape(rfluo)
+print *,'shape of rgppfluo is',shape(rgppfluo)
 
 END Do     ! loop on jl
 
