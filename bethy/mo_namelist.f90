@@ -160,6 +160,7 @@ CONTAINS
        WRITE(6,*) '# station data file:              ',datfile
        WRITE(6,*) '# mapping file global:            ',mapping_file_global
 
+       print *, 'Grid points ng = ', ng
 ! Check grid settings
        IF (grdwid==0.5 .AND.  ng /= 62483) THEN
           STOP '0.5 degree reg grid must have 62483 land grid points'

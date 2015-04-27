@@ -562,8 +562,12 @@ if (im == 0 ) im =  12
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)
 
-
-  DO jl = 1,vp,100
+!print*,'shape of vp is ',shape(vp)
+!print*,'vp is ',vp
+!print*,'shape of gridp is ',shape(gridp)
+!print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
+!print*,'gridp array: ', gridp
+  DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -932,6 +936,8 @@ DEALLOCATE(Ciu,Ccu,Tcu)
      rgppfluo(iyear,imonth,jj) = rgppfluo(iyear,imonth,jj)+Agtot*frac1
      print*,'Agtot*frac1 equals: ',Agtot*frac1
 
+     zgppfluo(jj) = zgppfluo(jj)+Agtot*frac1     
+
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
 PAR_scope_cab(iyear,imonth,jj) =  PAR_scope_cab(iyear,imonth,jj) +Pntot_Cab*1e6*frac1
@@ -950,8 +956,6 @@ endif
 
 END DO  ! Loop on the jd 
 
-print *,'shape of rfluo is ', shape(rfluo)
-print *,'shape of rgppfluo is',shape(rgppfluo)
 
 END Do     ! loop on jl
 
