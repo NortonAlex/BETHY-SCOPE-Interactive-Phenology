@@ -49,7 +49,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   REAL, DIMENSION(vp)  :: lfac
 
   INTEGER :: jl, jj !FastOpt: new loop counter from diagnostics now in model
-  print *, 'entered the bethy code' 
+!  print *, 'entered the bethy code' 
 !------------------------------------------------------------------
 ! some initializations
 ! Note, remove inho dependency
@@ -164,7 +164,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
-           print *, 'daycount = ', daycount(iday), iday
+!           print *, 'daycount = ', daycount(iday), iday
 
            inho=13
 
@@ -190,7 +190,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
            DO its = 1, tspd
               keydiurnal = its + (daycount(iday)-1) * (tspd) + (oday-1) * (tspd*dstep) + (scale-1) * (tspd*nchk*dstep)
 !              print *, 'keydiurnal = ', keydiurnal, daycount(iday), iday, dayint
-              print *,'[keydiurnal, daycount(iday), iday, dayint] =', keydiurnal, daycount(iday), iday, dayint
+!              print *,'[keydiurnal, daycount(iday), iday, dayint] =', keydiurnal, daycount(iday), iday, dayint
               inho = MOD(its+11,24) + 1
               day1p = its-1
               ts=ts+1
@@ -206,6 +206,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
                     ENDIF
                  ENDIF
               ENDDO
+!              print *,'Inside diurnal timestep loop, inho = ', inho
               CALL climsubday2 (ng, REAL(inho))
 !              print *, 'swdown shape:', shape(swdown)
 !              print *, 'SWDOWN ARRAY:', swdown
@@ -231,14 +232,14 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
-              IF ( inho == 12 ) THEN
+              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,its,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab)             
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
-              print *,'SCOPE FLUO::', rfluo
-              print *,'SCOPE GPP::', rgppfluo
+!              print *,'SCOPE FLUO::', rfluo
+!              print *,'SCOPE GPP::', rgppfluo
               ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
@@ -265,12 +266,12 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
         !WOK-CHG-070625 also pass time step as last argument
 !FastOpt !$taf store zfpar = day_tape, rec = keyday 
         CALL ddiagnostics (nrun,outint,ng,vp,lmonth(aday)-fmonth(aday)+1,doy(rday),scale,fapar)
-        print *,'..end of inner daily loop'
-        RETURN
+!        print *,'..end of inner daily loop'
+!        RETURN
      ENDDO ! inner daily loop
-     print *,'.end of outer daily loop' 
+!     print *,'.end of outer daily loop' 
   ENDDO ! outer daily loop
-print *,'Outside of outer daily loop'
+!print *,'Outside of outer daily loop'
 
   ! .. update carbon balance (inc. soil respiration)
 !$TAF store dsleafshed,dspsoilst,rnppv = scale_tape, rec = scale

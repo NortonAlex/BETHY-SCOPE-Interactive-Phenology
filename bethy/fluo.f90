@@ -931,10 +931,10 @@ DEALLOCATE(Ciu,Ccu,Tcu)
                         LoF_jl = LoF(ifreq_sat)
 ! IF (isNaN(LoF_jl))     LoF_jl = 0. 
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
-        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
+!        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
 ! GPP
      rgppfluo(iyear,imonth,jj) = rgppfluo(iyear,imonth,jj)+Agtot*frac1
-     print*,'Agtot*frac1 equals: ',Agtot*frac1
+!     print*,'Agtot*frac1 equals: ',Agtot*frac1
 
      zgppfluo(jj) = zgppfluo(jj)+Agtot*frac1     
 
