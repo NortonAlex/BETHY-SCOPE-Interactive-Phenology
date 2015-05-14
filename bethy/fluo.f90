@@ -210,7 +210,7 @@ END SUBROUTINE read_radiation
      INTEGER                           :: nb
      INTEGER                           :: j,jp,k,jl,np,img  
      
-     print*, ' ifs ', ifs 
+!     print*, ' ifs ', ifs 
 
      if (ifs /=0 ) then 
     ! Uncertainties in BETHY when simulating fs ... To evalutate this 
@@ -546,6 +546,8 @@ REAL                                         :: hm(24)
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
 
+print *, 'in fluorescence subroutine'
+
 ! When using Faquahar model to compute GPP and Fluo at leaf level 
 gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
      faq = 0      ! 1: In addition to Collatz model, we use Faquahar model to compute GPP  0:  Only Collatz 
@@ -567,7 +569,7 @@ CALL pb_hour_bethy(hm)
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
-  DO jl = 1,vp
+  DO jl = 1,vp,100
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -583,7 +585,6 @@ CALL pb_hour_bethy(hm)
 ! Latitude/longitude of the grid cell
              Lati  =  lat(jj)             ! Latitude of the BETHY pixel
              Long  =  lon(jj)             ! Longitude of the BETHY pixel
-
 
 ! Search for the right modtran file 
 CALL modtran_file (imonth, Long) 
@@ -790,7 +791,6 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 
 ! Now we call the routines 
 ! 1. RTMO 
-
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&

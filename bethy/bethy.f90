@@ -88,12 +88,15 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   zgc = 0.
   dsevp = 0.
 
+print *, 'nchk =', nchk
+print *, 'tdays =', tdays
+
 !$taf store pasmmax = scale_tape, rec = scale
 !------------------------------------------------------------------
 ! .. outer daily time loop (for checkpointing)
 !------------------------------------------------------------------
   DO oday = 1,nchk
-     print *,'Outer daily time loop, oday =', oday
+!     print *,'Outer daily time loop, oday =', oday
      dstep=INT(tdays/nchk)
      IF (MOD(tdays,nchk).GT.0) THEN
         dstep = dstep + 1
@@ -106,7 +109,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
 ! .. inner daily time loop (for checkpointing)
 !------------------------------------------------------------------
      DO iday = 1, dstep
-        print *,'Inner daily time loop, iday =', iday
+!        print *,'Inner daily time loop, iday =', iday
         keyday = iday+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
 !        print *, 'keyday = ', keyday
 !FastOpt !$taf store dnpp,dpcevp,dpsevp,dtrp,esum,lai,laihi,lintw = day_tape, rec = keyday 
@@ -159,12 +162,13 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
 
         rmonth=amonth(rday)
 
-!   PRINT*,rday,iday0,iday1,sdays,aday
+   print*,"rday,iday0,iday1,sdays,aday"
+   PRINT*,rday,iday0,iday1,sdays,aday
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
-!           print *, 'daycount = ', daycount(iday), iday
+           print *, '..daycount = ', daycount(iday), iday
 
            inho=13
 

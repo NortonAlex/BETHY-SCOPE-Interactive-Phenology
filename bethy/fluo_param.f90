@@ -1927,7 +1927,7 @@ DO  i = 1,6
 !print*, 'n ',  i,minval(n), maxval(n), sum(n) 
 END DO 
 
-print*,minval(atmoM), maxval(atmoM), sum(atmoM)
+!print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
 DEALLOCATE(xdata,wlM,S,U,j,n)
 
