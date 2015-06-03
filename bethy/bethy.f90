@@ -54,6 +54,11 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
 ! some initializations
 ! Note, remove inho dependency
 !------------------------------------------------------------------
+
+!Output fluo and gppfluo for every day run, not just per rmonth. 
+  OPEN(unit=93,file='fluoro.bin',form='unformatted')
+  OPEN(unit=94,file='gppfluo.bin',form='unformatted')
+
   jdlast = 0
   ragain = .TRUE.
 

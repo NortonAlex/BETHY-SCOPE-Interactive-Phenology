@@ -482,6 +482,7 @@ REAL, DIMENSION(vp), INTENT(in)            :: zlai       ! LAI data
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope_cab
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
+REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 
 
 ! Local fields 
@@ -569,7 +570,7 @@ CALL pb_hour_bethy(hm)
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
-  DO jl = 1,vp,100
+  DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -928,6 +929,11 @@ DEALLOCATE(Ciu,Ccu,Tcu)
 ! by weighting ith the fraction of the PFT in the selected grid cell of BETHY
 
 ! Fluorescence
+
+!    For daily output files
+        dayfluo(jl) = LoF_jl
+        daygpp(jl) = Agtot
+
                         LoF_jl = LoF(ifreq_sat)
 ! IF (isNaN(LoF_jl))     LoF_jl = 0. 
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
@@ -956,6 +962,8 @@ endif
 
 END DO  ! Loop on the jd 
 
+write(93) dayfluo
+write(94) daygpp
 
 END Do     ! loop on jl
 
