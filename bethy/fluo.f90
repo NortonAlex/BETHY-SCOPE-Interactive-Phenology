@@ -547,7 +547,7 @@ REAL                                         :: hm(24)
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
 
-print *, 'in fluorescence subroutine'
+print *, '            In fluorescence subroutine'
 
 ! When using Faquahar model to compute GPP and Fluo at leaf level 
 gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
@@ -565,12 +565,12 @@ if (im == 0 ) im =  12
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)
 
-!print*,'shape of vp is ',shape(vp)
+print*,'            DO LOOP over vp: ', vp
 !print*,'vp is ',vp
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
-  DO jl = 1,vp
+  DO jl = 1,vp,300
         jj=gridp(jl)
 
  ! do jj = 1, ng

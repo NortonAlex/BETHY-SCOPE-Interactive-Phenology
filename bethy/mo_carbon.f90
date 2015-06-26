@@ -67,7 +67,7 @@ CONTAINS
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon
 
-    print *, "in photo1"
+    print *, "            in photo1"
 
     coszen(:)=mu(ts,:)
     klon=vp
@@ -296,7 +296,7 @@ CONTAINS
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon, fcinh
 
-    print *, "in photo2"
+    print *, "            in photo2"
 
     coszen(:)=mu(ts,:)
     klon=vp
@@ -669,6 +669,7 @@ CONTAINS
 
 !$taf loop = parallel
 !!    IF (KFLG.EQ.0) THEN          ! First ENTRY, calculate gs0 from TC = T
+!    print *,'            DO LOOP over vp: ', NLIST
        
     DO Jl = 1, NLIST
        Jj = gridl(Jl)
@@ -1013,6 +1014,7 @@ CONTAINS
 !
 !---------------------------------------------------------------------------------
 !$taf loop = parallel
+!    print *,'            DO LOOP over vp: ', NLIST
     DO Jl = 1, NLIST
        Jj = gridl(Jl)
        T = TC(JL) + 273.16             !  Canopy or Vegetation Temperature K

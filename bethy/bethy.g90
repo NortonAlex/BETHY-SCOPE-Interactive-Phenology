@@ -101,7 +101,8 @@ print *, 'tdays =', tdays
 ! .. outer daily time loop (for checkpointing)
 !------------------------------------------------------------------
   DO oday = 1,nchk
-!     print *,'Outer daily time loop, oday =', oday
+     print *,'OUTER DAILY TIME-LOOP'
+     print *,'oday = ', oday
      dstep=INT(tdays/nchk)
      IF (MOD(tdays,nchk).GT.0) THEN
         dstep = dstep + 1
@@ -114,7 +115,8 @@ print *, 'tdays =', tdays
 ! .. inner daily time loop (for checkpointing)
 !------------------------------------------------------------------
      DO iday = 1, dstep
-!        print *,'Inner daily time loop, iday =', iday
+        print *,'    INNER DAILY TIME-LOOP'
+        print *,'    iday = ', iday
         keyday = iday+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
 !        print *, 'keyday = ', keyday
 !FastOpt !$taf store dnpp,dpcevp,dpsevp,dtrp,esum,lai,laihi,lintw = day_tape, rec = keyday 
@@ -167,13 +169,13 @@ print *, 'tdays =', tdays
 
         rmonth=amonth(rday)
 
-   print*,"rday,iday0,iday1,sdays,aday"
-   PRINT*,rday,iday0,iday1,sdays,aday
+!   print*,"rday,iday0,iday1,sdays,aday"
+!   PRINT*,rday,iday0,iday1,sdays,aday
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
-           print *, '..daycount = ', daycount(iday), iday
+!           print *, '..daycount = ', daycount(iday), iday
 
            inho=13
 
@@ -190,6 +192,7 @@ print *, 'tdays =', tdays
 
            CALL climsubday1 (ng, vp, fe, iday0, iday1)
            keydayint = daycount(iday)+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
+           print *,'    daycount(iday) = ', daycount(iday)  
 !           print*, 'iday, keydayint = ',iday, keydayint
 !$TAF store mu, tmp, pair, cloudf  = dayint_tape, rec = keydayint
 
@@ -199,8 +202,11 @@ print *, 'tdays =', tdays
            DO its = 1, tspd
               keydiurnal = its + (daycount(iday)-1) * (tspd) + (oday-1) * (tspd*dstep) + (scale-1) * (tspd*nchk*dstep)
 !              print *, 'keydiurnal = ', keydiurnal, daycount(iday), iday, dayint
+              print *,'        DIURNAL TIME-LOOP'
+              print *,'        its = ', its
 !              print *,'[keydiurnal, daycount(iday), iday, dayint] =', keydiurnal, daycount(iday), iday, dayint
               inho = MOD(its+11,24) + 1
+              print *,'        inho = ', inho
               day1p = its-1
               ts=ts+1
               DO k = 1, vp
