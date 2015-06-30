@@ -175,7 +175,7 @@ ifeq ($(COMPILER),INTEL)# INTEL Compiler
 	RTECHECK        = -C
 	OPTFLAG         = -O3#-xW -tpp7 
 	F90FLAGS        =  $(INCDIRS) $(OPTFLAG)
-	F90FLAGS        =  $(INCDIRS) 
+	F90FLAGS        =  $(INCDIRS) $(DEBUGFLAG) 
 	FFLAGS        	=  $(F90FLAGS)  
 	LSOPT 	= /scratch/local1/adbethy/
 	TAFDIR	= /scratch/local1/m211024/taf
