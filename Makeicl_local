@@ -12,8 +12,8 @@ DEBUGFLAG       = -g -p -traceback -fpe0 -O0
 RTECHECK        =# -C
 OPTFLAG         =-O3
 F90FLAGS        =  -static  $(INCDIRS)  $(OPTFLAG)
-F90FLAGS       =    --static $(INCDIRS)  $(RTECHECK) $(DEBUGFLAG)
-
+F90FLAGS       =    --static -openmp $(INCDIRS)  $(RTECHECK) $(DEBUGFLAG)
+ 
 #
 NETCDFINCDIR	= 
 NETCDFLIBDIR	= 
