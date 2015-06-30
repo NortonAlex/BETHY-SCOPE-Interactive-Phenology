@@ -13,7 +13,7 @@ RTECHECK        =# -C
 OPTFLAG         =-O3
 F90FLAGS        =  -static  $(INCDIRS)  $(OPTFLAG)
 F90FLAGS       =    --static -openmp $(INCDIRS)  $(RTECHECK) $(DEBUGFLAG)
- 
+LINKFLAGS      = -openmp $(RTECHECK) $(DEBUGFLAG) 
 #
 NETCDFINCDIR	= 
 NETCDFLIBDIR	= 
