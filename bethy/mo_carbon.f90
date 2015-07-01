@@ -649,7 +649,8 @@ CONTAINS
     REAL    T, T0, T1, eta, pvmmin
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
-    
+
+    DATA THETA    /0.83/       ! THETA   CURVATURE PARAMETER    
     DATA eta      /0.99/       ! eta     colimitation shape parameter
 
 
