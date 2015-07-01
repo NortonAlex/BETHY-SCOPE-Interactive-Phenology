@@ -567,6 +567,9 @@ CALL pb_hour_bethy(hm)
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
+
+!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(rfluo, rgppfluo, zgppfluo, PAR_scope, PAR_scope_cab)
+
   DO jl = 1,vp,300
         jj=gridp(jl)
 
@@ -963,6 +966,8 @@ write(93) dayfluo
 write(94) daygpp
 
 END Do     ! loop on jl
+
+!$OMP END PARALLEL DO
 
 ial = 1
 
