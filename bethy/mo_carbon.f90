@@ -67,8 +67,6 @@ CONTAINS
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon
 
-    print *, "            in photo1"
-
     coszen(:)=mu(ts,:)
     klon=vp
     nveglist=vp
@@ -295,8 +293,6 @@ CONTAINS
     REAL, DIMENSION(ng) :: zirrin, zpar,coszen
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon, fcinh
-
-    print *, "            in photo2"
 
     coszen(:)=mu(ts,:)
     klon=vp
