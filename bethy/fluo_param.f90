@@ -1141,7 +1141,7 @@ REAL, INTENT(IN), DIMENSION(:)                   :: leafpar
 !REAL, INTENT(OUT),  DIMENSION(nwl)                :: tran,refl,kChrel
 
 ! Local variables 
-REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe
+REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
 REAL, DIMENSION(nwlP)                               :: phiI, phiII, Kall,t1,t2,taut
 REAL, DIMENSION(nwlP)                               :: talf,ralf

@@ -654,6 +654,7 @@ CONTAINS
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
     
+    DATA eta      /0.99/       ! eta     colimitation shape parameter
 
 
 !-----------------------------------------------------------------------
