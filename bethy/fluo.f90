@@ -568,7 +568,17 @@ CALL pb_hour_bethy(hm)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
 
-!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(rfluo, rgppfluo, zgppfluo, PAR_scope, PAR_scope_cab)
+!!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(jl,jj,sum_frac_tot,ok,Lati,Long) &
+!!$OMP& PRIVATE(jd,t,Rin,Rli,Ta,pa,ea,LAI,pft,Vcmo,frac1,Cc,Oa,CCc,Occ,Jmo) &
+!!$OMP& PRIVATE(LAI_max,Tch,Tcu,Cch,Ccu,Fs,Ps,Fc,F0,F1,F0a,Pnhc,Rnhc,F1a) &
+!!$OMP& PRIVATE(Pnuc,Rnuc,Agtot,Actot,Pntot,Agh,Ah,Agu,Au,LoF_jl,LoF,imonth) &
+
+!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
+!$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
+!$OMP& SHARED(irrin,lwd,temp,pres,ea0,Cab,zlai,vg_nv,vm,frac,Cca,COa) &
+!$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
+!$OMP& SHARED(nl,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
+!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab)
 
   DO jl = 1,vp,300
         jj=gridp(jl)
@@ -593,6 +603,12 @@ CALL modtran_file (imonth, Long)
 ! We select the appropriate spectrum  ...  for the mid-latitudes , we have two
 ! files (winter and summer) and one file. We select the file according to the
 ! latitude 
+  atmos_file = './input/scope/radiationdata/FLEX-S3_std.atm'
+  print *,'filename   atmos_file:', atmos_file
+  print *,'spectral_nreg:', spectral_nreg
+  print *,'spectral_start:', spectral_start
+  print *,'spectral_end:', spectral_end
+  print *,'spectral_res:', spectral_res
 CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
 
@@ -629,7 +645,7 @@ tts    = min(85.,ttsR/deg2rad)                                  ! %sun zenith an
          frac_max = -999
           LAI_max = -999
 pft_dominant_cell = -999
-           jl_max = -999
+           !jl_max = -999
             v_max = -999
 
 ! We go through up to the 3 PFTs that are in the selected BETHY grid cell
