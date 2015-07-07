@@ -564,7 +564,7 @@ if (im == 0 ) im =  12
 CALL pb_hour_bethy(hm)
 
 ! Read in modtran atmosphere transmittance files to variable array
-CALL read_modtran_files
+!CALL read_modtran_files
 
 !print*,'vp is ',vp
 !print*,'shape of gridp is ',shape(gridp)
@@ -1241,31 +1241,33 @@ INTEGER, INTENT(IN)   :: month
 REAL, INTENT(IN)      :: lon
 INTEGER, INTENT(OUT)  :: iatmos_file
 
+! Use of standard atmosphere
+iatmos_file = 1
 
 ! Use of tropical atmosphere 
-IF ((lon.le.30.).and.(lon.ge.-30.)) iatmos_file=1
+IF ((lon.le.30.).and.(lon.ge.-30.)) iatmos_file=2
 
 
 ! NORTH HEMISPHERE 
 ! Winter in mid-latitude in northern hemisphere 
 If (lon.gt.30.) then
- if ((month.ge.10).or.(month.le.3)) iatmos_file=2
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=3
 endif
 
 ! Summer  in mid-latitude in northern hemisphere
 If (lon.gt.30.) then
- if ((month.ge.4).and.(month.le.9)) iatmos_file=3
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=4
 endif
 
 ! SOUTH HEMISPHERE 
 ! Summer in mid-latitude in southern hemisphere
 If (lon.lt.-30.) then
- if ((month.ge.10).or.(month.le.3)) iatmos_file=3
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=4
 endif
 
 ! Winter in mid-latitude in northern hemisphere
 If (lon.lt.-30.) then
- if ((month.ge.4).and.(month.le.9)) iatmos_file=2
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=3
 endif
 
 

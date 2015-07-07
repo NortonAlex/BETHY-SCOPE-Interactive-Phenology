@@ -97,7 +97,7 @@ IMPLICIT NONE
 !resolution
 !global psi tto tto_ psi_ noa 
 
-integer, parameter                       :: natmosfiles = 3
+integer, parameter                       :: natmosfiles = 4
 REAL,   ALLOCATABLE,DIMENSION(:,:,:)     :: xdata
 INTEGER                                  :: nwM
 
@@ -317,6 +317,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)        :: rsfile
 ! 10.3 MODTRAN output spectrum (used as input for SCOPE)
 CHARACTER(len=80)                        :: path_atmos_file = './input/scope/radiationdata/'
 CHARACTER(len=80)                        :: atmos_file
+CHARACTER(len=80)                        :: modtran_std   ! The atmosphere files, std for standard atmosphere
 CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
 CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
 CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
@@ -480,8 +481,9 @@ gcmin           = 1E-6                    ! %[m s-1]            minimum stomatal
                                           ! %                   ... this parameter is used to avoid instability
                                                                     
 ! File MODTRAN for default  standard atmosphere 
-atmos_file = trim(path_atmos_file)//'FLEX-S3_std.atm'
-
+!atmos_file = trim(path_atmos_file)//'FLEX-S3_std.atm'
+modtran_std = trim(path_atmos_file)//'FLEX-S3_std.atm'
+atmos_file = modtran_std
 
 ! File for tropics 
 modtran_trop = trim(path_atmos_file)//'FLEX-S3_Trop.atm'
@@ -1737,29 +1739,35 @@ SUBROUTINE read_modtran_files()
 IMPLICIT NONE
 
 integer :: iatmosfile
+CHARACTER(len=80)                        :: atmfile
 
 print*,'In subroutine: read_modtran_files'
 
-! Use of tropical atmosphere
+! Use of standard atmosphere
 iatmosfile = 1
-atmos_file = trim(modtran_trop)
-call read_atm_files(iatmosfile, atmos_file)
+atmfile = trim(modtran_std)
+call read_atm_files(iatmosfile, atmfile)
+
+! Use of tropical atmosphere
+iatmosfile = 2
+atmfile = trim(modtran_trop)
+call read_atm_files(iatmosfile, atmfile)
 !IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
 
 
 ! NORTH HEMISPHERE 
 ! Winter in mid-latitude in northern hemisphere 
-iatmosfile = 2
-atmos_file = trim(modtran_wint)
-call read_atm_files(iatmosfile, atmos_file)
+iatmosfile = 3
+atmfile = trim(modtran_wint)
+call read_atm_files(iatmosfile, atmfile)
 !If (lon.gt.30.) then
 ! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
 !endif
 
 ! Summer  in mid-latitude in northern hemisphere
-iatmosfile = 3
-atmos_file = trim(modtran_sum)
-call read_atm_files(iatmosfile, atmos_file)
+iatmosfile = 4
+atmfile = trim(modtran_sum)
+call read_atm_files(iatmosfile, atmfile)
 !If (lon.gt.30.) then
 ! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
 !endif
