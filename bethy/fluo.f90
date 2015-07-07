@@ -571,6 +571,8 @@ CALL pb_hour_bethy(hm)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
 
+print*,'In fluo, before vp loop'
+
 !!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(jl,jj,sum_frac_tot,ok,Lati,Long) &
 !!$OMP& PRIVATE(jd,t,Rin,Rli,Ta,pa,ea,LAI,pft,Vcmo,frac1,Cc,Oa,CCc,Occ,Jmo) &
 !!$OMP& PRIVATE(LAI_max,Tch,Tcu,Cch,Ccu,Fs,Ps,Fc,F0,F1,F0a,Pnhc,Rnhc,F1a) &
@@ -587,7 +589,7 @@ CALL pb_hour_bethy(hm)
         jj=gridp(jl)
 
  ! do jj = 1, ng
-
+print*,'In fluo, inside vp loop at: ', jl
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
       sum_frac_tot = 0.
@@ -614,6 +616,7 @@ CALL modtran_ifile (imonth, Long, jatmos_file)
 !  print *,'spectral_res:', spectral_res
 CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
+print*,'In fluo, after aggreg call'
 
 ! Diurnal variations. We only consider the data at 12 h, which correspond to
 ! BEHTY its of 24 
