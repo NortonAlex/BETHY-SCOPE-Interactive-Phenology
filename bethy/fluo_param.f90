@@ -696,9 +696,10 @@ CALL leafangles(LIDFa,LIDFb)
 !CALL layers
 !dx     = abs(xlay(2)-xlay(1))                          !  %
 
-tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
-psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
-noa    = size(tto_,1)     !  %       Number of Observation Angles 
+!tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
+!psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
+noa    = size(angles(:,1),1) !  %       Number of Observation Angles
+!noa    = size(tto_,1)     !  %       Number of Observation Angles 
 
 !print*, ' noa ', noa 
 
@@ -1151,7 +1152,7 @@ REAL, INTENT(IN), DIMENSION(:)                   :: leafpar
 !REAL, INTENT(OUT),  DIMENSION(nwl)                :: tran,refl,kChrel
 
 ! Local variables 
-REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
+REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
 REAL, DIMENSION(nwlP)                               :: phiI, phiII, Kall,t1,t2,taut
 REAL, DIMENSION(nwlP)                               :: talf,ralf

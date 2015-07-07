@@ -49,6 +49,7 @@ SUBROUTINE init_config (npoint)
      DO vl=1,nv
         CTYPE=vtype(j,vl)
         IF (ctype /= 0) THEN
+           k=k+1
            vg_nv(k) = CTYPE
            gridvp(j,vl) = k
            frac(k)=vfrac(j,vl)
@@ -56,6 +57,7 @@ SUBROUTINE init_config (npoint)
      ENDDO
   ENDDO
 
+k=0
 
   DO j=1,npoint
      DO vl=1,nv
