@@ -97,6 +97,10 @@ IMPLICIT NONE
 !resolution
 !global psi tto tto_ psi_ noa 
 
+integer, parameter                       :: natmosfiles = 3
+REAL,   ALLOCATABLE,DIMENSION(:,:,:)     :: xdata
+INTEGER                                  :: nwM
+
 INTEGER                                  :: nlazi,nli,noa,nwl,nl
 INTEGER                                  :: nwlfi,nwlfo,nwlt 
 INTEGER                                  :: nwlP,nwlF,nwlS,nwlO,nwlE,nwlPAR
@@ -318,6 +322,7 @@ CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere file
 CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
 
 REAL, ALLOCATABLE,DIMENSION(:,:)         :: atmoM
+INTEGER                                  :: jatmos_file
 
 
 ! 10.4 observation angles in case of BRDF calculation
@@ -352,7 +357,7 @@ INTEGER, PARAMETER                   :: inunit = 2
 
 INTEGER                              :: ireg 
 
-
+print*,'In subroutine: fluo_initparam'
 
 ! ---------------------------------------------------------------------
 ! Now we assign the default values of these parameters 
@@ -487,6 +492,8 @@ modtran_wint = trim(path_atmos_file)//'FLEX-S3_Wint.atm'
 ! Summer 
 modtran_sum = trim(path_atmos_file)//'FLEX-S3_Mar.atm'
 
+CALL read_modtran_files
+
 ! Here GOSAT frequency used for fluo data retrieval in nm  
 freq_sat =  755.                      
 
@@ -536,7 +543,8 @@ CALL define_bands
 !print*,'spectral_end ', spectral_end
 !print*, ' spectral_res ', spectral_res
 
-CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
+!!!!!!!! FIXME: commenting out this line is just a test ....
+!CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
 !END DO 
@@ -1724,10 +1732,96 @@ END SUBROUTINE dcum
 
 END SUBROUTINE Nlayers
 
+SUBROUTINE read_modtran_files()
+
+IMPLICIT NONE
+
+integer :: iatmosfile
+
+print*,'In subroutine: read_modtran_files'
+
+! Use of tropical atmosphere
+iatmosfile = 1
+atmos_file = trim(modtran_trop)
+call read_atm_files(iatmosfile, atmos_file)
+!IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
+
+
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
+iatmosfile = 2
+atmos_file = trim(modtran_wint)
+call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
+!endif
+
+! Summer  in mid-latitude in northern hemisphere
+iatmosfile = 3
+atmos_file = trim(modtran_sum)
+call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
+!endif
+
+! SOUTH HEMISPHERE 
+! Summer in mid-latitude in southern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
+!endif
+
+! Winter in mid-latitude in northern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_wint)
+!endif
+
+END SUBROUTINE read_modtran_files
+
+
+subroutine read_atm_files(iatmosfile, atmosfile)
+
+integer, intent(in) :: iatmosfile
+CHARACTER(len=80), INTENT(IN)                :: atmosfile
+
+character(len = 300) :: header
+!integer              :: nwM
+integer, parameter :: inunit = 1537
+integer              :: i
+
+print *,'In subroutine: read_atm_files'
+print *,'atmosfile: ', atmosfile
+
+OPEN(unit=inunit,file=atmosfile,status='old')
+REWIND inunit
+READ(inunit,*) header
+READ(inunit,*) header
+ nwM = 0
+    DO WHILE (.TRUE.)
+       READ(inunit,*,END=1000) header ! just skip data
+       nwM =  nwM+1
+    END DO
+1000 CONTINUE
+CLOSE(inunit)
+!print*, ' nwM ', nwM 
+
+IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(natmosfiles,nwM,20))
+
+OPEN(unit=inunit,file=atmosfile,status='old')
+REWIND inunit
+READ(inunit,*) header
+READ(inunit,*) header
+!print*, header
+
+DO i=1, nwM
+READ(inunit,*)xdata(iatmosfile,i,:)
+END DO
+CLOSE(inunit)
+
+end subroutine read_atm_files
 
  !function [M] = aggreg(atmfile,SCOPEspec)
 
- SUBROUTINE aggreg (atmosfile,nreg,streg,enreg,width) 
+ SUBROUTINE aggreg (iatmosfile,nreg,streg,enreg,width) 
 
  IMPLICIT NONE 
 
@@ -1738,15 +1832,16 @@ CHARACTER(len=120)                           :: header
 
 ! Input variables 
 INTEGER, INTENT(IN)                          :: nreg 
-CHARACTER(len=80), INTENT(IN)                :: atmosfile 
+!CHARACTER(len=80), INTENT(IN)                :: atmosfile 
+integer, INTENT(IN)                :: iatmosfile
 REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width 
 
 !Output variables 
 !REAL, ALLOCATABLE,DIMENSION(:,:),INTENT(OUT) :: atmoM 
 
 ! Local variables 
-INTEGER                                      :: nwM 
-REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
+!INTEGER                                      :: nwM 
+!REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
 INTEGER,PARAMETER                            :: inunit = 2
 REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
 REAL,  ALLOCATABLE,DIMENSION(:,:)            :: U 
@@ -1768,31 +1863,32 @@ REAL                                         :: w
 
 !% Read .atm file with MODTRAN data
 !s   = importdata(atmfile);
-OPEN(unit=inunit,file=atmosfile,status='old')
-REWIND inunit
-READ(inunit,*) header
-READ(inunit,*) header
- nwM = 0
-    DO WHILE (.TRUE.)
-       READ(inunit,*,END=1000) header ! just skip data
-       nwM =  nwM+1
-    END DO
-1000 CONTINUE
-CLOSE(inunit)
+!print *,'In aggreg: ', trim(atmosfile)
+!OPEN(unit=inunit,file=atmosfile,status='old')
+!REWIND inunit
+!READ(inunit,*) header
+!READ(inunit,*) header
+! nwM = 0
+!    DO WHILE (.TRUE.)
+!       READ(inunit,*,END=1000) header ! just skip data
+!       nwM =  nwM+1
+!    END DO
+!1000 CONTINUE
+!CLOSE(inunit)
 !print*, ' nwM ', nwM 
 
-IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(nwM,20))
+IF (.NOT.ALLOCATED(xdata)) stop 'xdata not available ....'
 
-OPEN(unit=inunit,file=atmosfile,status='old')
-REWIND inunit
-READ(inunit,*) header
-READ(inunit,*) header
+!OPEN(unit=inunit,file=atmosfile,status='old')
+!REWIND inunit
+!READ(inunit,*) header
+!READ(inunit,*) header
 !print*, header
 
-DO i=1, nwM
-READ(inunit,*)xdata(i,:)
-END DO
-CLOSE(inunit)
+!DO i=1, nwM
+!READ(inunit,*)xdata(i,:)
+!END DO
+!CLOSE(inunit)
 
 !print*, xdata(1,:)
 !print*
@@ -1800,7 +1896,7 @@ CLOSE(inunit)
 
 IF (.NOT.ALLOCATED(wlM)) ALLOCATE(wlM(nwM))
 
-wlM = xdata(:,2)
+wlM = xdata(iatmosfile,:,2)
 !T  = s.data(:,3:20);
 
 !% Extract 6 relevant columns from T
@@ -1814,12 +1910,12 @@ wlM = xdata(:,2)
 !U     = [T(:,1) T(:,3) T(:,4) T(:,5) T(:,12) T(:,16)];
 IF (.NOT.ALLOCATED(U)) ALLOCATE(U(nwM,6))
 !U     =  [xdata(:,3),xdata(:,5),xdata(:,6),xdata(:,7),xdata(:,14),xdata(:,18)]
-U(:,1) = xdata(:,3)
-U(:,2) = xdata(:,5)
-U(:,3) = xdata(:,6)
-U(:,4) = xdata(:,7)
-U(:,5) = xdata(:,14)
-U(:,6) = xdata(:,18)
+U(:,1) = xdata(iatmosfile,:,3)
+U(:,2) = xdata(iatmosfile,:,5)
+U(:,3) = xdata(iatmosfile,:,6)
+U(:,4) = xdata(iatmosfile,:,7)
+U(:,5) = xdata(iatmosfile,:,14)
+U(:,6) = xdata(iatmosfile,:,18)
 
 !DO  i=1,6
 !print*, ' U ',i, minval(U(:,i)), maxval(U(:,i)), sum(U(:,i))
@@ -1929,7 +2025,8 @@ END DO
 
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
-DEALLOCATE(xdata,wlM,S,U,j,n)
+DEALLOCATE(wlM,S,U,j,n)
+!DEALLOCATE(xdata,wlM,S,U,j,n)
 
 END SUBROUTINE aggreg
 

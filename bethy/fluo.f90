@@ -563,6 +563,9 @@ if (im == 0 ) im =  12
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)
 
+! Read in modtran atmosphere transmittance files to variable array
+CALL read_modtran_files
+
 !print*,'vp is ',vp
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
@@ -580,7 +583,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab)
 
-  DO jl = 1,vp,300
+  DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -598,18 +601,18 @@ CALL pb_hour_bethy(hm)
              Long  =  lon(jj)             ! Longitude of the BETHY pixel
 
 ! Search for the right modtran file 
-CALL modtran_file (imonth, Long) 
+CALL modtran_ifile (imonth, Long, jatmos_file) 
 
 ! We select the appropriate spectrum  ...  for the mid-latitudes , we have two
 ! files (winter and summer) and one file. We select the file according to the
 ! latitude 
-  atmos_file = './input/scope/radiationdata/FLEX-S3_std.atm'
-  print *,'filename   atmos_file:', atmos_file
-  print *,'spectral_nreg:', spectral_nreg
-  print *,'spectral_start:', spectral_start
-  print *,'spectral_end:', spectral_end
-  print *,'spectral_res:', spectral_res
-CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
+!  atmos_file = './input/scope/radiationdata/FLEX-S3_std.atm'
+  print *,'atmos_file index:', jatmos_file
+!  print *,'spectral_nreg:', spectral_nreg
+!  print *,'spectral_start:', spectral_start
+!  print *,'spectral_end:', spectral_end
+!  print *,'spectral_res:', spectral_res
+CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
 
 ! Diurnal variations. We only consider the data at 12 h, which correspond to
@@ -1182,6 +1185,92 @@ If (lon.lt.-30.) then
 endif
 
 END SUBROUTINE modtran_file 
+
+!SUBROUTINE read_modtran_files()
+
+!USE fluo_param, ONLY : read_atm_files,atmos_file,modtran_trop, modtran_sum, modtran_wint
+
+!IMPLICIT NONE
+
+!integer :: iatmosfile
+
+! Use of tropical atmosphere
+!iatmosfile = 1
+!atmos_file = trim(modtran_trop)
+!call read_atm_files(iatmosfile, atmos_file)
+!IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
+
+
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
+!iatmosfile = 2
+!atmos_file = trim(modtran_wint)
+!call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
+!endif
+
+! Summer  in mid-latitude in northern hemisphere
+!iatmosfile = 3
+!atmos_file = trim(modtran_sum)
+!call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
+!endif
+
+! SOUTH HEMISPHERE 
+! Summer in mid-latitude in southern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
+!endif
+
+! Winter in mid-latitude in northern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_wint)
+!endif
+
+!END SUBROUTINE read_modtran_files
+
+SUBROUTINE modtran_ifile(month, lon, iatmos_file)
+
+USE fluo_param, ONLY : atmos_file,modtran_trop, modtran_sum, modtran_wint
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)   :: month
+REAL, INTENT(IN)      :: lon
+INTEGER, INTENT(OUT)  :: iatmos_file
+
+
+! Use of tropical atmosphere 
+IF ((lon.le.30.).and.(lon.ge.-30.)) iatmos_file=1
+
+
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
+If (lon.gt.30.) then
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=2
+endif
+
+! Summer  in mid-latitude in northern hemisphere
+If (lon.gt.30.) then
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=3
+endif
+
+! SOUTH HEMISPHERE 
+! Summer in mid-latitude in southern hemisphere
+If (lon.lt.-30.) then
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=3
+endif
+
+! Winter in mid-latitude in northern hemisphere
+If (lon.lt.-30.) then
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=2
+endif
+
+
+
+END SUBROUTINE modtran_ifile
 
 
 ! This routine is to correct the actual local time of BETHY 
