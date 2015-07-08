@@ -390,7 +390,13 @@ USE mo_namelist
 USE mo_grid
 
 ! Fluo 
-USE fluo_param 
+USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
+                      & spectral_res,tts,tto,Rin,Rli,Ta,pa,ea,LAI,Vcmo,Oa,Cab,option, &
+                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe, &
+                      & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
+                      & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
+                      & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
+                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial 
 USE fluo_func 
 USE mo_rtmo 
 USE chemical
@@ -583,7 +589,7 @@ print*,'In fluo, before vp loop'
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,Cab,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
 !$OMP& SHARED(nl,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
-!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab)
+!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat)
 
   DO jl = 1,vp
         jj=gridp(jl)
@@ -819,6 +825,7 @@ CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
         & Pnhc_Cab, Pnuc_Cab)
 
+print*,'In fluo, after rtmo call'
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs(1) = 1.-Ps(size(Ps))
         Fs(2) = Ps(size(Ps))
@@ -900,6 +907,7 @@ CALL biochemical(nlh,Pnhc*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,opti
 ! Sunlit leaves 
 CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu)
 
+print*,'In fluo, after biochemical calls'
 
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
