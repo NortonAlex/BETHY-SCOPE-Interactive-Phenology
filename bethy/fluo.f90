@@ -399,8 +399,8 @@ USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spec
                       & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial 
 USE fluo_func 
 USE mo_rtmo 
-USE chemical
-USE mo_rtmf
+USE chemical, ONLY : biochemical_faq, biochemical
+USE mo_rtmf, ONLY : rtmf  
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -588,14 +588,14 @@ print*,'In fluo, before vp loop'
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,Cab,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
-!$OMP& SHARED(nl,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
+!$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto)
 
   DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
-print*,'In fluo, inside vp loop at: ', jl
+!print*,'In fluo, inside vp loop at: ', jl
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
       sum_frac_tot = 0.
@@ -615,14 +615,13 @@ CALL modtran_ifile (imonth, Long, jatmos_file)
 ! files (winter and summer) and one file. We select the file according to the
 ! latitude 
 !  atmos_file = './input/scope/radiationdata/FLEX-S3_std.atm'
-  print *,'atmos_file index:', jatmos_file
+!  print *,'atmos_file index:', jatmos_file
 !  print *,'spectral_nreg:', spectral_nreg
 !  print *,'spectral_start:', spectral_start
 !  print *,'spectral_end:', spectral_end
 !  print *,'spectral_res:', spectral_res
 CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
-print*,'In fluo, after aggreg call'
 
 ! Diurnal variations. We only consider the data at 12 h, which correspond to
 ! BEHTY its of 24 
@@ -825,7 +824,6 @@ CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
         & Pnhc_Cab, Pnuc_Cab)
 
-print*,'In fluo, after rtmo call'
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs(1) = 1.-Ps(size(Ps))
         Fs(2) = Ps(size(Ps))
@@ -907,7 +905,6 @@ CALL biochemical(nlh,Pnhc*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,opti
 ! Sunlit leaves 
 CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu)
 
-print*,'In fluo, after biochemical calls'
 
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
