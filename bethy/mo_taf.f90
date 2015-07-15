@@ -1,5 +1,1 @@
-MODULE mo_taf
-  INTEGER :: ikey
-  INTEGER :: keydiurnal, keyday, keydayint
-  INTEGER :: maxkeydiurnal, maxkeyday, maxkeydayint
-END MODULE mo_taf
+/home/STUDENT/nortona/fluoro2/bethy/mo_taf.f90

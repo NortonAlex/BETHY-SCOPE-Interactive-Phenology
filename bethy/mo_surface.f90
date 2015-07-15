@@ -1,9 +1,1 @@
-MODULE mo_surface
-
-!CCCC surface variables 
-
-  IMPLICIT NONE
-
-  REAL, ALLOCATABLE, DIMENSION(:) ::  rbe
-
-END MODULE mo_surface
+/home/STUDENT/nortona/fluoro2/bethy/mo_surface.f90

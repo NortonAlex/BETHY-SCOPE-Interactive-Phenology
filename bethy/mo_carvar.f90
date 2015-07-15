@@ -1,10 +1,1 @@
-MODULE mo_carvar
-
-!CCCC mo_carbon variables 
-
-  IMPLICIT NONE
-
-  REAL, ALLOCATABLE, DIMENSION(:,:) ::  pci
-  REAL, ALLOCATABLE, DIMENSION(:) ::  zci
-
-END MODULE mo_carvar
+/home/STUDENT/nortona/fluoro2/bethy/mo_carvar.f90
