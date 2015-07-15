@@ -1227,14 +1227,14 @@ rho_thermal = leafpar(7)
 tau_thermal = leafpar(8)
 
 
-!print*, ' Cab ', Cab 
-!print*, ' Cdm ', Cdm 
-!print*, ' Cw ', Cw 
-!print*, ' Csm ', Csm 
-!print*, ' N ', N 
-!print*, ' fqe ', fqe 
-!print*, 'rho_thermal ', rho_thermal 
-!print*, 'tau_thermal ', tau_thermal 
+!print*, 'fluspect: Cab ', Cab 
+!print*, 'fluspect: Cdm ', Cdm 
+!print*, 'fluspect: Cw ', Cw 
+!print*, 'fluspect: Csm ', Csm 
+!print*, 'fluspect: N ', N 
+!print*, 'fluspect: fqe ', fqe 
+!print*, 'fluspect: rho_thermal ', rho_thermal 
+!print*, 'fluspect: tau_thermal ', tau_thermal 
 
 !print*, ' size ', size(nr)
 !print*, ' opticoef ',minval(opticoef(2,:)), maxval(opticoef(2,:))
@@ -1495,6 +1495,11 @@ DO i = 1,ndub
     wre(1,:) = re
     wrf(:,1) = rf
 
+!   print*,' in fluspect, wxe ', minval(wxe), maxval(wxe), sum(wxe)
+!   print*,' in fluspect, wxf ', minval(wxf), maxval(wxf), sum(wxf)
+!   print*,' in fluspect, wre ', minval(wre), maxval(wre), sum(wre)
+!   print*,' in fluspect, wrf ', minval(wrf), maxval(wrf), sum(wrf)  
+
  !   MfnI    = MfI  .*(xf*Ih + Iv*xe')         + MbI  .*(xf*xe').*(rf*Ih + Iv*re');
  !   MbnI    = MbI  .*(1+(xf*xe').*(1+rf*re')) + MfI.*((xf.*rf)*Ih+Iv*(xe.*re)');
  !   MfnII   = MfII .*(xf*Ih + Iv*xe')         + MbII .*(xf*xe').*(rf*Ih +Iv*re');
@@ -1532,12 +1537,6 @@ DEALLOCATE(MfnI,MbnI, MfnII,MbnII)
 !print*, ' in fluspect refl ', minval(refl), maxval(refl),sum(refl)
 !print*, ' in fluspect tran ', minval(tran), maxval(tran), sum(tran)
 !print*, ' in fluspect kClrel ', minval(kClrel), maxval(kClrel),sum(kClrel)
-
-!print*, ' in fluspect MbI ', minval(MbI), maxval(MbI), sum(MbI)
-!print*, ' in fluspect MbII ', minval(MbII), maxval(MbII), sum(MbII)
-!print*, ' in fluspect MfI ', minval(MfI), maxval(MfI), sum(MfI)
-!print*, ' in fluspect MfII ', minval(MfII), maxval(MfII), sum(MfII)
-
 !print*, 'size wlT ', size(wlT)
 !print*, 'size wlP ', size(wlP)
 !print*, 'size wlS ', size(wlS)

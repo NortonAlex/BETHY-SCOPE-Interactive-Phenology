@@ -586,12 +586,12 @@ print*,'In fluo, before vp loop'
 
 !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
-!$OMP& SHARED(irrin,lwd,temp,pres,ea0,Cab,zlai,vg_nv,vm,frac,Cca,COa) &
+!$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto)
 
-  DO jl = 1,vp
+  DO jl = 1,vp,100
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -748,9 +748,12 @@ if (pft == 13) option = 1  ! C3 crop plant only
            leafbio(7) = rho_thermal
            leafbio(8) = tau_thermal
 
+!$OMP CRITICAL 
+
 ! Computation of the fluorescence matrices 
   CALL fluspect(leafbio)
  
+!$OMP END CRITICAL
 
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
 ! WHICH DEPEND ON LAI
@@ -962,7 +965,7 @@ DEALLOCATE(Ciu,Ccu,Tcu)
         daygpp(jl) = Agtot
 
                         LoF_jl = LoF(ifreq_sat)
-! IF (isNaN(LoF_jl))     LoF_jl = 0. 
+! IF (isNaN(LoF_jl))     LoF_jl = 0.
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
 !        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
 ! GPP

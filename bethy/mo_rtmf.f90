@@ -225,10 +225,10 @@ tau1        = tau(iwlfo)  !; % [nwlfo]     leaf/needle transmission
 !print*, 'rho1', minval(rho1), maxval(rho1), sum(rho1)
 !print*, 'tau', minval(tau), maxval(tau), sum(tau)
 !print*, 'tau1', minval(tau1), maxval(tau1), sum(tau1)
-!print*, 'MbI ', minval(MbI), maxval(MbI), sum(MbI)
-!print*, 'MbII ', minval(MbII), maxval(MbII), sum(MbII)
-!print*, 'MfI ', minval(MfI), maxval(MfI), sum(MfI)
-!print*, 'MfII ', minval(MfII), maxval(MfII), sum(MfII)
+print*, 'rtmf: MbI ', sum(MbI) !minval(MbI), maxval(MbI), sum(MbI)
+print*, 'rtmf: MbII ', sum(MbII) !minval(MbII), maxval(MbII), sum(MbII)
+print*, 'rtmf: MfI ', sum(MfI) !minval(MfI), maxval(MfI), sum(MfI)
+print*, 'rtmf: MfII ', sum(MfII) !minval(MfII), maxval(MfII), sum(MfII)
 !print*, 'rs ', minval(rs), maxval(rs), sum(rs)
 !print*,  ' tto ', tto, ' tts ', tts, ' psi ', psi
 !print*, 'etahi ', minval(etahi), maxval(etahi), sum(etahi)
@@ -420,6 +420,18 @@ DO i = 1,nwlfo
     Fplu(i,nl+1)  = 0. 
 
     piLtoti         = iLAI*sum(Pso(1:nl)*piLs + (Po(1:nl)-Pso(1:nl))*piLd)                     !  % total canopy pi*F in obs dir for this ps 
+
+    IF (piLtoti.gt.500) THEN
+        print*,'**** piLtoti **** ', piLtoti
+        print*,' rtmf:     MbI      ', sum(MbI) !minval(MbI), maxval(MbI), sum(MbI)
+        print*,' rtmf:     MbII      ', sum(MbII) !minval(MbII), maxval(MbII), sum(MbII)
+        print*,' rtmf:     MfI      ', sum(MfI) !minval(MfI), maxval(MfI), sum(MfI)
+        print*,' rtmf:     MfII      ', sum(MfII) !minval(MfII), maxval(MfII), sum(MfII)
+!        print*,'    iLAI ', iLAI
+!        print*,'    piLs ', minval(piLs), maxval(piLs)
+!        print*,'    piLd ', minval(piLd), maxval(piLd)
+    ENDIF
+
     LoF_(i,ips)      = piLtoti/pi
 
 
