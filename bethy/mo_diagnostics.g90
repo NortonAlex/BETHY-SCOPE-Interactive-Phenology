@@ -1,1 +1,208 @@
-/home/STUDENT/nortona/fluoro2/bethy/mo_diagnostics.g90
+MODULE mo_diagnostics
+
+!CCCC diagnostic output variables
+!WOK-ADD-070625 daily storage of carbon fluxes
+
+  IMPLICIT NONE
+
+! .. Local Arrays ..
+
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rgpp, rnpp, rnep, nppv, rnppv, rmnt, rgrw
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rgppp, rnppp, rnepp,rfparp
+!WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: raet, rpet
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ress, resf
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ressv, resfv
+!WOK-ADD-070725 monthly diagnostics of various status variables
+  REAL, ALLOCATABLE, DIMENSION (:,:,:) :: rrhos, rpasm, rlai, rfpar
+  REAL, ALLOCATABLE, DIMENSION (:,:,:) :: rrunoff, rsevp, rsnmelt
+!MAS-ADD-040220  nppp            
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: nppp
+!WOK-ADD-070625 daily storage of carbon fluxes
+  REAL, ALLOCATABLE, DIMENSION (:) :: dgpp, dnpp, drgrw, drmnt
+!MAS-CHG-091106 dsleafshed, dspsoilst for cbalance spin-up
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: dsleafshed, dspsoilst
+!WOK-ADD-071031 daily mean surface reflectance
+  REAL, ALLOCATABLE, DIMENSION (:) :: drhos
+!ANorton-ADD-150107. Fluorescence arrays
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rfluo
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rgppfluo
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rrad,rpar
+  REAL, ALLOCATABLE, DIMENSION(:,:,:) :: PAR_scope,PAR_scope_cab
+
+contains
+
+!*********************************************************
+!*  SUBROUTINE diagnostics_allocate
+!*********************************************************
+SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
+  USE mo_constants
+!HEW-ADD-050307:
+!  USE mo_grid, ONLY: ng, vp
+  
+  IMPLICIT NONE
+
+  INTEGER, INTENT(in) :: nrun, ng, vp, outint
+  integer :: i
+
+  ALLOCATE( dsleafshed(366*nrun,vp), dspsoilst(366*nrun,vp))
+  dsleafshed = 0.
+  dspsoilst = 0.
+
+  ALLOCATE( rnep (0:nrun,outint,ng) )
+  ALLOCATE( rnpp (0:nrun,outint,ng) )
+  ALLOCATE( rnppv (0:nrun,outint,vp) )
+
+  ALLOCATE( rnepp (0:nrun,outint,ng,nv) )
+  rnepp(:,:,:,:) = 0.
+!  print*, 'allocating rnepp with dimensions: '
+!  print*, 'rnepp(0:',nrun,',',outint,',',ng,',',nv,')'
+!  do i = 1,4
+!     print*, 'bounds of rnepp component ',i,' = ',lbound(rnepp,i),ubound(rnepp,i)
+!  enddo
+!  print*, 'test output = ', sum(rnepp(1,1:31,1,3))
+!  do i = 1, 31
+!     print*, 'test output per component ', i, rnepp(1,i,1,3)
+!  enddo
+
+  ALLOCATE( dnpp(vp))
+  ALLOCATE( drgrw(vp))
+  ALLOCATE( drmnt(vp))
+  ALLOCATE( ress(0:nrun,outint,ng) )
+  ALLOCATE( resf(0:nrun,outint,ng) )
+  ALLOCATE( ressv(0:nrun,outint,vp) )
+  ALLOCATE( resfv(0:nrun,outint,vp) )
+
+  ALLOCATE( rlai(0:nrun,outt,ng) )
+  rlai = 0.
+
+#ifdef POST
+  ALLOCATE( rnppp (0:nrun,outt,ng,nv) )
+  rnppp = 0.
+  ALLOCATE( rgppp (0:nrun,outt,ng,nv) )
+  rgppp = 0.
+  ALLOCATE( rfparp(0:nrun,outint,ng,nv) )
+  rfparp = 0.
+  ALLOCATE( rgpp (0:nrun,outint,ng) )
+  rgpp = 0.
+  ALLOCATE( rmnt (0:nrun,outt,ng) )
+  rmnt = 0.
+  ALLOCATE( rgrw (0:nrun,outt,ng) )
+  rgrw = 0.
+  !ANorton-ADD-150107. Fluorescence
+  ALLOCATE( rfluo (0:nrun,outt,ng) )
+  rfluo = 0.
+  ALLOCATE( rgppfluo (0:nrun,outt,ng) )
+  rgppfluo = 0.
+  ALLOCATE( rrad (0:nrun,outt,ng) )
+  rrad = 0.
+  ALLOCATE( rpar (0:nrun,outt,ng) )
+  rpar = 0.
+  ALLOCATE( PAR_scope (0:nrun,outt,ng) )
+  PAR_scope = 0.
+  ALLOCATE( PAR_scope_cab (0:nrun,outt,ng) )
+  PAR_scope_cab = 0.
+  !WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
+  ALLOCATE( raet(0:nrun,outt,ng) )
+  raet = 0.
+  ALLOCATE( rpet(0:nrun,outt,ng) )
+  rpet = 0.
+  !WOK-ADD-070725 monthly diagnostics for daily status variables
+  ALLOCATE( rrhos(0:nrun,outt,ng) )
+  rrhos =0.
+  ALLOCATE( rpasm(0:nrun,outt,ng) )
+  rpasm = 0.
+  ALLOCATE( rfpar(0:nrun,outt,ng) )
+  rfpar = 0.
+  ALLOCATE( rrunoff(0:nrun,outt,ng) )
+  rrunoff = 0.
+  ALLOCATE( rsevp(0:nrun,outt,ng) )
+  rsevp = 0.
+  ALLOCATE( rsnmelt(0:nrun,outt,ng) )
+  rsnmelt = 0.
+  ALLOCATE( nppv (0:nrun,outt,vp) )
+  nppv = 0.
+  ALLOCATE( nppp (0:nrun,outt,ng,nv) )
+  nppp = 0.
+  ALLOCATE( dgpp(vp))
+  dgpp = 0.
+  ALLOCATE( drhos(vp) )
+  drhos = 0.
+#endif 
+
+END SUBROUTINE diagnostics_allocate
+    
+
+!*********************************************************
+!*  SUBROUTINE diagnostics_deallocate
+!*********************************************************
+SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
+  USE mo_constants
+!rg  USE mo_namelist, ONLY : nrun ! Txk: workaround to provide nrun to adjoint
+  IMPLICIT NONE
+  
+  INTEGER, INTENT(in) :: nrun, ng, vp, outint
+
+!$taf next required = vp
+  DEALLOCATE( dnpp)
+!$taf next required = vp
+  DEALLOCATE( drgrw)
+!$taf next required = vp
+  DEALLOCATE( drmnt )
+
+!$taf next required = nrun, vp
+  DEALLOCATE(  dsleafshed, dspsoilst )
+
+!$taf next required = nrun, outint, ng
+  DEALLOCATE( rnep  )
+!$taf next required = nrun, outint, vp
+  DEALLOCATE( rnppv  )
+!$taf next required = nrun, outint, ng
+  DEALLOCATE( rnpp  )
+!$taf next required = nrun, outint, ng
+
+!$taf next required = nrun, outint, ng, vp
+  DEALLOCATE( rnepp  )
+
+
+!$taf next required = nrun, outint, ng
+  DEALLOCATE( ress  )
+!$taf next required = nrun, outint, ng
+  DEALLOCATE( resf  )
+!$taf next required = nrun, outint, vp
+  DEALLOCATE( ressv )
+!$taf next required = nrun, outint, vp
+  DEALLOCATE( resfv )
+  DEALLOCATE( rlai )
+
+#ifdef POST
+  DEALLOCATE( rnppp  )
+  DEALLOCATE( rgppp  )
+  DEALLOCATE( rfparp  )
+  DEALLOCATE( rgpp  )
+  DEALLOCATE( rmnt  )
+  DEALLOCATE( rgrw  )
+  DEALLOCATE( raet )
+  DEALLOCATE( rpet )
+  DEALLOCATE( rrhos )
+  DEALLOCATE( rpasm )
+  DEALLOCATE( rfpar )
+  DEALLOCATE( rrunoff )
+  DEALLOCATE( rsevp )
+  DEALLOCATE( rsnmelt )
+  DEALLOCATE( nppv  )  
+  DEALLOCATE( nppp )  
+  DEALLOCATE( dgpp )
+  DEALLOCATE( drhos )
+  !ANorton-ADD-150107. Fluorescence
+  DEALLOCATE( rfluo )
+  DEALLOCATE( rgppfluo )
+  DEALLOCATE( rrad )
+  DEALLOCATE( rpar )
+  DEALLOCATE( PAR_scope )
+  DEALLOCATE( PAR_scope_cab )
+#endif
+
+END SUBROUTINE diagnostics_deallocate
+
+END MODULE mo_diagnostics

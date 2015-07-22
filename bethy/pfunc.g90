@@ -1,1 +1,305 @@
-/home/STUDENT/nortona/fluoro2/bethy/pfunc.g90
+SUBROUTINE setfunc( n, m )
+  IMPLICIT NONE
+  INTEGER n, m
+  CALL numbmod( n )
+  m = NPADM
+END SUBROUTINE setfunc
+
+
+SUBROUTINE initfunc( n, x )
+  IMPLICIT NONE
+  INTEGER n
+  REAL    x(n)
+
+  REAL fc
+  INTEGER nn
+  INTEGER ifail
+  LOGICAL cold
+  INTEGER jmin, jmax, nupdate, ifunc
+
+
+  CALL initmod( n, x )
+
+!==============================================================
+! option to read control vector after an optimisation
+! removed by FastOpt for testing
+!==============================================================
+  CALL instoref( nn, ifunc, fc, nupdate, jmin, jmax, cold, ifail )
+  
+  IF (cold) THEN
+     PRINT *, 'control variables are set by initfunc'
+  ELSE
+     IF (n .NE. nn) THEN
+        STOP 'inconsitent number of control variables'
+     ENDIF
+     CALL dostoref( n,   x, .FALSE., 1 ,'OPWARMD')
+     PRINT *, 'control variables read from OPWARMD'
+  ENDIF  
+
+
+END SUBROUTINE initfunc
+
+
+SUBROUTINE func( n, x, m, y )
+!********************************************************************
+!
+! input  : N      amount of parameters
+!          X      array of parameters
+!
+! output : Y      prognostic values
+!
+!********************************************************************
+!!MS$  USE mo_diagnostics
+  USE mo_constants
+  USE constants_pjr !FastOpt
+  USE mo_prog
+  USE costf
+  USE mo_namelist, ONLY: year0_site,year1_site,year0,year1
+  USE mo_grid, ONLY: ng
+  USE tm, ONLY: f_tm
+
+  IMPLICIT NONE
+
+  INTEGER :: n, m
+  REAL    :: x(n), y(m)
+  REAL    :: fc
+#ifdef REGIONS
+  REAL    :: mask(ng,9)
+#endif
+#ifdef LOREGIONS
+  REAL    :: mask(ng,6)
+#endif
+  INTEGER :: i,yr,mo,gr,j
+  INTEGER :: h1,h2,h3
+
+!==============================================
+! example of a prognostic variable
+!==============================================
+
+  CALL model( n, x, fc )
+
+  y = 0.  
+  IF (n_stats>0) THEN
+ 
+#ifdef LOREGIONS
+! calculate jacobian for net flux for 9 regions
+
+  OPEN(unit=21,file='../../util/regions/regions_areas_TM2grid.dat',status='old')
+
+  REWIND 21
+  READ(21,*) mask
+  CLOSE(21)
+
+  y = 0.
+  DO i=1,6
+     DO yr=1,(1+year1-year0)  
+        DO mo=1,12
+           do gr =1,ng
+              y(i) = y(i) + prog_global(1,yr, mo, gr)*mask(gr,i) ! NEP
+              y(i+6) = y(i+6) + prog_global(2,yr, mo, gr)*mask(gr,i) ! NPP
+           ENDDO
+        enddo
+     ENDDO
+  ENDDO
+  
+  y = y / (1.+year1-year0)  
+
+#endif
+
+
+#ifdef REGIONS
+! calculate jacobian for net flux for 9 regions
+
+  OPEN(unit=21,file='util/regions/regions_areas_VICgrid.dat',status='old')
+
+  REWIND 21
+  READ(21,*) mask
+  CLOSE(21)
+
+  y = 0.
+  DO i=1,9
+     DO yr=1,(1+year1-year0)  
+        DO mo=1,12
+           y(i) = y(i) + SUM( prog_global(yr, mo, :)*mask(:,i))
+        ENDDO
+     ENDDO
+  ENDDO
+#endif
+
+#ifdef BANDS
+! would be a nice task to combine these two definitions to a single one
+IF (m.GT.n_lats) THEN
+!$taf loop = parallel
+  DO i=1,m
+     y(i)=SUM(f_tm(:,n_lats-MOD(i-1,n_lats),:))
+  ENDDO
+ELSE
+!$taf loop = parallel
+  DO i=1,m
+     y(i)=SUM(f_tm(:,1+(i-1)*n_lats/m : i*n_lats/m,:))
+
+  ENDDO
+ENDIF
+!  y(1)=sum(f_tm(:,15,:))
+#endif
+  ENDIF
+
+  IF (n_sites>0) THEN
+#ifdef NPP
+     j=0	
+! code for future prognostics ucnertainties, four 10-year means 2000-2039
+!     DO i=1, n_sites
+!	do yr=0,3
+!           if (j.lt.m) then
+!              j=j+1
+!           else
+!              print*, ' error in func: increase m, overwriting y(', j, ')'
+!           endif
+!           y(j) = sum(sum(prog_sites(1+yr*10:yr*10+10,:,i),2))/10.
+!	enddo
+!     enddo	
+! code for diagnostic monthly npp flux uncertainty 2000-2003
+!$taf loop = parallel
+      DO i=1, n_sites
+!$taf loop = parallel
+        DO yr=1,(1+year1_site-year0_site)  
+           h1=yr+year0_site-1                      
+	   DO mo=1,12
+             IF (j.LT.m) THEN
+                j=j+1
+             ELSE
+                PRINT*, ' error in func: increase m, overwriting y(', j, ')'
+             ENDIF
+             h2=jdfst_f(mo)
+             h3=jdlst_f(mo)
+             IF (MODULO (h1,4)==0) THEN
+                IF (mo==2) THEN
+                   h3=jdlst_f(mo)+1
+                ELSEIF (mo>2) THEN
+                   h2=jdfst_f(mo)+1
+                   h3=jdlst_f(mo)+1
+                ENDIF
+             ENDIF
+             y(j) = SUM(prog_sites(yr,h2:h3,i))
+	  ENDDO
+	ENDDO
+      ENDDO
+#else
+!  y(1) = SUM(prog_sites)
+#endif
+  ENDIF
+
+END SUBROUTINE func
+
+
+SUBROUTINE postfunc( n, x, m, y )
+!********************************************************************
+! postprocessing for Prognostic function
+!********************************************************************
+  IMPLICIT NONE
+
+  INTEGER :: n, m
+  REAL    :: x(n), y(m)
+  INTEGER :: j
+
+      PRINT *,'**************************************'
+      PRINT *,'***   Function Components           **'
+      PRINT *,'**************************************'
+      DO J = 1,M
+         PRINT '(X,I4,20(X,E12.6))', J, Y(J)
+      ENDDO
+
+END SUBROUTINE postfunc
+
+SUBROUTINE POSTJACCOL  (nvar, x, m, y, g_y, col, ncol )
+  USE mo_namelist, ONLY: outdir
+  IMPLICIT NONE
+  INTEGER nvar, m, ncol, col(ncol)
+  REAL   g_y(ncol,m)
+  REAL   x(nvar)
+  REAL   y(m)
+
+  ! local variables
+  INTEGER i_stat, i_year, i_month , i
+  CHARACTER (len=80) :: ofname
+  INTEGER icol ,j
+
+  PRINT *
+  PRINT *,    '**************************************************'
+  PRINT '(A)',' Jacobian columns'
+  PRINT *,    '**************************************************'
+  PRINT '(A)', ' col row       x(col)       y(row)  d2fc(row)/dx2(col)'
+  DO icol = 1, ncol
+     DO j = 1, m
+        PRINT '(2i4,2(1x,e12.6),(8x,e12.6)  )',&
+             & col(icol),j,x(col(icol)),y(j),g_y(icol,j)
+     END DO
+  END DO
+  PRINT *
+! save Jacobian
+   ofname=TRIM(outdir)//'pjaccolfwd.bin'
+   OPEN (38,file=ofname,status='unknown',form='unformatted')
+   WRITE(38) g_y
+   CLOSE(38)
+END SUBROUTINE POSTJACCOL
+
+!================================================
+! The subroutine "POSTJACREV" is called
+! after computation of full Jacobian in reverse mode
+!================================================
+SUBROUTINE POSTJACREV(  n, x, m, y, adx)
+  USE mo_namelist, ONLY: outdir
+  IMPLICIT NONE
+  INTEGER n, m
+  REAL   adx(m,n)
+  REAL   x(n)
+  REAL   y(m)
+  
+  INTEGER i,j
+  CHARACTER (len=80) :: ofname
+
+  PRINT *
+  PRINT *,    '**************************************************'
+  PRINT '(A)',' Jacobian'
+  PRINT *,    '**************************************************'
+  PRINT '(A)', ' col row       x(col)       y(row)  dy(row)/dx(col)'
+  DO i = 1, n
+     DO j = 1, m
+        PRINT '(2i4,2(1x,e12.6),(5x,e12.6)  )',&
+             &           i,j,x(i),y(j),adx(j,i)
+     END DO
+  END DO
+  ! save hessian
+   ofname=TRIM(outdir)//'pjaccolrev.bin'
+   OPEN (38,file=ofname,status='unknown',form='unformatted')
+   WRITE(38) adx
+   CLOSE(38)
+
+  PRINT *
+END SUBROUTINE POSTJACREV
+
+!================================================
+! The subroutine "POSTJACFWD" is called
+! after computation of full Jacobian in forward mode
+!================================================
+SUBROUTINE POSTJACFWD(  n, x, m, y, g_y)
+  IMPLICIT NONE
+  INTEGER n, m
+  REAL   g_y(n,m)
+  REAL   x(n)
+  REAL   y(m)
+  
+  INTEGER i,j
+  PRINT *
+  PRINT *,    '**************************************************'
+  PRINT '(A)',' Jacobian'
+  PRINT *,    '**************************************************'
+  PRINT '(A)', ' col row       x(col)       y(row)  dy(row)/dx(col)'
+  DO i = 1, n
+     DO j = 1, m
+        PRINT '(2i4,2(1x,e12.6),(5x,e12.6)  )',&
+             &           i,j,x(i),y(j),g_y(i,j)
+     END DO
+  END DO
+  PRINT *
+END SUBROUTINE POSTJACFWD
