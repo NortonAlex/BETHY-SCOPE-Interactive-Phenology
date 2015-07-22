@@ -537,7 +537,7 @@ SUBROUTINE   init_faparg (ns, nrs, outt)
   ALLOCATE( faparg_unc (nrs, outt, ns))
   faparg_unc = 1.e9
   
-  in_sitedir = "./inputs/fapar_global/"
+  in_sitedir = "./input/fapar_global/"
   
   infile%name=TRIM(in_sitedir)//TRIM(faparfile_global)
   nc_year%name='time'
