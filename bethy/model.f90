@@ -42,7 +42,7 @@ SUBROUTINE model( nvar, x, fc )
   INTEGER :: k, j, np, i, y, m
   INTEGER :: scale
   REAL :: h1, pnlty
-
+  print *, 'entered subroutine model.f90'
 !$taf init top_tape = static, 1
 ! maxscale = 2
 !$taf init scale_tape = static, 2
@@ -97,48 +97,49 @@ SUBROUTINE model( nvar, x, fc )
 ! first bethy call, global grid
 !------------------------------------------------------------------
      CALL bethy (nchk, dayint, ng, vp, nrun, outt, scale, netflux, faparg)
+     print *,'Passed bethy subroutine call in model.f90'
 
 !------------------------------------------------------------------
 ! do interpolation from bethy to TM grid
 !------------------------------------------------------------------
 !$taf store netflux = top_tape, rec = 1 
 ! netflux only needed for its 'size', should be improved
-     CALL run_bethy2tm(f_tm) 
-
+!     CALL run_bethy2tm(f_tm) 
+!     print *,'Passed run_bethy2tm subroutine call in model.f90'
 ! pjr 04/04/28 add parts for direct fluxes
-     ALLOCATE( flux_magnitudes( COUNT( xpf == direct_flux)))
+!     ALLOCATE( flux_magnitudes( COUNT( xpf == direct_flux)))
 ! collect all the direct_flux parameters from the param vector and scale them by their unc
-     i_flux = 1
-     DO i_x = 1, size(xpf)
-        IF( xpf( i_x) == direct_flux) THEN
-           flux_magnitudes( i_flux) = x( i_x) * p0su(  i_x) 
-           i_flux = i_flux + 1
-        ENDIF
-     END DO
+!     i_flux = 1
+!     DO i_x = 1, size(xpf)
+!        IF( xpf( i_x) == direct_flux) THEN
+!           flux_magnitudes( i_flux) = x( i_x) * p0su(  i_x) 
+!           i_flux = i_flux + 1
+!        ENDIF
+!     END DO
 
 !------------------------------------------------------------------
 ! add background fluxes
 !------------------------------------------------------------------
 !$taf store f_tm = top_tape, rec = 1 
 ! f_tm only needed for its 'size', should be improved
-     CALL run_bgr ( f_tm , flux_magnitudes)
-     DEALLOCATE( flux_magnitudes)
-
+!     CALL run_bgr ( f_tm , flux_magnitudes)
+!     DEALLOCATE( flux_magnitudes)
+     print *,'Passed run_bgr subroutine call in model.f90'
 !------------------------------------------------------------------
 ! now transport it
 !------------------------------------------------------------------
-     CALL run_tm (glob_offset, f_tm, conc) 
-
+!     CALL run_tm (glob_offset, f_tm, conc) 
+     print *,'Passed run_tm subroutine call in model.f90'
 !------------------------------------------------------------------
 ! deallocate climate variables
 !------------------------------------------------------------------
      CALL climate_deallocate (ng, vp, sdays)
-
+     print *,'Passed climate_deallocate subroutine call in model.f90'
 !------------------------------------------------------------------
 ! deallocate calendar variables
 !------------------------------------------------------------------
      CALL deallocate_cal  
-
+     print *,'Passed deallocate_cal subroutine call in model.f90'
 !      if (optpftg) then
 !!         fc = fc + cost_pft(x(nxp+1:nxp+vp),frac_u)
 !         call cost_pft(fc_pft,(x(nxp+1:nxp+vp),frac_u)
@@ -179,11 +180,11 @@ SUBROUTINE model( nvar, x, fc )
 ! deallocate init variables
 !------------------------------------------------------------------
 !     CALL config_deallocate
-     CALL config_deallocate(ng,vp) ! note: use these if passing dimension to TAF
-     CALL model_deallocate(outt, nrun, ng, vp)
-     CALL hydro_deallocate(ng, vp)
-     CALL pheno_deallocate(vp)
-
+!     CALL config_deallocate(ng,vp) ! note: use these if passing dimension to TAF
+!     CALL model_deallocate(outt, nrun, ng, vp)
+!     CALL hydro_deallocate(ng, vp)
+!     CALL pheno_deallocate(vp)
+     print *,'Passed other deallocate subroutine calls in model.f90'
 !------------------------------------------------------------------
 ! .. concentration and FAPAR costfunction global
 !------------------------------------------------------------------

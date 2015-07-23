@@ -13,15 +13,15 @@ MODULE mo_grid
 !!MS$  INTEGER :: nlon = 360
 !!MS$  INTEGER :: nlat = 180
 
-!--------------------------------------------
- INTEGER, ALLOCATABLE, DIMENSION(:) :: vg_nv
- INTEGER, ALLOCATABLE, DIMENSION(:,:) :: gridvp
-!--------------------------------------------
-
  INTEGER, PARAMETER :: ng = 170   ! TM2 grid
  INTEGER :: nlon = 36
  INTEGER :: nlat = 24
 
+! ANorton 12-2014 For fluorescence calculation
+!--------------------------------------------
+ INTEGER, ALLOCATABLE, DIMENSION(:) :: vg_nv
+ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: gridvp
+!--------------------------------------------
 
 !cccc ng         number of land grid points !cccc nlon       number of longitudes        >  grid resolution dependant
 

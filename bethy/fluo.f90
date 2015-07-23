@@ -592,7 +592,7 @@ print*,'In fluo, before vp loop'
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
-!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto)
+!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto,nwl,wlf)
 
   DO jl = 1,vp,100
         jj=gridp(jl)

@@ -639,6 +639,11 @@ nwl = nwlS
 IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(nwlS))
 wl =  wlS
 
+IF (.NOT.ALLOCATED(MfI)) ALLOCATE(MfI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbI)) ALLOCATE(MbI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
+
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(rho(nwl))
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(tau(nwl))
 IF (.NOT.ALLOCATED(rs)) ALLOCATE(rs(nwl))
@@ -1572,6 +1577,10 @@ CALL mask_ind(size(mask),mask,IwlP)
 !print*, 'min max IwlP ', minval(IwlP),maxval(IwlP)
 !print*, 'min max IwlT ', minval(IwlT),maxval(IwlT)
 !print*, 'size rsfile ', size(rsfile(:,2)), 'IwlP ', size(IwlP)
+
+!print*,' In fluspect, rho ', size(rho)
+!print*,' In fluspect, refl ', size(refl)
+!print*,' In fluspect, IwlP ', size(IwlP)
 
 rho(IwlP) = refl
 tau(IwlP) = tran
