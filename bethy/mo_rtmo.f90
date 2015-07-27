@@ -154,7 +154,7 @@ USE fluo_func
 
 USE fluo_param, ONLY:  nwl, nl, xlay, dx, prm_, lidf, q, litab, &
                         & lazitab, nli,nlazi, &
-                        & wl,wlT,wlP,wlS,wlF,wlF,wlPAR,&
+                        & wl,wlT,wlP,wlS,wlPAR,&
                         & nwlfi, nwlfo, nwlT, nwlP,nwlPAR, &
                         & atmoM
 
