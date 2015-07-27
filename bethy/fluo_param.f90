@@ -114,7 +114,7 @@ REAL, ALLOCATABLE, DIMENSION(:)          :: psi_,tto_
 REAL, ALLOCATABLE, DIMENSION(:)          :: fEsun, fEsky
 REAL, ALLOCATABLE, DIMENSION(:)          :: wlfi,wlfo
 REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
-REAL, ALLOCATABLE, DIMENSION(:)          :: kClrel, tran, refl 
+REAL, ALLOCATABLE, DIMENSION(:)          :: tran, refl 
 !REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
 REAL, ALLOCATABLE, DIMENSION(:)          :: prm
 !REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfI, MbI
@@ -361,6 +361,7 @@ INTEGER                              :: ireg
 !Fluspect output
 REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
+REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
 
 print*,'In subroutine: fluo_initparam'
 
@@ -662,7 +663,7 @@ leafbio(6)  = fqe
 leafbio(7)  = rho_thermal
 leafbio(8)  = tau_thermal
 
-CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs)
+CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
 
 !print*, 'size wlT ', size(wlT)  
 !print*, 'size wlP ', size(wlP)  
@@ -1121,7 +1122,7 @@ END SUBROUTINE layers
 
 
 !function [refl,tran,Mb,Mf] = fluspect(leafpar, optipar)
-SUBROUTINE fluspect(leafpar,MfI,MbI,MfII,MbII,rho,tau,rs)
+SUBROUTINE fluspect(leafpar,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
 
 !% calculates reflection and transmission of a leaf using FLUSPECT
 !%
@@ -1172,6 +1173,7 @@ REAL, INTENT(IN), DIMENSION(:)                   :: leafpar
 REAL, DIMENSION(:,:), INTENT(OUT)                  :: MfI, MbI, MfII, MbII
 !REAL, DIMENSION(:), INTENT(OUT)                    :: IwlP
 REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
+REAL, DIMENSION(:), INTENT(OUT)                    :: kClrel
 
 
 ! Local variables 

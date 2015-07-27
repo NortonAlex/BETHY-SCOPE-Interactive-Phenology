@@ -7,7 +7,7 @@ CONTAINS
 SUBROUTINE rtmo(Rin,Rli,Ta,LAI,tts,tto,psi, Ps, Po, Pso, km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto, Eoutt, Rnhs, Rnus, Rnhc, Rnuc,&
-        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs)
+        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel)
 
 USE fluo_func
 
@@ -156,7 +156,7 @@ USE fluo_param, ONLY:  nwl, nl, xlay, dx, prm_, lidf, q, litab, &
                         & lazitab, nli,nlazi, &
                         & wl,wlT,wlP,wlS,wlF,wlF,wlPAR,&
                         & nwlfi, nwlfo, nwlT, nwlP,nwlPAR, &
-                        & kClrel, atmoM
+                        & atmoM
 
 IMPLICIT NONE
 
@@ -166,7 +166,7 @@ REAL, PARAMETER                             :: deg2rad = pi/180.
 ! Input variables 
 REAL, INTENT(IN)                            :: LAI,tts,tto,psi
 REAL, INTENT(IN)                            :: Rin,Rli,Ta 
-REAL, DIMENSION(:), INTENT(IN)            :: rho,tau,rs
+REAL, DIMENSION(:), INTENT(IN)            :: rho,tau,rs,kClrel    ! fluspect output
 
 ! Output variables 
 REAL, DIMENSION(nl+1,nwl), INTENT(OUT)      :: Eplu_,Emin_

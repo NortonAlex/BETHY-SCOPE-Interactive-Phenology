@@ -396,7 +396,7 @@ USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spec
                       & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
-                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl 
+                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP 
 USE fluo_func 
 USE mo_rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
@@ -485,6 +485,7 @@ REAL, DIMENSION(vp), INTENT(in)            :: zlai       ! LAI data
 !Output variable from fluspect
 REAL, ALLOCATABLE, DIMENSION(:,:)            :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)              :: rho, tau, rs
+REAL, ALLOCATABLE, DIMENSION(:)              :: kClrel
 
 ! Output variable from fluoresence routine
 !REAL, DIMENSION(vp), INTENT(out)            :: zfluo, zgppfluo
@@ -592,7 +593,8 @@ print*,'In fluo, before vp loop'
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
-!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto,nwl,wlf)
+!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
+!$OMP& SHARED(nwl,wlf,nwlP)
 
   DO jl = 1,vp,100
         jj=gridp(jl)
@@ -607,6 +609,7 @@ ALLOCATE(MbII(size(wlf),size(wle)))
 ALLOCATE(rho(nwl))
 ALLOCATE(tau(nwl))
 ALLOCATE(rs(nwl))
+ALLOCATE(kClrel(nwlP))
 
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
@@ -763,7 +766,12 @@ if (pft == 13) option = 1  ! C3 crop plant only
 !$OMP CRITICAL 
 
 ! Computation of the fluorescence matrices 
-  CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs)
+  CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
+
+  print*,' in fluo, after fluspect, rho ', jl, sum(rho)
+  print*,' in fluo, after fluspect, tau ', jl, sum(tau)
+  print*,' in fluo, after fluspect, rs ', jl, sum(rs)
+!  print*,' in fluo, after fluspect, MbII ', jl, sum(MbII)
  
 !$OMP END CRITICAL
 
@@ -837,7 +845,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
-        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs)
+        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel)
 
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs(1) = 1.-Ps(size(Ps))
