@@ -977,6 +977,7 @@ DEALLOCATE(MbII)
 DEALLOCATE(rho)
 DEALLOCATE(tau)
 DEALLOCATE(rs)
+DEALLOCATE(kClrel)
 
 ! This activate if we want to calculate the number of layers as function of
 ! pft... There is memory leaks so far ... 
