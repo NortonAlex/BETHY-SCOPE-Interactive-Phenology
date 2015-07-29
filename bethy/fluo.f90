@@ -398,7 +398,7 @@ USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spec
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
                       & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP 
 USE fluo_func 
-USE mo_rtmo 
+USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
 
