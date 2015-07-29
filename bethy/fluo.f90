@@ -591,7 +591,7 @@ print*,'In fluo, before vp loop'
 !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
-!$OMP& SHARED(jmf,leafbio,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
+!$OMP& SHARED(jmf,Cdm,Cw,Csm,N,fqe,rho_thermal,tau_thermal) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP)
@@ -771,6 +771,9 @@ if (pft == 13) option = 1  ! C3 crop plant only
   print*,' in fluo, after fluspect, rho ', jl, sum(rho)
   print*,' in fluo, after fluspect, tau ', jl, sum(tau)
   print*,' in fluo, after fluspect, rs ', jl, sum(rs)
+!  print*,' in fluo, after fluspect, MfI ', jl, sum(MfI)
+!  print*,' in fluo, after fluspect, MbI ', jl, sum(MbI)
+!  print*,' in fluo, after fluspect, MfII ', jl, sum(MfII)
 !  print*,' in fluo, after fluspect, MbII ', jl, sum(MbII)
  
 !!!$OMP END CRITICAL
