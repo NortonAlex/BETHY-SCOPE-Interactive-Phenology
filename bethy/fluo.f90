@@ -763,7 +763,7 @@ if (pft == 13) option = 1  ! C3 crop plant only
            leafbio(7) = rho_thermal
            leafbio(8) = tau_thermal
 
-!$OMP CRITICAL 
+!!!$OMP CRITICAL 
 
 ! Computation of the fluorescence matrices 
   CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
@@ -773,7 +773,7 @@ if (pft == 13) option = 1  ! C3 crop plant only
   print*,' in fluo, after fluspect, rs ', jl, sum(rs)
 !  print*,' in fluo, after fluspect, MbII ', jl, sum(MbII)
  
-!$OMP END CRITICAL
+!!!$OMP END CRITICAL
 
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
 ! WHICH DEPEND ON LAI
