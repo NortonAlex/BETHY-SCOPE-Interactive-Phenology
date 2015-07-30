@@ -331,6 +331,7 @@ CHARACTER(len=80)                        :: brdf_file = './input/scope/direction
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
+!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl)
 
 ! ------------------------------------------------------------------------------------------------
 
@@ -1388,6 +1389,9 @@ k(j)        = 0.
 kChl(j)     = 0.
 
 !% Reflectance and transmittance of the leaf: combine top layer with next N-1 layers
+IF (.NOT.ALLOCATED(tran)) ALLOCATE(tran(nwlP))
+IF (.NOT.ALLOCATED(refl)) ALLOCATE(refl(nwlP))
+
 denom = 1.-Rsub*r
 tran  = Taf*Tsub/denom
 refl  = Ra+Taf*Rsub*t/denom
