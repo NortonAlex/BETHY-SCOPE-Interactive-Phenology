@@ -331,7 +331,7 @@ CHARACTER(len=80)                        :: brdf_file = './input/scope/direction
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
-!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl)
+!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl,atmoM)
 
 ! ------------------------------------------------------------------------------------------------
 
