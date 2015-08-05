@@ -570,7 +570,7 @@ print*,'            DO LOOP over vp: ', vp
 !print*,'shape of gridp is ',shape(gridp)
 !print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
 !print*,'gridp array: ', gridp
-  DO jl = 1,vp,300
+  DO jl = 1,vp,100
         jj=gridp(jl)
 
  ! do jj = 1, ng
