@@ -67,8 +67,6 @@ CONTAINS
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon
 
-    print *, "            in photo1"
-
     coszen(:)=mu(ts,:)
     klon=vp
     nveglist=vp
@@ -295,8 +293,6 @@ CONTAINS
     REAL, DIMENSION(ng) :: zirrin, zpar,coszen
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon, fcinh
-
-    print *, "            in photo2"
 
     coszen(:)=mu(ts,:)
     klon=vp
@@ -653,7 +649,9 @@ CONTAINS
     REAL    T, T0, T1, eta, pvmmin
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
-    
+
+    DATA THETA    /0.83/       ! THETA   CURVATURE PARAMETER    
+    DATA eta      /0.99/       ! eta     colimitation shape parameter
 
 
 !-----------------------------------------------------------------------

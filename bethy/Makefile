@@ -420,7 +420,7 @@ ftlm $(FTLSRC):   $(FSRC) ffunc.f90
 
 # print current control vector and gradient
 ../post: $(DRIVERS)/prgpost.o $(DRIVERS)/storef.o $(MOBJ) $(OBJ) 
-	$(F90) $(LIBDIRS)	\
+	$(F90) $(LINKFLAGS) $(LIBDIRS)	\
 		-o $@ $(DRIVERS)/prgpost.o $(DRIVERS)/storef.o $(MOBJ) $(OBJ) $(LIBS)
 
 # do a linesearch between two control vectors
