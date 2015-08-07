@@ -703,9 +703,9 @@ CALL leafangles(LIDFa,LIDFb)
 !CALL layers
 !dx     = abs(xlay(2)-xlay(1))                          !  %
 
-tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
-psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
-noa    = size(tto_,1)     !  %       Number of Observation Angles 
+!tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
+!psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
+noa    = size(angles(:,1),1)     !  %       Number of Observation Angles 
 
 !print*, ' noa ', noa 
 
