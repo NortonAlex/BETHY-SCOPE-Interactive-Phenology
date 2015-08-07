@@ -588,12 +588,12 @@ print*,'            DO LOOP over vp: ', vp
              Long  =  lon(jj)             ! Longitude of the BETHY pixel
 
 ! Search for the right modtran file 
-CALL modtran_file (imonth, Long) 
+CALL modtran_ifile (imonth, Long, jatmos_file) 
 
 ! We select the appropriate spectrum  ...  for the mid-latitudes , we have two
 ! files (winter and summer) and one file. We select the file according to the
 ! latitude 
-CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
+CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
 
 ! Diurnal variations. We only consider the data at 12 h, which correspond to
@@ -1165,6 +1165,48 @@ endif
 
 END SUBROUTINE modtran_file 
 
+SUBROUTINE modtran_ifile(month, lon, iatmos_file)
+
+USE fluo_param, ONLY : atmos_file,modtran_trop, modtran_sum, modtran_wint
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)   :: month
+REAL, INTENT(IN)      :: lon
+INTEGER, INTENT(OUT)  :: iatmos_file
+
+! Use of standard atmosphere
+iatmos_file = 1
+
+! Use of tropical atmosphere
+IF ((lon.le.30.).and.(lon.ge.-30.)) iatmos_file=2
+
+
+! NORTH HEMISPHERE
+! Winter in mid-latitude in northern hemisphere
+If (lon.gt.30.) then
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=3
+endif
+
+! Summer  in mid-latitude in northern hemisphere
+If (lon.gt.30.) then
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=4
+endif
+
+! SOUTH HEMISPHERE
+! Summer in mid-latitude in southern hemisphere
+If (lon.lt.-30.) then
+ if ((month.ge.10).or.(month.le.3)) iatmos_file=4
+endif
+
+! Winter in mid-latitude in northern hemisphere
+If (lon.lt.-30.) then
+ if ((month.ge.4).and.(month.le.9)) iatmos_file=3
+endif
+
+
+
+END SUBROUTINE modtran_ifile
 
 ! This routine is to correct the actual local time of BETHY 
 SUBROUTINE pb_hour_bethy(hm)
