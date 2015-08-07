@@ -152,10 +152,10 @@ USE fluo_func
 ! Translation of the RTMo.m matlab code of Christian Van der Tol in Fortran 
 ! ----------------------------------------------------------------------------
 
-USE fluo_param, ONLY:  nwl, nl, xlay, dx, prm_, lidf, q, litab, &
+USE fluo_param, ONLY:  nwl, nl, xlay, dx, lidf, q, litab, &
                         & lazitab, nli,nlazi, &
-                        & wl,wlT,wlP,wlS,wlF,wlF,wlPAR,&
-                        & nwlfi, nwlfo, nwlT, nwlP,nwlPAR, &
+                        & wl,wlT,wlP,wlS,wlPAR,&
+                        & nwlP, &
                         & atmoM
 
 IMPLICIT NONE

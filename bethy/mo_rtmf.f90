@@ -72,7 +72,7 @@ SUBROUTINE rtmf(Esun_, Emin_, Eplu_,etahi,etaui,LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fh
 
 USE fluo_func,  ONLY : Sint 
 USE fluo_param, ONLY : nl,nwl,nli,nwlfi,nwlfo,iwlfi,iwlfo,nlazi,nwlF,wlF,&
-               &  litab,lazitab,lidf,wl,IwlP
+               &  litab,lazitab,lidf
 
 
 REAL, PARAMETER                                 :: pi      = 3.1415926535879
