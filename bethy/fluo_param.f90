@@ -548,6 +548,7 @@ CALL define_bands
 !print*,'spectral_end ', spectral_end
 !print*, ' spectral_res ', spectral_res
 
+jatmos_file = 1
 CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
