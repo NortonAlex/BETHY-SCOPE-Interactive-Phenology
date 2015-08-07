@@ -476,6 +476,10 @@ REAL, DIMENSION(vp), INTENT(in)            :: zlai       ! LAI data
 ! Chlorophyl concentration 
 !REAL,INTENT(IN)                             :: Cab,Cdm,Cw,Csm,NN
 
+!Output variable from fluspect
+REAL, ALLOCATABLE, DIMENSION(:,:)            :: MfI, MbI, MfII, MbII
+REAL, ALLOCATABLE, DIMENSION(:)              :: rho, tau, rs
+REAL, ALLOCATABLE, DIMENSION(:)              :: kClrel
 
 ! Output variable from fluoresence routine
 !REAL, DIMENSION(vp), INTENT(out)            :: zfluo, zgppfluo
@@ -574,6 +578,15 @@ print*,'            DO LOOP over vp: ', vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
+
+ALLOCATE(MfI(size(wlf),size(wle)))
+ALLOCATE(MbI(size(wlf),size(wle)))
+ALLOCATE(MfII(size(wlf),size(wle)))
+ALLOCATE(MbII(size(wlf),size(wle)))
+ALLOCATE(rho(nwl))
+ALLOCATE(tau(nwl))
+ALLOCATE(rs(nwl))
+ALLOCATE(kClrel(nwlP))
 
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
@@ -722,7 +735,7 @@ if (pft == 13) option = 1  ! C3 crop plant only
            leafbio(8) = tau_thermal
 
 ! Computation of the fluorescence matrices 
-  CALL fluspect(leafbio)
+  CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
  
 
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
@@ -795,7 +808,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
-        & Pnhc_Cab, Pnuc_Cab)
+        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel)
 
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs(1) = 1.-Ps(size(Ps))
@@ -881,7 +894,7 @@ CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0
 
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
-           & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof)
+           & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,MfI,MbI,MfII,MbII,rho,tau,rs)
 
 !Integration over the layers 
  type_integration = 'angles_and_layers'     ! This is working
@@ -918,6 +931,16 @@ DEALLOCATE(Fout)
 DEALLOCATE(Agu,Au,rcwu,Fu)
 DEALLOCATE(A1,Ag1,rcw1,F1a,F1,W1)
 DEALLOCATE(Ciu,Ccu,Tcu)
+
+!Deallocate fluspect output arrays
+DEALLOCATE(MfI)
+DEALLOCATE(MbI)
+DEALLOCATE(MfII)
+DEALLOCATE(MbII)
+DEALLOCATE(rho)
+DEALLOCATE(tau)
+DEALLOCATE(rs)
+DEALLOCATE(kClrel)
 
 ! This activate if we want to calculate the number of layers as function of
 ! pft... There is memory leaks so far ... 

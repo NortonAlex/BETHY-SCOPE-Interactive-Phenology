@@ -66,12 +66,13 @@ IMPLICIT NONE
 CONTAINS 
 
 
-SUBROUTINE rtmf(Esun_, Emin_, Eplu_,etahi,etaui,LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof)
+SUBROUTINE rtmf(Esun_, Emin_, Eplu_,etahi,etaui,LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,&
+                & MfI,MbI,MfII,MbII,rho,tau,rs)
 
 
 USE fluo_func,  ONLY : Sint 
 USE fluo_param, ONLY : nl,nwl,nli,nwlfi,nwlfo,iwlfi,iwlfo,nlazi,nwlF,wlF,&
-               &  litab,lazitab,lidf,wl,MfI,MbI, MfII,MbII,IwlP,rho,tau,rs
+               &  litab,lazitab,lidf,wl,IwlP
 
 
 REAL, PARAMETER                                 :: pi      = 3.1415926535879
@@ -84,6 +85,8 @@ REAL,  DIMENSION(nwl,nl+1), INTENT(IN)          :: Emin_, Eplu_
 REAL,  DIMENSION(nl), INTENT(IN)                :: etahi
 REAL,  DIMENSION(nli,nlazi,nl),INTENT(IN)       :: etaui
 REAL,  DIMENSION(nl+1),INTENT(IN)               :: Po,Ps,Pso
+REAL, DIMENSION(:,:), INTENT(IN)                :: MfI,MbI,MfII,MbII
+REAL, DIMENSION(:), INTENT(IN)                  :: rho,tau,rs
 
 ! Output variables 
 REAL,  DIMENSION(nwlfo), INTENT(OUT)            :: LoF,Fhem 
