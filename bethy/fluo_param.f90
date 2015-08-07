@@ -1171,7 +1171,7 @@ REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
 REAL, DIMENSION(:), INTENT(OUT)                    :: kClrel
 
 ! Local variables 
-REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
+REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
 REAL, DIMENSION(nwlP)                               :: phiI, phiII, Kall,t1,t2,taut
 REAL, DIMENSION(nwlP)                               :: talf,ralf
@@ -1381,6 +1381,9 @@ k(j)        = 0.
 kChl(j)     = 0.
 
 !% Reflectance and transmittance of the leaf: combine top layer with next N-1 layers
+IF (.NOT.ALLOCATED(tran)) ALLOCATE(tran(nwlP))
+IF (.NOT.ALLOCATED(refl)) ALLOCATE(refl(nwlP))
+
 denom = 1.-Rsub*r
 tran  = Taf*Tsub/denom
 refl  = Ra+Taf*Rsub*t/denom
