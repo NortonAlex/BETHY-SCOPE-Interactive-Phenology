@@ -390,11 +390,17 @@ USE mo_namelist
 USE mo_grid
 
 ! Fluo 
-USE fluo_param 
+USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
+                      & spectral_res,tts,tto,Rin,Rli,Ta,pa,ea,LAI,Vcmo,Oa,Cab,option, &
+                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe, &
+                      & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
+                      & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
+                      & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
+                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP 
 USE fluo_func 
-USE mo_rtmo 
-USE chemical
-USE mo_rtmf
+USE mo_rtmo, ONLY : rtmo
+USE chemical, ONLY : biochemical_faq, biochemical
+USE mo_rtmf, ONLY : rtmf
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
