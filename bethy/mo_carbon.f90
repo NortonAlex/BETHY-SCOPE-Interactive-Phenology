@@ -645,10 +645,18 @@ CONTAINS
     REAL    OX, dummy
     REAL    K
     REAL    VCMAX, KC, KO, GAM, JE, JC, JMAX, J0, J1
-    REAL    FRDC3, FRDC4, jmt
-    REAL    T, T0, T1, pvmmin
+    REAL    FRDC3, FRDC4, THETA, jmt
+    REAL    T, T0, T1, eta, pvmmin
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
+
+    DATA THETA    /0.83/       ! THETA   CURVATURE PARAMETER    
+    DATA eta      /0.99/       ! eta     colimitation shape parameter
+    DATA jmt      /0.04/       ! jmt     temperature scaling for Jmax
+    DATA OX       /0.21/       ! OX      OXYGEN CONCENTRATION [MOL(O2)/MOL(AIR)]
+    DATA FRDC3    /0.011/      ! FRDC3   RATIO OF DARK RESPIRATION TO "PVM"
+    DATA FRDC4    /0.042/      ! FRDC4   RATIO OF DARK RESPIRATION TO "PVM"
+    DATA pvmmin   /1.e-20/     ! pvmmin  security parameter for pvm
 
 
 !-----------------------------------------------------------------------
