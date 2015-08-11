@@ -398,9 +398,9 @@ USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spec
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
                       & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP 
 USE fluo_func 
-USE mo_rtmo, ONLY : rtmo
+USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
-USE mo_rtmf, ONLY : rtmf
+USE mo_rtmf, ONLY : rtmf  
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -557,8 +557,6 @@ REAL                                         :: hm(24)
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
 
-print *, '            In fluorescence subroutine'
-
 ! When using Faquahar model to compute GPP and Fluo at leaf level 
 gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
      faq = 0      ! 1: In addition to Collatz model, we use Faquahar model to compute GPP  0:  Only Collatz 
@@ -575,15 +573,31 @@ if (im == 0 ) im =  12
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)
 
-print*,'            DO LOOP over vp: ', vp
-!print*,'vp is ',vp
-!print*,'shape of gridp is ',shape(gridp)
-!print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
-!print*,'gridp array: ', gridp
+! Read in modtran atmosphere transmittance files to variable array
+!CALL read_modtran_files
+
+!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
+!$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
+!$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
+!$OMP& SHARED(jmf,Cdm,Cw,Csm,N,fqe) &
+!$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
+!$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
+!$OMP& SHARED(nwl,wlf,nwlP)
+
   DO jl = 1,vp,100
         jj=gridp(jl)
 
  ! do jj = 1, ng
+!print*,'In fluo, inside vp loop at: ', jl
+
+ALLOCATE(MfI(size(wlf),size(wle)))
+ALLOCATE(MbI(size(wlf),size(wle)))
+ALLOCATE(MfII(size(wlf),size(wle)))
+ALLOCATE(MbII(size(wlf),size(wle)))
+ALLOCATE(rho(nwl))
+ALLOCATE(tau(nwl))
+ALLOCATE(rs(nwl))
+ALLOCATE(kClrel(nwlP))
 
 ALLOCATE(MfI(size(wlf),size(wle)))
 ALLOCATE(MbI(size(wlf),size(wle)))
@@ -742,7 +756,6 @@ if (pft == 13) option = 1  ! C3 crop plant only
 
 ! Computation of the fluorescence matrices 
   CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
- 
 
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
 ! WHICH DEPEND ON LAI
@@ -964,7 +977,7 @@ DEALLOCATE(kClrel)
         daygpp(jl) = Agtot
 
                         LoF_jl = LoF(ifreq_sat)
-! IF (isNaN(LoF_jl))     LoF_jl = 0. 
+! IF (isNaN(LoF_jl))     LoF_jl = 0.
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
 !        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
 ! GPP
@@ -991,10 +1004,9 @@ endif
 
 END DO  ! Loop on the jd 
 
-write(93) dayfluo
-write(94) daygpp
-
 END Do     ! loop on jl
+
+!$OMP END PARALLEL DO
 
 ial = 1
 
@@ -1194,6 +1206,51 @@ endif
 
 END SUBROUTINE modtran_file 
 
+!SUBROUTINE read_modtran_files()
+
+!USE fluo_param, ONLY : read_atm_files,atmos_file,modtran_trop, modtran_sum, modtran_wint
+
+!IMPLICIT NONE
+
+!integer :: iatmosfile
+
+! Use of tropical atmosphere
+!iatmosfile = 1
+!atmos_file = trim(modtran_trop)
+!call read_atm_files(iatmosfile, atmos_file)
+!IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
+
+
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
+!iatmosfile = 2
+!atmos_file = trim(modtran_wint)
+!call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
+!endif
+
+! Summer  in mid-latitude in northern hemisphere
+!iatmosfile = 3
+!atmos_file = trim(modtran_sum)
+!call read_atm_files(iatmosfile, atmos_file)
+!If (lon.gt.30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
+!endif
+
+! SOUTH HEMISPHERE 
+! Summer in mid-latitude in southern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
+!endif
+
+! Winter in mid-latitude in northern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_wint)
+!endif
+
+!END SUBROUTINE read_modtran_files
+
 SUBROUTINE modtran_ifile(month, lon, iatmos_file)
 
 USE fluo_param, ONLY : atmos_file,modtran_trop, modtran_sum, modtran_wint
@@ -1207,12 +1264,12 @@ INTEGER, INTENT(OUT)  :: iatmos_file
 ! Use of standard atmosphere
 iatmos_file = 1
 
-! Use of tropical atmosphere
+! Use of tropical atmosphere 
 IF ((lon.le.30.).and.(lon.ge.-30.)) iatmos_file=2
 
 
-! NORTH HEMISPHERE
-! Winter in mid-latitude in northern hemisphere
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
 If (lon.gt.30.) then
  if ((month.ge.10).or.(month.le.3)) iatmos_file=3
 endif
@@ -1222,7 +1279,7 @@ If (lon.gt.30.) then
  if ((month.ge.4).and.(month.le.9)) iatmos_file=4
 endif
 
-! SOUTH HEMISPHERE
+! SOUTH HEMISPHERE 
 ! Summer in mid-latitude in southern hemisphere
 If (lon.lt.-30.) then
  if ((month.ge.10).or.(month.le.3)) iatmos_file=4

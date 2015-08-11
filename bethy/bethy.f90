@@ -1,4 +1,3 @@
-!------------------------------------------------------------------
 ! compute net terrestrial carbon flux
 !------------------------------------------------------------------ 
 
@@ -101,8 +100,6 @@ print *, 'tdays =', tdays
 ! .. outer daily time loop (for checkpointing)
 !------------------------------------------------------------------
   DO oday = 1,nchk
-     print *,'OUTER DAILY TIME-LOOP'
-     print *,'oday = ', oday
      dstep=INT(tdays/nchk)
      IF (MOD(tdays,nchk).GT.0) THEN
         dstep = dstep + 1
@@ -115,8 +112,6 @@ print *, 'tdays =', tdays
 ! .. inner daily time loop (for checkpointing)
 !------------------------------------------------------------------
      DO iday = 1, dstep
-        print *,'    INNER DAILY TIME-LOOP'
-        print *,'    iday = ', iday
         keyday = iday+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
 !        print *, 'keyday = ', keyday
 !FastOpt !$taf store dnpp,dpcevp,dpsevp,dtrp,esum,lai,laihi,lintw = day_tape, rec = keyday 
@@ -202,11 +197,8 @@ print *, 'tdays =', tdays
            DO its = 1, tspd
               keydiurnal = its + (daycount(iday)-1) * (tspd) + (oday-1) * (tspd*dstep) + (scale-1) * (tspd*nchk*dstep)
 !              print *, 'keydiurnal = ', keydiurnal, daycount(iday), iday, dayint
-              print *,'        DIURNAL TIME-LOOP'
-              print *,'        its = ', its
 !              print *,'[keydiurnal, daycount(iday), iday, dayint] =', keydiurnal, daycount(iday), iday, dayint
               inho = MOD(its+11,24) + 1
-              print *,'        inho = ', inho
               day1p = its-1
               ts=ts+1
               DO k = 1, vp

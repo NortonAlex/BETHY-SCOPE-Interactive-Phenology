@@ -1,3 +1,4 @@
+!------------------------------------------------------------------
 ! compute net terrestrial carbon flux
 !------------------------------------------------------------------ 
 
@@ -26,6 +27,8 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   USE mo_helper, ONLY : minx, maxx
   !ANorton-ADD-150107. Fluorescence
   USE fluo
+! PARALLEL
+  USE omp_lib
   
   IMPLICIT NONE
 
@@ -48,16 +51,18 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   REAL, DIMENSION(vp)  :: lfac
 
   INTEGER :: jl, jj !FastOpt: new loop counter from diagnostics now in model
+
+! PARALLEL
+  INTEGER :: nthreads, ithread, igrid_lower, igrid_upper, ngrid_loop, iveg_lower, iveg_upper, nveg_loop, n_per_thread
+
+! PARALLEL
+  nthreads = omp_get_num_threads()
+
 !  print *, 'entered the bethy code' 
 !------------------------------------------------------------------
 ! some initializations
 ! Note, remove inho dependency
 !------------------------------------------------------------------
-
-!Output fluo and gppfluo for every day run, not just per rmonth. 
-  OPEN(unit=93,file='fluoro.bin',form='unformatted')
-  OPEN(unit=94,file='gppfluo.bin',form='unformatted')
-
   jdlast = 0
   ragain = .TRUE.
 
@@ -92,14 +97,12 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   zgc = 0.
   dsevp = 0.
 
-print *, 'nchk =', nchk
-print *, 'tdays =', tdays
-
 !$taf store pasmmax = scale_tape, rec = scale
 !------------------------------------------------------------------
 ! .. outer daily time loop (for checkpointing)
 !------------------------------------------------------------------
   DO oday = 1,nchk
+     print *,'Outer daily time loop, oday =', oday
      dstep=INT(tdays/nchk)
      IF (MOD(tdays,nchk).GT.0) THEN
         dstep = dstep + 1
@@ -112,6 +115,7 @@ print *, 'tdays =', tdays
 ! .. inner daily time loop (for checkpointing)
 !------------------------------------------------------------------
      DO iday = 1, dstep
+        print *,'Inner daily time loop, iday =', iday
         keyday = iday+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
 !        print *, 'keyday = ', keyday
 !FastOpt !$taf store dnpp,dpcevp,dpsevp,dtrp,esum,lai,laihi,lintw = day_tape, rec = keyday 
@@ -164,13 +168,12 @@ print *, 'tdays =', tdays
 
         rmonth=amonth(rday)
 
-!   print*,"rday,iday0,iday1,sdays,aday"
 !   PRINT*,rday,iday0,iday1,sdays,aday
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
-!           print *, '..daycount = ', daycount(iday), iday
+!           print *, 'daycount = ', daycount(iday), iday
 
            inho=13
 
@@ -187,7 +190,6 @@ print *, 'tdays =', tdays
 
            CALL climsubday1 (ng, vp, fe, iday0, iday1)
            keydayint = daycount(iday)+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
-           print *,'    daycount(iday) = ', daycount(iday)  
 !           print*, 'iday, keydayint = ',iday, keydayint
 !$TAF store mu, tmp, pair, cloudf  = dayint_tape, rec = keydayint
 
@@ -222,19 +224,36 @@ print *, 'tdays =', tdays
               zlai = lai
 !$TAF store zrhos = diurnal_tape, rec = keydiurnal
 !FastOpt !$TAF store pardown, zgc, pgs, rbe = diurnal_tape, rec = keydiurnal
-              CALL photo1 (ng,vp,swdown,tmp(inho,:),pair, &
+
+! PARALLEL
+	 n_per_thread = nint(real(ng)/real(nthreads))
+	 igrid_upper = 0
+!$OMP PARALLEL DO default(shared) private(ithread, igrid_lower, igrid_upper, ngrid_loop, iveg_lower, iveg_upper, nveg_loop, n_per_thread)
+	 do ithread = 1,nthreads
+	    igrid_lower = (ithread-1)*n_per_thread + 1
+	    igrid_upper = ithread*n_per_thread + 1
+	    if(ithread .eq. nthreads) igrid_upper = ng
+	    ngrid_loop = igrid_upper - igrid_lower + 1
+	    iveg_lower = (igrid_lower-1)*3 + 1
+	    iveg_upper = (igrid_upper-1)*3 + 1
+	    nveg_loop = iveg_upper - iveg_lower + 1
+	    
+	    ! for variables with dimension :: x(ng) -> take subset x(igrid_lower:igrid_upper)
+	    ! for variables with dimension :: x(vp) -> take subset x(iveg_lower:iveg_upper)
+
+              CALL photo1 (ngrid_loop,nveg_loop,swdown,tmp(inho,:),pair, &
                    & zrhos,pardown,fdirpar,zlai,zgc,pgs,zfpar,zfc,zassc,zraut,inho, &
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0) 
 !$TAF store pgs,zfpar,eamin  = diurnal_tape, rec = keydiurnal
               ! .. calculate energy balance and evapotranspiration fluxes
-              CALL surface (ng,vp,tmp(inho,:),cloudf,wspeed,pair,psoilst,lintw,zfpar, &
+              CALL surface (ngrid_loop,nveg_loop,tmp(inho,:),cloudf,wspeed,pair,psoilst,lintw,zfpar, &
                    & zfc,zlai,swdown,zgc,pgs,ptv,eamin,fe,ztrans,zptrans,zpcevp, &
                    & zpsevp,inho,hv,day1p,zrhos,keydiurnal)     
 !write (9,'(2I5,9E20.12)') iday, its, ztrans(429), zptrans(429)
 !$TAF store ptv  = diurnal_tape, rec = keydiurnal
               ! .. calculate C assimilation
-              CALL photo2 (ng,vp,swdown,ptv,pair, &
+              CALL photo2 (ngrid_loop,nveg_loop,swdown,ptv,pair, &
                    & zrhos,pardown,fdirpar,zlai,zgc,pgs,zfpar,zfc,zassc,zraut,inho, &
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
@@ -244,6 +263,11 @@ print *, 'tdays =', tdays
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab)             
+
+! PARALLEL
+	end do
+!$OMP END PARALLEL DO	
+
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo

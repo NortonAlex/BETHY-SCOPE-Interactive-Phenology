@@ -166,7 +166,7 @@ REAL, PARAMETER                             :: deg2rad = pi/180.
 ! Input variables 
 REAL, INTENT(IN)                            :: LAI,tts,tto,psi
 REAL, INTENT(IN)                            :: Rin,Rli,Ta 
-REAL, DIMENSION(:), INTENT(IN)              :: rho,tau,rs,kClrel
+REAL, DIMENSION(:), INTENT(IN)              :: rho,tau,rs,kClrel    ! fluspect output
 
 ! Output variables 
 REAL, DIMENSION(nl+1,nwl), INTENT(OUT)      :: Eplu_,Emin_

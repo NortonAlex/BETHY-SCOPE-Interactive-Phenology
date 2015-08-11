@@ -317,7 +317,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)        :: rsfile
 ! 10.3 MODTRAN output spectrum (used as input for SCOPE)
 CHARACTER(len=80)                        :: path_atmos_file = './input/scope/radiationdata/'
 CHARACTER(len=80)                        :: atmos_file
-CHARACTER(len=80)                        :: modtran_std
+CHARACTER(len=80)                        :: modtran_std   ! The atmosphere files, std for standard atmosphere
 CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
 CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
 CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
@@ -330,6 +330,7 @@ CHARACTER(len=80)                        :: brdf_file = './input/scope/direction
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
+!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl,atmoM)
 
 ! ------------------------------------------------------------------------------------------------
 
@@ -362,6 +363,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
 REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
 
+print*,'In subroutine: fluo_initparam'
 
 ! ---------------------------------------------------------------------
 ! Now we assign the default values of these parameters 
@@ -707,6 +709,7 @@ CALL leafangles(LIDFa,LIDFb)
 !tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
 !psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
 noa    = size(angles(:,1),1)     !  %       Number of Observation Angles 
+!noa    = size(tto_,1)     !  %       Number of Observation Angles 
 
 !print*, ' noa ', noa 
 
@@ -1171,6 +1174,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)                  :: MfI, MbI, MfII, MbII
 REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
 REAL, DIMENSION(:), INTENT(OUT)                    :: kClrel
 
+
 ! Local variables 
 REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
@@ -1246,14 +1250,14 @@ rho_thermal = leafpar(7)
 tau_thermal = leafpar(8)
 
 
-!print*, ' Cab ', Cab 
-!print*, ' Cdm ', Cdm 
-!print*, ' Cw ', Cw 
-!print*, ' Csm ', Csm 
-!print*, ' N ', N 
-!print*, ' fqe ', fqe 
-!print*, 'rho_thermal ', rho_thermal 
-!print*, 'tau_thermal ', tau_thermal 
+!print*, 'fluspect: Cab ', Cab 
+!print*, 'fluspect: Cdm ', Cdm 
+!print*, 'fluspect: Cw ', Cw 
+!print*, 'fluspect: Csm ', Csm 
+!print*, 'fluspect: N ', N 
+!print*, 'fluspect: fqe ', fqe 
+!print*, 'fluspect: rho_thermal ', rho_thermal 
+!print*, 'fluspect: tau_thermal ', tau_thermal 
 
 !print*, ' size ', size(nr)
 !print*, ' opticoef ',minval(opticoef(2,:)), maxval(opticoef(2,:))
@@ -1517,6 +1521,11 @@ DO i = 1,ndub
     wre(1,:) = re
     wrf(:,1) = rf
 
+!   print*,' in fluspect, wxe ', minval(wxe), maxval(wxe), sum(wxe)
+!   print*,' in fluspect, wxf ', minval(wxf), maxval(wxf), sum(wxf)
+!   print*,' in fluspect, wre ', minval(wre), maxval(wre), sum(wre)
+!   print*,' in fluspect, wrf ', minval(wrf), maxval(wrf), sum(wrf)  
+
  !   MfnI    = MfI  .*(xf*Ih + Iv*xe')         + MbI  .*(xf*xe').*(rf*Ih + Iv*re');
  !   MbnI    = MbI  .*(1+(xf*xe').*(1+rf*re')) + MfI.*((xf.*rf)*Ih+Iv*(xe.*re)');
  !   MfnII   = MfII .*(xf*Ih + Iv*xe')         + MbII .*(xf*xe').*(rf*Ih +Iv*re');
@@ -1554,12 +1563,6 @@ DEALLOCATE(MfnI,MbnI, MfnII,MbnII)
 !print*, ' in fluspect refl ', minval(refl), maxval(refl),sum(refl)
 !print*, ' in fluspect tran ', minval(tran), maxval(tran), sum(tran)
 !print*, ' in fluspect kClrel ', minval(kClrel), maxval(kClrel),sum(kClrel)
-
-!print*, ' in fluspect MbI ', minval(MbI), maxval(MbI), sum(MbI)
-!print*, ' in fluspect MbII ', minval(MbII), maxval(MbII), sum(MbII)
-!print*, ' in fluspect MfI ', minval(MfI), maxval(MfI), sum(MfI)
-!print*, ' in fluspect MfII ', minval(MfII), maxval(MfII), sum(MfII)
-
 !print*, 'size wlT ', size(wlT)
 !print*, 'size wlP ', size(wlP)
 !print*, 'size wlS ', size(wlS)
@@ -1578,6 +1581,10 @@ CALL mask_ind(size(mask),mask,IwlP)
 !print*, 'min max IwlP ', minval(IwlP),maxval(IwlP)
 !print*, 'min max IwlT ', minval(IwlT),maxval(IwlT)
 !print*, 'size rsfile ', size(rsfile(:,2)), 'IwlP ', size(IwlP)
+
+!print*,' In fluspect, rho ', size(rho)
+!print*,' In fluspect, refl ', size(refl)
+!print*,' In fluspect, IwlP ', size(IwlP)
 
 rho(IwlP) = refl
 tau(IwlP) = tran
@@ -1779,8 +1786,8 @@ call read_atm_files(iatmosfile, atmfile)
 !IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
 
 
-! NORTH HEMISPHERE
-! Winter in mid-latitude in northern hemisphere
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
 iatmosfile = 3
 atmfile = trim(modtran_wint)
 call read_atm_files(iatmosfile, atmfile)
@@ -1796,7 +1803,7 @@ call read_atm_files(iatmosfile, atmfile)
 ! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
 !endif
 
-! SOUTH HEMISPHERE
+! SOUTH HEMISPHERE 
 ! Summer in mid-latitude in southern hemisphere
 !If (lon.lt.-30.) then
 ! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
@@ -1909,7 +1916,6 @@ REAL                                         :: w
 !print*, ' nwM ', nwM 
 
 IF (.NOT.ALLOCATED(xdata)) stop 'xdata not available ....'
-
 
 !OPEN(unit=inunit,file=atmosfile,status='old')
 !REWIND inunit
