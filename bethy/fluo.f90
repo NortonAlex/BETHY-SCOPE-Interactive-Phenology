@@ -599,15 +599,6 @@ ALLOCATE(tau(nwl))
 ALLOCATE(rs(nwl))
 ALLOCATE(kClrel(nwlP))
 
-ALLOCATE(MfI(size(wlf),size(wle)))
-ALLOCATE(MbI(size(wlf),size(wle)))
-ALLOCATE(MfII(size(wlf),size(wle)))
-ALLOCATE(MbII(size(wlf),size(wle)))
-ALLOCATE(rho(nwl))
-ALLOCATE(tau(nwl))
-ALLOCATE(rs(nwl))
-ALLOCATE(kClrel(nwlP))
-
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
       sum_frac_tot = 0.
