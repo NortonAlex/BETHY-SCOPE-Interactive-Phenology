@@ -576,18 +576,6 @@ CALL pb_hour_bethy(hm)
 ! Read in modtran atmosphere transmittance files to variable array
 !CALL read_modtran_files
 
-!print*,'vp is ',vp
-!print*,'shape of gridp is ',shape(gridp)
-!print*,'minval gridp: ',minval(gridp),', maxval gridp: ',maxval(gridp)
-!print*,'gridp array: ', gridp
-
-print*,'In fluo, before vp loop'
-
-!!$OMP PARALLEL DO DEFAULT(SHARED) PRIVATE(jl,jj,sum_frac_tot,ok,Lati,Long) &
-!!$OMP& PRIVATE(jd,t,Rin,Rli,Ta,pa,ea,LAI,pft,Vcmo,frac1,Cc,Oa,CCc,Occ,Jmo) &
-!!$OMP& PRIVATE(LAI_max,Tch,Tcu,Cch,Ccu,Fs,Ps,Fc,F0,F1,F0a,Pnhc,Rnhc,F1a) &
-!!$OMP& PRIVATE(Pnuc,Rnuc,Agtot,Actot,Pntot,Agh,Ah,Agu,Au,LoF_jl,LoF,imonth) &
-
 !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
@@ -671,7 +659,7 @@ tts    = min(85.,ttsR/deg2rad)                                  ! %sun zenith an
          frac_max = -999
           LAI_max = -999
 pft_dominant_cell = -999
-           !jl_max = -999
+           jl_max = -999
             v_max = -999
 
 ! We go through up to the 3 PFTs that are in the selected BETHY grid cell
@@ -1012,9 +1000,6 @@ endif
 !IF (ALLOCATED(xlay)) CALL fieldlayer_deallocate
 
 END DO  ! Loop on the jd 
-
-write(93) dayfluo
-write(94) daygpp
 
 END Do     ! loop on jl
 
