@@ -1,7 +1,7 @@
 MODULE chemical 
 
 USE fluo_func
-USE mo_constants
+USE mo_constants, ONLY: rhoa, Mair, ar
 
 IMPLICIT NONE
 
