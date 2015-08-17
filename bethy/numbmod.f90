@@ -24,7 +24,7 @@ SUBROUTINE numbmod( nx )
   USE mo_taf
 
   !ANorton. Fluorescence
-  USE fluo_param
+  USE fluo_param, ONLY: fluo_initparam 
   USE fluo
 
   IMPLICIT NONE

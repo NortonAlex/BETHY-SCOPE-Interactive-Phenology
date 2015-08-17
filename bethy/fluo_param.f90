@@ -1682,40 +1682,40 @@ IMPLICIT NONE
 REAL, INTENT(IN)                    :: a,b
 
 ! Local variables 
- REAL, DIMENSION(1,13)                :: F 
+ REAL, DIMENSION(1,13)                :: FthetaL   ! Cumulative leaf inclination density 
  REAL                                 :: theta 
  INTEGER                              :: i
 
 !F           =   zeros(1,13);
-F = 0.
+FthetaL = 0.
 
 DO i = 1, 8                                                               
     theta  =  i*10.             !% theta_l =  10:80
-    CALL dcum(a,b,theta,F(1,i))     !% F(theta)
+    CALL dcum(a,b,theta,FthetaL(1,i))     !% F(theta)
 END DO 
 
 DO i=9,12                                                              
     theta   =   80. + (i-8)*2.   !% theta_l = 82:88
-    CALL dcum(a,b,theta,F(1,i))  !% F(theta)
+    CALL dcum(a,b,theta,FthetaL(1,i))  !% F(theta)
 END DO 
 
-F(1,13) = 1.                     !%  theta_l = 90:90
+FthetaL(1,13) = 1.                     !%  theta_l = 90:90
 
 lidf = 0. 
 DO i=13,2,-1                                                           
-    lidf(i) =  F(1,i) -   F(1,i-1)  !% lidf   =   dF/dtheta;
+    lidf(i) =  FthetaL(1,i) -   FthetaL(1,i-1)  !% lidf   =   dF/dtheta;
     !lidf(i,1) =  F(1,i) -   F(1,i-1)  !% lidf   =   dF/dtheta;
 
 END DO 
 
 !lidf(1,1) =   F(1,1)                  !% Boundary condition
-lidf(1) =   F(1,1)                  !% Boundary condition
+lidf(1) =   FthetaL(1,1)                  !% Boundary condition
 
 END SUBROUTINE leafangles  
 
 !%
 !function [F]   =  dcum(a,b,theta)
-SUBROUTINE  dcum(a,b,theta,F)
+SUBROUTINE  dcum(a,b,theta,FthetaL)
 
 IMPLICIT NONE 
 
@@ -1725,7 +1725,7 @@ REAL, PARAMETER             :: pi = 3.1415926535879
 REAL, INTENT(IN)            :: a,b,theta 
 
 ! Output variables 
-REAL, INTENT(OUT)           :: F 
+REAL, INTENT(OUT)           :: FthetaL 
 
 ! Local variables 
 REAL                        :: rd,eps,delx,x1
@@ -1735,7 +1735,7 @@ REAL                        :: y,dx1,theta2
 rd  =   pi/180.                ! %   Geometrical constant
 
 if ( a>1. ) then  
-    F  = 1 - cos(theta*rd)
+    FthetaL  = 1 - cos(theta*rd)
 else
     eps     =   1e-8
     delx    =   1.
@@ -1748,7 +1748,7 @@ else
         x1   =   x1 + dx1
         delx =   abs(dx1)
   end do 
-    F    =   (2*y + theta2)/pi    ! %   Cumulative leaf inclination density function
+    FthetaL    =   (2*y + theta2)/pi    ! %   Cumulative leaf inclination density function
 
     !%pag 139 thesis says: F = 2*(y+p)/pi. 
     !%Since theta2=theta*2 (in rad), this makes F=(2*y + 2*theta)/pi    
