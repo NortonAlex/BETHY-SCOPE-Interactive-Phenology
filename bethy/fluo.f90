@@ -496,7 +496,7 @@ REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 
 
 ! Local fields 
-REAL, DIMENSION(2)                           :: Fs
+REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
 
 REAL, ALLOCATABLE,DIMENSION(:)               :: Agh,Ah,rcwh,Fh,Cih,Cch       ! brown leaves
 REAL, ALLOCATABLE,DIMENSION(:)               :: Agu,Au,rcwu,Fu,Ciu,Ccu       ! green leaves
@@ -821,8 +821,8 @@ CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel)
 
 ! Matrix containing values for 1-Ps and Ps of soil
-        Fs(1) = 1.-Ps(size(Ps))
-        Fs(2) = Ps(size(Ps))
+        Fs_mat(1) = 1.-Ps(size(Ps))
+        Fs_mat(2) = Ps(size(Ps))
 
 ! Matrix containing values for Ps of canopy
          Fc   = (1-Ps(1:size(Ps)-1))/nl     ! Matrix containing values for Ps of canopy
