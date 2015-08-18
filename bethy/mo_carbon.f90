@@ -649,14 +649,6 @@ CONTAINS
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
 
-!    DATA THETA    /0.83/       ! THETA   CURVATURE PARAMETER    
-!    DATA eta      /0.99/       ! eta     colimitation shape parameter
-!    DATA jmt      /0.04/       ! jmt     temperature scaling for Jmax
-!    DATA OX       /0.21/       ! OX      OXYGEN CONCENTRATION [MOL(O2)/MOL(AIR)]
-!    DATA FRDC3    /0.011/      ! FRDC3   RATIO OF DARK RESPIRATION TO "PVM"
-!    DATA FRDC4    /0.042/      ! FRDC4   RATIO OF DARK RESPIRATION TO "PVM"
-!    DATA pvmmin   /1.e-20/     ! pvmmin  security parameter for pvm
-
 
 !-----------------------------------------------------------------------
 ! dummy assignments for TAF
@@ -990,16 +982,6 @@ CONTAINS
     REAL    G0, K1, W1, K2, W2, B, C
     INTEGER JL, JJ
     
-
-!    DATA OX       /0.21/       ! OX      OXYGEN CONCENTRATION [MOL(O2)/MOL(AIR)]  
-!    DATA FRDC3    /0.011/      ! FRDC3   RATIO OF DARK RESPIRATION TO "PVM" 
-!                               !         AT 25C for C3
-!    DATA FRDC4    /0.042/      ! FRDC4   RATIO OF DARK RESPIRATION TO "PVM" 
-!                               !         AT 25C for C4
-!    DATA THETA    /0.83/       ! THETA   CURVATURE PARAMETER
-!    DATA eta      /0.99/       ! eta     colimitation shape parameter
-!    DATA pvmmin   /1.e-20/     ! pvmmin  security parameter for pvm
-!    DATA jmt      /0.04/       ! jmt     temperature scaling for Jmax
 
 
 !-----------------------------------------------------------------------
