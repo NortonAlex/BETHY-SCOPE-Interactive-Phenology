@@ -644,7 +644,7 @@ IF (.NOT.ALLOCATED(MbI)) ALLOCATE(MbI(size(wlf),size(wle)))
 IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
 IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
 
-IF (.NOT.ALLOCATED(tau)) ALLOCATE(rho(nwl))
+IF (.NOT.ALLOCATED(rho)) ALLOCATE(rho(nwl))
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(tau(nwl))
 IF (.NOT.ALLOCATED(rs)) ALLOCATE(rs(nwl))
 
