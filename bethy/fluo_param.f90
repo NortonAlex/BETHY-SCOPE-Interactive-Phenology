@@ -126,7 +126,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:)       :: iwlfi,iwlfo
 INTEGER, ALLOCATABLE, DIMENSION(:)       :: IwlP
 
 REAL                                     :: dx
-REAL                                     :: gbs,w 
+REAL                                     :: gbs 
 REAL                                     :: Vcmax_ref ! %[umol/m2/s]        maximum carboxylation capacity
 REAL                                     :: Jmax_ref  ! %[umol/m2/s]        maximum electron transport rate (~100;120;270)
 
@@ -1883,12 +1883,12 @@ REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width
 !REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
 INTEGER,PARAMETER                            :: inunit = 2
 REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
-REAL,  ALLOCATABLE,DIMENSION(:,:)            :: U 
+REAL,  ALLOCATABLE,DIMENSION(:,:)            :: Udata 
 INTEGER                                      :: iwl,r,i,k
 INTEGER                                      :: nwS
 INTEGER, DIMENSION(3)                        :: nwreg,off  
 REAL, ALLOCATABLE,DIMENSION(:,:)             :: S 
-INTEGER, ALLOCATABLE,DIMENSION(:)            :: n 
+INTEGER, ALLOCATABLE,DIMENSION(:)            :: nk    ! Counter 
 INTEGER, ALLOCATABLE,DIMENSION(:)            :: j 
 REAL                                         :: w 
  
@@ -1946,14 +1946,14 @@ wlM = xdata(iatmosfile,:,2)
 !% 16: <La(b)>
 
 !U     = [T(:,1) T(:,3) T(:,4) T(:,5) T(:,12) T(:,16)];
-IF (.NOT.ALLOCATED(U)) ALLOCATE(U(nwM,6))
+IF (.NOT.ALLOCATED(Udata)) ALLOCATE(Udata(nwM,6))
 !U     =  [xdata(:,3),xdata(:,5),xdata(:,6),xdata(:,7),xdata(:,14),xdata(:,18)]
-U(:,1) = xdata(iatmosfile,:,3)
-U(:,2) = xdata(iatmosfile,:,5)
-U(:,3) = xdata(iatmosfile,:,6)
-U(:,4) = xdata(iatmosfile,:,7)
-U(:,5) = xdata(iatmosfile,:,14)
-U(:,6) = xdata(iatmosfile,:,18)
+Udata(:,1) = xdata(iatmosfile,:,3)
+Udata(:,2) = xdata(iatmosfile,:,5)
+Udata(:,3) = xdata(iatmosfile,:,6)
+Udata(:,4) = xdata(iatmosfile,:,7)
+Udata(:,5) = xdata(iatmosfile,:,14)
+Udata(:,6) = xdata(iatmosfile,:,18)
 
 !DO  i=1,6
 !print*, ' U ',i, minval(U(:,i)), maxval(U(:,i)), sum(U(:,i))
@@ -1999,8 +1999,8 @@ nwS = sum(nwreg)
 !print* , ' nwS ', nwS 
 
 !n   = zeros(nwS,1);    !% Count of MODTRAN data contributing to a band
-IF (.NOT.ALLOCATED(n)) ALLOCATE(n(nwS))
-n = 0
+IF (.NOT.ALLOCATED(nk)) ALLOCATE(nk(nwS))
+nk = 0
 
 
 !S   = zeros(nwS,6);    ! Intialize sums
@@ -2042,8 +2042,8 @@ DO iwl = 1,nwM
             !print*, ' k ', k, ' j r ', j(r), ' off ', off(r), ' n ', n(k) , iwl 
             !print*, 'BEFORE S ', S(k,:)
 
-            S(k,:) = S(k,:)+U(iwl,:)           !    % Accumulate from contributing MODTRAN data
-            n(k)   = n(k)+1                    !    % Increment count 
+            S(k,:) = S(k,:)+Udata(iwl,:)           !    % Accumulate from contributing MODTRAN data
+            nk(k)   = nk(k)+1                    !    % Increment count 
             !print*, '  U ', iwl,U(k,:) 
             !print*, 'AFTER S ', S(k,:) 
 
@@ -2056,14 +2056,14 @@ IF (.NOT.ALLOCATED(atmoM)) ALLOCATE(atmoM(nwS,6))
 atmoM = 0.
 DO  i = 1,6
 !print*, 'S ',  i,minval(S(:,i) ), maxval(S(:,i)), sum(S(:,i)) 
-    atmoM(:,i) = S(:,i)/n      !% Calculate averages per SCOPE band
+    atmoM(:,i) = S(:,i)/nk      !% Calculate averages per SCOPE band
 !print*, 'atmoM ',  i,minval(atmoM(:,i) ), maxval(atmoM(:,i)), sum(atmoM(:,i)) 
 !print*, 'n ',  i,minval(n), maxval(n), sum(n) 
 END DO 
 
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
-DEALLOCATE(wlM,S,U,j,n)
+DEALLOCATE(wlM,S,Udata,j,nk)
 
 END SUBROUTINE aggreg
 
