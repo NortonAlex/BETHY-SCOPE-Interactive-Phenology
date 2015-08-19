@@ -171,7 +171,7 @@ ifeq ($(COMPILER),INTEL)# INTEL Compiler
 	F90             = ifort #$(DEBUG)
 	FC              = $(F90)
 	DBL             = -autodouble# turn off double precision
-	DEBUGFLAG       = -g -p # -mp -C -inline_debug_info
+	DEBUGFLAG       = # -mp -C -inline_debug_info
 	RTECHECK        = -C
 	OPTFLAG         = -O3#-xW -tpp7 
 	F90FLAGS        =  $(INCDIRS) $(OPTFLAG)
