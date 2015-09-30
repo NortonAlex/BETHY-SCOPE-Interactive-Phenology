@@ -19,13 +19,19 @@ MODULE mo_grid
 !!MS$  INTEGER :: nlon = 36
 !!MS$  INTEGER :: nlat = 24
 
+! ANorton 12-2014 For fluorescence calculation
+!--------------------------------------------
+ INTEGER, ALLOCATABLE, DIMENSION(:) :: vg_nv
+ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: gridvp
+!--------------------------------------------
+
 !cccc ng         number of land grid points \
 !cccc nlon       number of longitudes        >  grid resolution dependant
 !cccc nlat       number of latitudes        / 
 
 ! .. Local Arrays ..
 
-  INTEGER, DIMENSION (ng) :: elev, vg
+  INTEGER, DIMENSION (ng) :: elev, vg, vpb, vpe, rfapar0
   INTEGER, ALLOCATABLE, DIMENSION(:) :: gridp
   REAL, ALLOCATABLE, DIMENSION(:) :: frac, frac_p, frac_u, sumfrac
   REAL, DIMENSION (ng) :: lon, lat  
