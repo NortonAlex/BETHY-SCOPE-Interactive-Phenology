@@ -7,8 +7,8 @@
 F90             = ifort
 # turn off double precision
 DBL             = -autodouble
-#DEBUGFLAG       = -g -traceback -fpe0 -O0
-DEBUGFLAG       = -traceback -fpe0 -O0 # -check all,noarg_temp_created,noformat
+DEBUGFLAG       = -g -traceback -fpe0 -O0
+#DEBUGFLAG       = -traceback -fpe0 -O0 # -check all,noarg_temp_created,noformat
 RTECHECK        =# -C
 OPTFLAG         =-O3
 F90FLAGS        =  -static  $(INCDIRS)  $(OPTFLAG)
