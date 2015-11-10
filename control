@@ -8,7 +8,7 @@
  inkind       = 3
  trans        = 0
  dtime        = 60
- dayint       = 25
+ dayint       = 32
  outtime      = 1
  grdwid       = 2.0
  lonw         = -180.0
@@ -19,7 +19,7 @@
  rflg         = 0
  wiflg        = 0
  vflg         = 0
- param_file   = './control_bethy/73_paramslist_new'
+ param_file   = './control_bethy/76_paramslist'
  mapping_file_global = './control_bethy/hires_28params.map'
  datfile      = './control_bethy/gv41_data'
  grid_file    = './control_bethy/bethy_grid3veg_v2.nc'
