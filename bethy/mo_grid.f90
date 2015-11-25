@@ -12,12 +12,12 @@ MODULE mo_grid
 !!MS$  INTEGER, PARAMETER :: ng = 11069  ! 1 deg equal area grid
 !!MS$  INTEGER :: nlon = 360
 !!MS$  INTEGER :: nlat = 180
-       INTEGER, PARAMETER :: ng = 3462   ! 2 deg reg grid
-       INTEGER :: nlon = 180
-       INTEGER :: nlat = 90
-!!MS$  INTEGER, PARAMETER :: ng = 170   ! TM2 grid
-!!MS$  INTEGER :: nlon = 36
-!!MS$  INTEGER :: nlat = 24
+!!MS$  INTEGER, PARAMETER :: ng = 3462   ! 2 deg reg grid
+!!MS$  INTEGER :: nlon = 180
+!!MS$  INTEGER :: nlat = 90
+    INTEGER, PARAMETER :: ng = 170   ! TM2 grid
+    INTEGER :: nlon = 36
+    INTEGER :: nlat = 24
 
 ! ANorton 12-2014 For fluorescence calculation
 !--------------------------------------------

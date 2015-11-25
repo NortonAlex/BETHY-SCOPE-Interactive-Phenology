@@ -584,7 +584,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP)
 
-  DO jl = 1,vp,500
+  DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
