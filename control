@@ -19,8 +19,8 @@
  rflg         = 0
  wiflg        = 0
  vflg         = 0
- param_file   = './control_bethy/76_paramslist'
- mapping_file_global = './control_bethy/lores_28params.map'
+ param_file   = './control_bethy/89_paramslist'
+ mapping_file_global = './control_bethy/lores_29params_scope.map'
  datfile      = './control_bethy/gv41_data'
  grid_file    = './control_bethy/bethy_loresgrid3veg_faparratio.nc'
  interp_file  = './control_bethy/tm2tm.nc'

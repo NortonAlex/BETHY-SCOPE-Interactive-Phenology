@@ -401,6 +401,7 @@ USE fluo_func
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
+USE mo_vegetation, ONLY : Chl
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -582,7 +583,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(jmf,Cdm,Cw,Csm,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
-!$OMP& SHARED(nwl,wlf,nwlP)
+!$OMP& SHARED(nwl,wlf,nwlP,Chl)
 
   DO jl = 1,vp
         jj=gridp(jl)
@@ -686,6 +687,7 @@ pft_dominant_cell = -999
               pft = vg_nv(jl)
              Vcmo = vm(jl)*1.e6
             frac1 = frac(jl)
+              Cab = Chl(jl)
 
 ! Concentration of CO2 and O2 in the atmosphere, i.e, at the boundary of the
 ! leaves
@@ -721,13 +723,13 @@ if (pft == 13) option = 1  ! C3 crop plant only
 
 
 ! Concentration of the fluorescence of the leaves We assume this for the moment
-                   Cab = 10.
-      if (pft==1)  Cab = 40.
-      if (pft==2)  Cab = 15.
-      if (pft==3)  Cab = 15.
-      if (pft==13) Cab = 20.
-      if (pft==9)  Cab = 10.
-      if (pft==10) Cab = 5.
+!                   Cab = 10.
+!      if (pft==1)  Cab = 40.
+!      if (pft==2)  Cab = 15.
+!      if (pft==3)  Cab = 15.
+!      if (pft==13) Cab = 20.
+!      if (pft==9)  Cab = 10.
+!      if (pft==10) Cab = 5.
 
 
 ! First we consider the same Cab for all the PFTs 
