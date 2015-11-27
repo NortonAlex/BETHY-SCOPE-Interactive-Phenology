@@ -370,7 +370,7 @@ print*,'In subroutine: fluo_initparam'
 
 !1. PROSPECT 
 !%1.1 green leaves
-Cab          = 10.00                       ! %[ug/cm2] Chorophyl AB content (~60)
+Cab          = 80.00                       ! %[ug/cm2] Chorophyl AB content (~60)
 Cdm          =  0.012                      ! %[g/cm2]  Dry matter content (~0.012;0.07)
 Cw           =  0.009                      ! %[cm]     Leaf water equivalent laye r(~0.009)
 Csm          =  0.0                        ! %         Senescent material fraction (~0.0)
@@ -389,7 +389,7 @@ rho_thermal  = 0.01                        ! % Broadband thermal reflectance
 tau_thermal  = 0.01                        ! % Broadband thermal translisttance
 
 ! 2. Leaf biochemical 
-Vcmo         = 30                          ! (um m-2 s) Maximum carboxylation capacity (at optimum temperature)  
+Vcmo         = 60                          ! (um m-2 s) Maximum carboxylation capacity (at optimum temperature)  
 Jmo          = 2.*Vcmo                     ! Jmax : maximum electron transport rate table  (not used in this version of scope) 
 m            = 8                           ! Ball-Berry stomatal conductance parameter 
 option       = 0                           ! Photoochemicl pathway : 0=C3, 1=C4  
@@ -401,7 +401,7 @@ Tparams      = [0.2, 0.3,281., 308., 328.] ! See PFT.xls file. These are five pa
 
 tempcor      = 0                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
                                            ! applied.
-stressfactor = 0.5                          !  []   optional input: stress factor to reduce Vcmax (for example
+stressfactor = 1.0                          !  []   optional input: stress factor to reduce Vcmax (for example
                                            !  soil moisture, leaf age). Default value =  1.
 Kcopt        = 350                         !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 Koopt        = 450                         !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
@@ -437,7 +437,7 @@ Oa           = 209.                        ! (ppm) Atmospheric O2 concentration
 
 !6. Canopy 
 LAI          = 2.                          ! (m2 m-2) Leaf area index  
-hc           = 1.                          ! (m)Leaf vegetation height 
+hc           = 2.                          ! (m)Leaf vegetation height 
 LIDFa        = -0.35                       ! Leaf inclination 
 LIDFb        = -0.15                       ! Variation in leaf inclination 
 leafwidth    = 0.1                         ! (m) Leaf width 
