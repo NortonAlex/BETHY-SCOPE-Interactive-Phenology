@@ -35,8 +35,9 @@ MODULE mo_ctrl
   INTEGER, PARAMETER :: iplgr     = 26
   INTEGER, PARAMETER :: ipkl      = 27
   INTEGER, PARAMETER :: iptauw    = 28
+  INTEGER, PARAMETER :: Chl       = 29
 
-  INTEGER, PARAMETER :: npar      = 28
+  INTEGER, PARAMETER :: npar      = 29
 
   REAL  :: dummy_in
   REAL  :: dummy_out
