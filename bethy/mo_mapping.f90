@@ -220,6 +220,10 @@ SUBROUTINE mapping(par,nvar,nxp, scale)
      ipar = paramap(iptauw,i)
      ptauw(i) = par(ipar)
 
+     ! Chl
+     ipar = paramap(iChl,i)
+     Chl (i) = par(ipar)
+
      ! pks
 !     ipar = paramap(ipks,i)
 !     pks(i) = par(ipar)
