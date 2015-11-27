@@ -45,5 +45,7 @@ SUBROUTINE veg_deallocate (vp)
   DEALLOCATE( psoilst )
 !$taf next required = vp
   DEALLOCATE( zlai, lai )
+!$taf next required = vp
+  DEALLOCATE( Chl )
 
 END SUBROUTINE veg_deallocate

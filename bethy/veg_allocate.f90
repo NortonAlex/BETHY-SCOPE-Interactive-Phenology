@@ -32,6 +32,7 @@ SUBROUTINE veg_allocate (vp)
   ALLOCATE( pci(vp,nl), zci(vp) )
   ALLOCATE (psoilst(vp))
   ALLOCATE (zlai(vp), lai(vp))
+  ALLOCATE( Chl(vp) )
   zlai = 0.
   zfpar = 0.
   q10s = 0.
