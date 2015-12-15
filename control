@@ -1,6 +1,6 @@
 &control
  year0        = 2010
- year1	      = 2012
+ year1	      = 2010
  irestart     = 0
  day0         = 1
  nspin        = 1
@@ -27,11 +27,11 @@
  faparfile    = 'fapar_redres_'
  faparfile_global = 'fapar_lores_serr.nc'
  yearin0      = 1979
- yearin1      = 2012
- dprecip_file = './inputs/climate/forcing.lores_v3.precip.1979-2012.nc'
- dtmax_file   = './inputs/climate/forcing.lores_v3.tmax.1979-2012.nc'
- dtmin_file   = './inputs/climate/forcing.lores_v3.tmin.1979-2012.nc'
- dswdown_file = './inputs/climate/forcing.lores_v3.swdown.1979-2012.nc'
+ yearin1      = 2011
+ dprecip_file = './inputs/climate/forcing.lores.precip.1979-2011.nc'
+ dtmax_file   = './inputs/climate/forcing.lores.tmax.1979-2011.nc'
+ dtmin_file   = './inputs/climate/forcing.lores.tmin.1979-2011.nc'
+ dswdown_file = './inputs/climate/forcing.lores.swdown.1979-2011.nc'
  dummyfluxes  = './inputs/co2fluxes.dat'
  jacdir       = './inputs/jactd/'
  datdir       = './inputs/gv08/'

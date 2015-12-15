@@ -78,10 +78,10 @@ CONTAINS
    CALL read_radiation 
 
 ! We read the data from fs 
-    call read_obs_fs(lastdat,firstdat)
+!    call read_obs_fs(lastdat,firstdat)
  !   print*, ' nobs_fs ', nobs_fs 
     
-    CALL fs_allocate
+!    CALL fs_allocate
 
 
     RETURN
