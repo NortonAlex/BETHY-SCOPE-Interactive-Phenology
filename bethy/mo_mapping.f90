@@ -232,9 +232,9 @@ SUBROUTINE mapping(par,nvar,nxp, scale)
      ipar = paramap(iCsm,i)
      Csm_arr (i) = par(ipar)
 
-!     ! hc_arr  (vp array)
-!     ipar = paramap(ihc,i)
-!     hc_arr (i) = par(ipar)
+     ! hc_arr  (vp array)
+     ipar = paramap(ihc,i)
+     hc_arr (i) = par(ipar)
 
      ! LIDFa_arr  (vp array)
      ipar = paramap(iLIDFa,i)
@@ -243,6 +243,10 @@ SUBROUTINE mapping(par,nvar,nxp, scale)
      ! LIDFb_arr  (vp array)
      ipar = paramap(iLIDFb,i)
      LIDFb_arr (i) = par(ipar)
+
+     ! leafwidth_arr  (vp array)
+     ipar = paramap(ileafwidth,i)
+     leafwidth_arr (i) = par(ipar)
 
      ! pks
 !     ipar = paramap(ipks,i)

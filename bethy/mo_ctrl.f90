@@ -40,8 +40,10 @@ MODULE mo_ctrl
   INTEGER, PARAMETER :: iCsm      = 31
   INTEGER, PARAMETER :: iLIDFa      = 32
   INTEGER, PARAMETER :: iLIDFb      = 33
+  INTEGER, PARAMETER :: ihc       = 34
+  INTEGER, PARAMETER :: ileafwidth       = 35
 
-  INTEGER, PARAMETER :: npar      = 33
+  INTEGER, PARAMETER :: npar      = 35
 
   REAL  :: dummy_in
   REAL  :: dummy_out

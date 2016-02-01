@@ -57,5 +57,7 @@ SUBROUTINE veg_deallocate (vp)
   DEALLOCATE( LIDFa_arr )
 !$taf next required = vp
   DEALLOCATE( LIDFb_arr )
+!$taf next required = vp
+  DEALLOCATE( leafwidth_arr )
 
 END SUBROUTINE veg_deallocate
