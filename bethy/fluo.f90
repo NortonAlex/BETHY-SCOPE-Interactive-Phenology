@@ -397,12 +397,12 @@ USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectra
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
                       & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP, &
-                      & LIDFa,LIDFb 
+                      & LIDFa,LIDFb,hc,leafwidth 
 USE fluo_func 
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
-USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr
+USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -587,7 +587,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(jmf,Cw,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
-!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr)
+!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr)
 
   DO jl = 1,vp
         jj=gridp(jl)
@@ -683,6 +683,8 @@ pft_dominant_cell = -999
            frac1 = 0. 
            LIDFa = 0.
            LIDFb = 0.
+              hc = 0.
+       leafwidth = 0. 
 
 ! We consider only grid cells with PFTs having LAI greater than 0.
   IF (zlai(jl) >0.) THEN
@@ -773,6 +775,9 @@ if (pft == 13) option = 1  ! C3 crop plant only
 
 ! We calculate the xlay and dx the thickness of the layers
 !  CALL layers
+
+! We calculate leaf hotspot parameter (q) from vegetation height and leafwidth
+                q = leafwidth(jl)/hc_arr(jl)
 
 ! We call leafangles subroutine to determine leaf-angle distribution function (lidf)
             LIDFa = LIDFa_arr(jl)
