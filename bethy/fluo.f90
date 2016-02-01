@@ -915,7 +915,7 @@ CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0
 
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
-           & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,MfI,MbI,MfII,MbII,rho,tau,rs)
+           & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,MfI,MbI,MfII,MbII,rho,tau,rs,lidf)
 
 !Integration over the layers 
  type_integration = 'angles_and_layers'     ! This is working
