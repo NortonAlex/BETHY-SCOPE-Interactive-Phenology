@@ -36,8 +36,12 @@ MODULE mo_ctrl
   INTEGER, PARAMETER :: ipkl      = 27
   INTEGER, PARAMETER :: iptauw    = 28
   INTEGER, PARAMETER :: iChl      = 29
+  INTEGER, PARAMETER :: iCdm      = 30
+  INTEGER, PARAMETER :: iCsm      = 31
+  INTEGER, PARAMETER :: iLIDFa      = 32
+  INTEGER, PARAMETER :: iLIDFb      = 33
 
-  INTEGER, PARAMETER :: npar      = 29
+  INTEGER, PARAMETER :: npar      = 33
 
   REAL  :: dummy_in
   REAL  :: dummy_out

@@ -1,5 +1,5 @@
 p0    | p0su    | xpf  | xpfa | xpfb  | parname   | pftno | parano | paralist_no
-89
+93
 60.e-6  12.e-6	  3	 0.	0.	V_m 		1 	1		1
 90.e-6  18.e-6	  3	 0.	0.	V_m 		2	2
 41.e-6  8.2e-6	  3	 0.	0.	V_m 		3	3
@@ -90,6 +90,6 @@ p0    | p0su    | xpf  | xpfa | xpfb  | parname   | pftno | parano | paralist_no
 10.     20.       1      0.     0.      Chl             12      88
 20.     20.       1      0.     0.      Chl             13      89
 0.012	0.002	  1	 0.	0.	Cdm_arr		-	90		30
-0.	1.e-2	  1	 0.	0.	Csm_arr		-	91		31
--0.35	1.e-1	  1	 0.	0.	LIDFa_arr	-	92		32
--0.15	1.e-1	  1	 0.	0.	LIDFb_arr	-	93		33
+0.	0.01	  1	 0.	0.	Csm_arr		-	91		31
+-0.35	0.1	  1	 0.	0.	LIDFa_arr	-	92		32
+-0.15	0.1	  1	 0.	0.	LIDFb_arr	-	93		33

@@ -396,7 +396,8 @@ USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectra
                       & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
-                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP 
+                      & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP, &
+                      & LIDFa,LIDFb 
 USE fluo_func 
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
@@ -680,6 +681,8 @@ pft_dominant_cell = -999
             Vcmo = -1. 
              pft = -1
            frac1 = 0. 
+           LIDFa = 0.
+           LIDFb = 0.
 
 ! We consider only grid cells with PFTs having LAI greater than 0.
   IF (zlai(jl) >0.) THEN
@@ -894,11 +897,11 @@ IF (.NOT.ALLOCATED(Fout)) ALLOCATE(Fout(np))
              Fout = 0.
 
 ! Net photosynthesis
-CALL integration(1,A1,type_integration,Ps(1:nl),Fout)
+CALL integration(1,A1,type_integration,Ps(1:nl),lidf,Fout)
 Actot_faq   = LAI*(dot_product(Fc,A0) + Fout(1))
 
 ! GPP
-CALL integration(1,Ag1,type_integration,Ps(1:nl),Fout)
+CALL integration(1,Ag1,type_integration,Ps(1:nl),lidf,Fout)
 Agtot_faq   = LAI*(dot_product(Fc,Ag0) + Fout(1))
 
 ENDIF 
@@ -924,19 +927,19 @@ IF (.NOT.ALLOCATED(Fout)) ALLOCATE(Fout(np))
              Fout = 0.
 
 ! GPP  ??? without substracting the dark respiration 
-CALL integration(1,Agu,type_integration,Ps(1:nl),Fout)
+CALL integration(1,Agu,type_integration,Ps(1:nl),lidf,Fout)
            Agtot  = LAI*(dot_product(Fc,Agh) + Fout(1))
 
 ! NPP ???  To ckarify this 
-CALL integration(1,Au,type_integration,Ps(1:nl),Fout)
+CALL integration(1,Au,type_integration,Ps(1:nl),lidf,Fout)
             Actot = LAI*(dot_product(Fc,Ah) + Fout(1))
 
 !% Net PAR 
-CALL integration(1,reshape(Pnuc,(/nlu/)),type_integration,Ps(1:nl),Fout)
+CALL integration(1,reshape(Pnuc,(/nlu/)),type_integration,Ps(1:nl),lidf,Fout)
            Pntot  = LAI*(dot_product(Fc,Pnhc) + Fout(1))
 
 !% net PAR_Cab 
-CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),Fout)
+CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),lidf,Fout)
         Pntot_Cab = LAI*(dot_product(Fc,Pnhc_Cab) + Fout(1))
 
 ! Fluo per jl and for the wavelenght of the studied satellite 

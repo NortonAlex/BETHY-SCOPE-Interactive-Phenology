@@ -1,9 +1,9 @@
 !function Fout = integration(F,choice,Ps)
 !global nl nlazi lidf nli
 
-SUBROUTINE integration (npt,F,choice,Ps,Fout)
+SUBROUTINE integration (npt,F,choice,Ps,lidf,Fout)
 
-USE fluo_param, ONLY : nl,nlazi,nli,lidf 
+USE fluo_param, ONLY : nl,nlazi,nli 
 
 !% author: Dr. ir. Christiaan van der Tol (tol@itc.nl)
 !% date:     7   December 2007
@@ -31,6 +31,7 @@ INTEGER ,INTENT(IN)                              :: npt
 CHARACTER(len=30),INTENT(IN)                     :: choice 
 REAL, INTENT(IN), DIMENSION(nli,nlazi,nl)        :: F 
 REAL, INTENT(IN), DIMENSION(nl)                  :: Ps 
+REAL, INTENT(IN), DIMENSION(nli)                 :: lidf
 
 ! Output variables 
 REAL, INTENT(OUT), DIMENSION(npt)                :: Fout 
