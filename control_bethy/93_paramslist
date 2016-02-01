@@ -91,6 +91,5 @@ p0    | p0su    | xpf  | xpfa | xpfb  | parname   | pftno | parano | paralist_no
 20.     20.       1      0.     0.      Chl             13      89
 0.012	0.002	  1	 0.	0.	Cdm_arr		-	90		30
 0.	1.e-2	  1	 0.	0.	Csm_arr		-	91		31
-3.	0.5	  1	 0.	0.	hc_arr		-	92		32
--0.35	1.e-1	  1	 0.	0.	LIDFa_arr	-	93		33
--0.15	1.e-1	  1	 0.	0.	LIDFb_arr	-	94		34
+-0.35	1.e-1	  1	 0.	0.	LIDFa_arr	-	92		32
+-0.15	1.e-1	  1	 0.	0.	LIDFb_arr	-	93		33
