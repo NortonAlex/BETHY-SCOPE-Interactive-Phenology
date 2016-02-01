@@ -401,7 +401,7 @@ USE fluo_func
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
-USE mo_vegetation, ONLY : Chl
+USE mo_vegetation, ONLY : Chl,Cdm_arr,Cs_arr
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -580,10 +580,10 @@ CALL pb_hour_bethy(hm)
 !$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
-!$OMP& SHARED(jmf,Cdm,Cw,Csm,N,fqe) &
+!$OMP& SHARED(jmf,Cw,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
-!$OMP& SHARED(nwl,wlf,nwlP,Chl)
+!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr)
 
   DO jl = 1,vp
         jj=gridp(jl)
@@ -739,9 +739,9 @@ if (pft == 13) option = 1  ! C3 crop plant only
 ! Leaf fluorescence concentration  and related parameters... We can only
 ! consider Cab , but for the moment we leave as follows
            leafbio(1) = Cab
-           leafbio(2) = Cdm
+           leafbio(2) = Cdm_arr(jl)
            leafbio(3) = Cw
-           leafbio(4) = Csm
+           leafbio(4) = Csm_arr(jl)
            leafbio(5) = N
            leafbio(6) = fqe
            leafbio(7) = rho_thermal

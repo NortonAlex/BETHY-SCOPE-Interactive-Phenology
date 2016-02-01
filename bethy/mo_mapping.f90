@@ -224,6 +224,26 @@ SUBROUTINE mapping(par,nvar,nxp, scale)
      ipar = paramap(iChl,i)
      Chl (i) = par(ipar)
 
+     ! Cdm_arr (vp array)
+     ipar = paramap(iCdm,i)
+     Cdm_arr (i) = par(ipar)
+
+     ! Csm_arr  (vp array)
+     ipar = paramap(iCsm,i)
+     Csm_arr (i) = par(ipar)
+
+     ! hc_arr  (vp array)
+     ipar = paramap(ihc,i)
+     hc_arr (i) = par(ipar)
+
+     ! LIDFa_arr  (vp array)
+     ipar = paramap(iLIDFa,i)
+     LIDFa_arr (i) = par(ipar)
+
+     ! LIDFb_arr  (vp array)
+     ipar = paramap(iLIDFb,i)
+     LIDFb_arr (i) = par(ipar)
+
      ! pks
 !     ipar = paramap(ipks,i)
 !     pks(i) = par(ipar)
