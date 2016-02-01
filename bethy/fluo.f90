@@ -390,7 +390,7 @@ USE mo_namelist
 USE mo_grid
 
 ! Fluo 
-USE fluo_param, ONLY : aggreg,fluspect,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
+USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
                       & spectral_res,tts,tto,Rin,Rli,Ta,pa,ea,LAI,Vcmo,Oa,Cab,option, &
                       & leafbio,Jmo,Cdm,Cw,Csm,N,fqe, &
                       & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
@@ -401,7 +401,7 @@ USE fluo_func
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
-USE mo_vegetation, ONLY : Chl,Cdm_arr,Cs_arr
+USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -583,7 +583,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(jmf,Cw,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
-!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr)
+!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr)
 
   DO jl = 1,vp
         jj=gridp(jl)
@@ -766,6 +766,10 @@ if (pft == 13) option = 1  ! C3 crop plant only
 ! We calculate the xlay and dx the thickness of the layers
 !  CALL layers
 
+! We call leafangles subroutine to determine leaf-angle distribution function (lidf)
+            LIDFa = LIDFa_arr(jl)
+            LIDFb = LIDFb_arr(jl)
+CALL leafangles(LIDFa,LIDFb)
 
 ! ALLOCATE LOCAL FIELDS 
 ! For shaded leaves
