@@ -397,7 +397,7 @@ USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectra
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
                       & Pnuc_Cab,Fc,tempcor,LoF,Fhem,Fiprof,ifreq_sat,ial,wlf,wle,nwl,nwlP, &
-                      & LIDFa,LIDFb,hc,leafwidth 
+                      & LIDFa,LIDFb,q 
 USE fluo_func 
 USE mo_rtmo, ONLY : rtmo 
 USE chemical, ONLY : biochemical_faq, biochemical
@@ -683,8 +683,6 @@ pft_dominant_cell = -999
            frac1 = 0. 
            LIDFa = 0.
            LIDFb = 0.
-              hc = 0.
-       leafwidth = 0. 
 
 ! We consider only grid cells with PFTs having LAI greater than 0.
   IF (zlai(jl) >0.) THEN
@@ -777,7 +775,7 @@ if (pft == 13) option = 1  ! C3 crop plant only
 !  CALL layers
 
 ! We calculate leaf hotspot parameter (q) from vegetation height and leafwidth
-                q = leafwidth(jl)/hc_arr(jl)
+                q = leafwidth_arr(jl)/hc_arr(jl)
 
 ! We call leafangles subroutine to determine leaf-angle distribution function (lidf)
             LIDFa = LIDFa_arr(jl)
@@ -837,7 +835,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
-        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf)
+        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf, q)
 
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs_mat(1) = 1.-Ps(size(Ps))

@@ -13,7 +13,7 @@ MODULE mo_vegetation
   REAL, ALLOCATABLE, DIMENSION(:) ::  vm, jmf, fautleaf, ccost, hv, sla
   REAL, ALLOCATABLE,DIMENSION(:) :: aw, q10f, q10s, fracs, tauf,EC, EO, EV, ER, EK, tgam
   REAL, ALLOCATABLE,DIMENSION(:) :: alpha,alc4,kc0,ko0
-  REAL, ALLOCATABLE, DIMENSION(:) :: Chl,Cdm_arr,Csm_arr,hc_arr,LIDFa_arr,LIDFb_arr
+  REAL, ALLOCATABLE, DIMENSION(:) :: Chl,Cdm_arr,Csm_arr,hc_arr,LIDFa_arr,LIDFb_arr,leafwidth_arr
 
 !WOK-ADD-070612 ztrans
 !WOK-CHG-070626 removed zctrans

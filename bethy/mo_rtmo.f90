@@ -7,7 +7,7 @@ CONTAINS
 SUBROUTINE rtmo(Rin,Rli,Ta,LAI,tts,tto,psi, Ps, Po, Pso, km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto, Eoutt, Rnhs, Rnus, Rnhc, Rnuc,&
-        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf)
+        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf, q)
 
 USE fluo_func
 
@@ -142,7 +142,7 @@ USE fluo_func
 !%
 !%% 0. Preparations
 !global nwl nl
-!global x dx prm_ q
+!global x dx prm_ 
 !global litab lazitab nlazi
 !global wl resolution 
 !global deg2rad
@@ -152,7 +152,7 @@ USE fluo_func
 ! Translation of the RTMo.m matlab code of Christian Van der Tol in Fortran 
 ! ----------------------------------------------------------------------------
 
-USE fluo_param, ONLY:  nwl, nl, xlay, dx, q, litab, &
+USE fluo_param, ONLY:  nwl, nl, xlay, dx, litab, &
                         & lazitab, nli,nlazi, &
                         & wl,wlT,wlP,wlS,wlPAR,&
                         & nwlP, &
@@ -168,6 +168,7 @@ REAL, INTENT(IN)                            :: LAI,tts,tto,psi
 REAL, INTENT(IN)                            :: Rin,Rli,Ta 
 REAL, DIMENSION(:), INTENT(IN)              :: rho,tau,rs,kClrel    ! fluspect output
 REAL, DIMENSION(:), INTENT(IN)              :: lidf    ! leafangles output
+REAL, INTENT(IN)                            :: q    ! hotspot parameter (leafwidth/hc)
 
 ! Output variables 
 REAL, DIMENSION(nl+1,nwl), INTENT(OUT)      :: Eplu_,Emin_
