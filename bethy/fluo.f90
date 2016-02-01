@@ -829,7 +829,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
-        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel)
+        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf)
 
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs_mat(1) = 1.-Ps(size(Ps))
