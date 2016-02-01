@@ -488,6 +488,9 @@ REAL, ALLOCATABLE, DIMENSION(:,:)            :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)              :: rho, tau, rs
 REAL, ALLOCATABLE, DIMENSION(:)              :: kClrel
 
+!Output variable from leafangles
+REAL, ALLOCATABLE, DIMENSION(:)              :: lidf
+
 ! Output variable from fluoresence routine
 !REAL, DIMENSION(vp), INTENT(out)            :: zfluo, zgppfluo
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope
@@ -599,6 +602,8 @@ ALLOCATE(rho(nwl))
 ALLOCATE(tau(nwl))
 ALLOCATE(rs(nwl))
 ALLOCATE(kClrel(nwlP))
+
+ALLOCATE(lidf(nli))
 
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
@@ -769,7 +774,7 @@ if (pft == 13) option = 1  ! C3 crop plant only
 ! We call leafangles subroutine to determine leaf-angle distribution function (lidf)
             LIDFa = LIDFa_arr(jl)
             LIDFb = LIDFb_arr(jl)
-CALL leafangles(LIDFa,LIDFb)
+CALL leafangles(LIDFa,LIDFb,lidf)
 
 ! ALLOCATE LOCAL FIELDS 
 ! For shaded leaves
@@ -957,6 +962,9 @@ DEALLOCATE(rho)
 DEALLOCATE(tau)
 DEALLOCATE(rs)
 DEALLOCATE(kClrel)
+
+!Deallocate leafangles output
+DEALLOCATE(lidf)
 
 ! This activate if we want to calculate the number of layers as function of
 ! pft... There is memory leaks so far ... 

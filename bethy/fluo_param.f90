@@ -113,7 +113,7 @@ REAL, ALLOCATABLE, DIMENSION(:)          :: wl,resolution,xlay
 REAL, ALLOCATABLE, DIMENSION(:)          :: psi_,tto_
 REAL, ALLOCATABLE, DIMENSION(:)          :: fEsun, fEsky
 REAL, ALLOCATABLE, DIMENSION(:)          :: wlfi,wlfo
-REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
+!REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
 REAL, ALLOCATABLE, DIMENSION(:)          :: tran, refl 
 !REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
 REAL, ALLOCATABLE, DIMENSION(:)          :: prm
@@ -362,6 +362,9 @@ INTEGER                              :: ireg
 REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
 REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
+
+!Leafangles output
+REAL, ALLOCATABLE, DIMENSION(:)      :: lidf
 
 print*,'In subroutine: fluo_initparam'
 
@@ -699,7 +702,7 @@ CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
 
 !% B.2 number of classes, leaf angle distribution, observation angles
 IF (.NOT.ALLOCATED(lidf)) ALLOCATE(lidf(nli))
-CALL leafangles(LIDFa,LIDFb)
+CALL leafangles(LIDFa,LIDFb,lidf)
 
 ! Define layers
 !IF (.NOT.ALLOCATED(xlay)) ALLOCATE(xlay(nl))
@@ -743,6 +746,8 @@ DEALLOCATE(rho)
 DEALLOCATE(tau)
 DEALLOCATE(rs)
 DEALLOCATE(kClrel)
+!Deallocate leafangles output
+DEALLOCATE(lidf)
 
 END SUBROUTINE fluo_initparam 
 
@@ -1657,7 +1662,7 @@ END SUBROUTINE calctav
 !function [lidf]=  leafangles(a,b)
 !% Subroutine FluorSail_dladgen
 
-SUBROUTINE leafangles(a,b)                                     
+SUBROUTINE leafangles(a,b,lidf)
 
 !function [lidf]=  leafangles(a,b)                                     
 !% Subroutine FluorSail_dladgen
@@ -1680,6 +1685,9 @@ IMPLICIT NONE
 
 !Input variables 
 REAL, INTENT(IN)                    :: a,b
+
+!Output variables
+REAL, DIMENSION(:), INTENT(OUT)     :: lidf
 
 ! Local variables 
  REAL, DIMENSION(1,13)                :: FthetaL   ! Cumulative leaf inclination density 
