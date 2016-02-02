@@ -33,7 +33,7 @@ SUBROUTINE veg_allocate (vp)
   ALLOCATE (psoilst(vp))
   ALLOCATE (zlai(vp), lai(vp))
   ALLOCATE( Chl(vp), Cdm_arr(vp), Csm_arr(vp), hc_arr(vp), LIDFa_arr(vp), LIDFb_arr(vp) )
-  ALLOCATE( hc_arr(vp), leafwidth_arr(vp) )
+  ALLOCATE( leafwidth_arr(vp) )
   zlai = 0.
   zfpar = 0.
   q10s = 0.
