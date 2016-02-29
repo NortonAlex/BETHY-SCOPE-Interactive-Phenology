@@ -156,15 +156,28 @@ CONTAINS
     CALL ncclose(infile)
     n=0
 !$taf loop = parallel
+!print*,' mo_climate.f90: nlat ',nlat,' nlon ',nlon
     DO i = nlat,1,-1
+!    print*,' lat ',i
 !$taf loop = parallel
-       DO j = 1,nlon      
+       DO j = 1,nlon
+!       print*,' lon ',j      
           IF (iload(j,i,1).gt.-1000) THEN        
              n=n+1
-             dswdown(n,:) = iload(j,i,:)
+             ! If the grid point falls within the given latitude band where we adjust to test for sensitivity
+             IF (i.ge.1 .AND. i.le.8) THEN     ! Sth Hemis (90S-30S)
+!             IF (i.ge.9 .AND. i.le.16) THEN     ! Tropics (30S-30N)
+!             IF (i.ge.17 .AND. i.le.24) THEN     ! Nth Hemis (30N-90N)
+                dswdown(n,:) = iload(j,i,:) + 0.01*(0.20*iload(j,i,:))   ! Adjust value by 1% of its uncertainty, where the uncertainty is 20% of the mean 
+             ELSE
+                dswdown(n,:) = iload(j,i,:)
+!             print*,' n ',n
+             ENDIF
           ENDIF
        ENDDO
     ENDDO
+
+    print*,' shape of dswdown:', SHAPE(dswdown)
 
     DEALLOCATE (iload)
 
