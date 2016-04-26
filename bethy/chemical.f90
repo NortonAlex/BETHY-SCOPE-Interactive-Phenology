@@ -513,22 +513,14 @@ REAL, DIMENSION(npt),INTENT(OUT)   :: fo,eta,qE,qQ,fs,fm,Kn
 ! Local variables 
 REAL, DIMENSION(npt)               :: x
 REAL                               :: po0 
-REAL,DIMENSION(npt)                :: nu,K_N0,Kn_alpha,Kn_beta
-
-!Set Kn parameter values (see Tol et al. 2014, J.Geophys.Res.Biogeosci. 119,doi:10.1002/2014JG002713)
-K_N0 = 2.48
-Kn_alpha = 2.83
-Kn_beta = 0.114
 
 
 po0         = Kp/(Kf+Kd+Kp)  !     % dark photochemistry fraction (Genty et al., 1989)
 x           = 1.-ps/po0  ! ;                % degree of light saturation
-!%Kn          = (3.9867 * x - 1.0589)*x;  % empirical fit to Flexas, Daumard, Rascher, Berry data
+!%Kn          = (3.9867 * x - 1.0589).*x;  % empirical fit to Flexas, Daumard, Rascher, Berry data
 !%p = [4.5531;8.5595;1.8510];
 !%Kn1   = p(1)./(p(3)+exp(-p(2)*(x-.5)));
-!Kn          = (6.2473 * x - 0.5944)*x   !; % empirical fit to Flexas' data
-nu = ((1+Kn_beta) * x**Kn_alpha)/(Kn_beta+x**Kn_alpha)
-Kn = nu*K_N0
+Kn          = (6.2473 * x - 0.5944)*x   !; % empirical fit to Flexas' data
 
 fo0         = Kf/(Kf+Kp+Kd)    !   % dark adapted fluorescence yield Fo
 fo          = Kf/(Kf+Kp+Kd+Kn) !;  % dark adapted fluorescence yield Fo

@@ -587,9 +587,10 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(jmf,Cw,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
-!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr)
+!$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
+!$OMP& SHARED(ihour,iday)
 
-  DO jl = 1,vp
+  DO jl = 1,vp,50
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -630,10 +631,10 @@ CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 ! Diurnal variations. We only consider the data at 12 h, which correspond to
 ! BEHTY its of 24 
   !DO jd = 1, 24 
-  DO jd = 1, 1 
+!  DO jd = 1, 1
 
-     t = hm(jd)*1. 
- 
+!     t = hm(jd)*1. 
+     t = hm(ihour)*1.
 
 ! Computation of the sun zenith angle in radians
 ! We have the time at which the sun reaches its maximum
@@ -1013,7 +1014,7 @@ endif
 ! Deallocate fields dependent to the layer
 !IF (ALLOCATED(xlay)) CALL fieldlayer_deallocate
 
-END DO  ! Loop on the jd 
+!END DO  ! Loop on the jd 
 
 END Do     ! loop on jl
 

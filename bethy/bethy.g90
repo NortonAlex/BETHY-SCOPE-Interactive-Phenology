@@ -57,7 +57,9 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
 !Output fluo and gppfluo for every day run, not just per rmonth. 
   OPEN(unit=93,file='fluoro.bin',form='unformatted')
   OPEN(unit=94,file='gppfluo.bin',form='unformatted')
-
+  OPEN(unit=95,file='gridp.bin',form='unformatted')
+  OPEN(unit=96,file='vg_nv.bin',form='unformatted')
+  OPEN(unit=97,file='t_.bin',form='unformatted')
   jdlast = 0
   ragain = .TRUE.
 
@@ -213,7 +215,7 @@ print *, 'tdays =', tdays
                     ENDIF
                  ENDIF
               ENDDO
-!              print *,'Inside diurnal timestep loop, inho = ', inho
+!              print *,'Inside diurnal timestep loop, inho = ', inho,' its = ', its
               CALL climsubday2 (ng, REAL(inho))
 !              print *, 'swdown shape:', shape(swdown)
 !              print *, 'SWDOWN ARRAY:', swdown
@@ -349,5 +351,11 @@ print *, 'tdays =', tdays
      flux = rnep(1:,:,:)
      prog_sites(:,:,:) = rnpp(1:,:,:)
   ENDIF
+
+CLOSE(93)
+CLOSE(94)
+CLOSE(95)
+CLOSE(96)
+CLOSE(97)
 
 END SUBROUTINE bethy
