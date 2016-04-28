@@ -1110,8 +1110,8 @@ Et              =   0.017 + .4281 * cos(GG) - 7.351 * sin(GG) - &
                     & 3.349 * cos(2*GG) - 9.731 * sin(2*GG)
 
 !%computes the time of the day when the sun reaches its highest angle                                
-tm              =   12+(4*(-Long)-Et)/60    !  % de Pury and Farquhar (1997), Iqbal (1983)
-
+!tm              =   12+(4*(-Long)-Et)/60    !  % de Pury and Farquhar (1997), Iqbal (1983)
+tm              =   12+(Et)/60 
 
 !%computes the hour angle of the sun
 Omega_s         =   (t-tm)/12*pi
