@@ -373,7 +373,7 @@ END SUBROUTINE read_radiation
   END SUBROUTINE read_obs_fs 
 
 
-SUBROUTINE fluorescence(iyear,imonth,iday,ihour,irrin,par,&
+SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & temp,pres,ea0,Cca,COa,zlai,&
                   & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab)
@@ -457,6 +457,7 @@ IMPLICIT NONE
 ! Input variables
 ! Date 
 INTEGER            , INTENT(in)           :: iyear,imonth,iday,ihour
+INTEGER            , INTENT(in)           :: iday0,iday1
 
 ! Radiation short wave and PAR computed from bethy  
 REAL, DIMENSION(ng), INTENT(in)           :: irrin,par       
@@ -569,11 +570,14 @@ gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
 
 
 ! To refine this 
-               t = 12.                    ! This is the local time at the selected pixel
-              im =  mod(imonth,12)
-if (im == 0 ) im =  12
-             doy =  sum(rdays(1:im)) +15.   ! We consider the middle of the month
+!               t = 12.                    ! This is the local time at the selected pixel
+!              im =  mod(imonth,12)
+!if (im == 0 ) im =  12
+!             doy =  sum(rdays(1:im)) +15.   ! We consider the middle of the month
 
+              doy = INT((iday0+iday1)/2)        ! Computes mid-point doy of simulated period (i.e. period over which forcing is averaged)
+
+print*,'In fluo, doy=',doy
 
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)

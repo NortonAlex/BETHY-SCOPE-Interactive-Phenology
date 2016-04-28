@@ -242,7 +242,7 @@ print *, 'tdays =', tdays
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
               IF ( inho == 13 ) THEN
-              CALL fluorescence (ryear,rmonth,iday,its,swdown,pardown,&
+              CALL fluorescence (ryear,rmonth,iday,its,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab)             
