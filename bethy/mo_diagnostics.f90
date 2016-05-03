@@ -29,6 +29,8 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rgppfluo
   REAL, ALLOCATABLE, DIMENSION(:,:,:) :: rrad,rpar
   REAL, ALLOCATABLE, DIMENSION(:,:,:) :: PAR_scope,PAR_scope_cab
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfluo_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rgppfluo_diurnal
 
 contains
 
@@ -102,6 +104,10 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   PAR_scope = 0.
   ALLOCATE( PAR_scope_cab (0:nrun,outt,ng) )
   PAR_scope_cab = 0.
+  ALLOCATE( rfluo_diurnal (0:nrun,outt,tspd,vp) )     ! Output array for diurnal time-course of sif at every vp
+  rfluo_diurnal = 0.
+  ALLOCATE( rgppfluo_diurnal (0:nrun,outt,tspd,vp) )  ! Output array for diurnal time-course of gpp at every vp
+  rgppfluo_diurnal = 0.
   !WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
   ALLOCATE( raet(0:nrun,outt,ng) )
   raet = 0.
@@ -201,6 +207,8 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( rpar )
   DEALLOCATE( PAR_scope )
   DEALLOCATE( PAR_scope_cab )
+  DEALLOCATE( rfluo_diurnal )
+  DEALLOCATE( rgppfluo_diurnal )
 
 
 END SUBROUTINE diagnostics_deallocate

@@ -376,7 +376,8 @@ END SUBROUTINE read_radiation
 SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & temp,pres,ea0,Cca,COa,zlai,&
                   & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
-                  & rfluo,rgppfluo,PAR_scope,PAR_scope_cab)
+                  & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
+                  & rfluo_diurnal,rgppfluo_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -499,7 +500,7 @@ REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope_cab
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
 REAL, DIMENSION(vp)                          :: daygpp, dayfluo
-
+REAL, DIMENSION(0:nrun,outt,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -577,8 +578,6 @@ gcmethod = 1      ! method gcmethod = 1 (Cowan, 1997?), = 0 (Leuning)
 
               doy = INT((iday0+iday1)/2)        ! Computes mid-point doy of simulated period (i.e. period over which forcing is averaged)
 
-print*,'In fluo, doy=',doy
-
 ! We have a pb with the hour to fix this 
 CALL pb_hour_bethy(hm)
 
@@ -592,9 +591,9 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday)
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal)
 
-  DO jl = 1,vp,50
+  DO jl = 1,vp
         jj=gridp(jl)
 
  ! do jj = 1, ng
@@ -1001,6 +1000,10 @@ DEALLOCATE(lidf)
 !     print*,'Agtot*frac1 equals: ',Agtot*frac1
 
      zgppfluo(jj) = zgppfluo(jj)+Agtot*frac1     
+
+     ! Output data per vegetation point and per diurnal time-step 
+     rfluo_diurnal(iyear,imonth,t,jl) = LoF_jl*frac1
+     rgppfluo_diurnal(iyear,imonth,t,jl) = Agtot*frac1
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1

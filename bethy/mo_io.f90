@@ -42,7 +42,7 @@ SUBROUTINE setio(outdir, scale)
   IMPLICIT NONE
 
 ! .. Arguments
-  CHARACTER(len=80),INTENT(in) :: outdir 
+  CHARACTER(len=80),INTENT(in) :: outdir
   INTEGER, INTENT(in) :: scale
 
 ! .. Local Scalars ..
@@ -51,7 +51,7 @@ SUBROUTINE setio(outdir, scale)
   INTEGER :: uu
 
 !cccc OPEN OUTPUT FILES:
-  
+
 !     error messages 
   uu=8
   ofname='error.dat'
@@ -142,7 +142,7 @@ SUBROUTINE setio(outdir, scale)
      uu=155
      ofname=TRIM(outdir)//'sevp_global.dat'
      OPEN (uu,file=ofname,status='unknown',form='formatted')
-  
+
 !     snow melt [mm/month]
      uu=156
      ofname=TRIM(outdir)//'snmelt_global.dat'
@@ -275,7 +275,7 @@ SUBROUTINE setio(outdir, scale)
      uu=255
      ofname=TRIM(outdir)//'sevp_site.dat'
      OPEN (uu,file=ofname,status='unknown',form='formatted')
-  
+
 !     snow melt [mm/month]
      uu=256
      ofname=TRIM(outdir)//'snmelt_site.dat'
@@ -315,7 +315,7 @@ SUBROUTINE diagout (ng,vp,scale,outint)
   USE mo_diagnostics, ONLY: rgpp,rnpp,rnep,raet,rpet,ress,resf,rgrw,rmnt,nppp, &
                        &   rrhos,rpasm,rlai,rfpar,rrunoff,rsevp,rsnmelt,rnppp, &
                        &   rgppp, rfparp, rnepp, rfluo, rgppfluo, rrad, rpar, &
-                       &   PAR_scope, PAR_scope_cab
+                       &   PAR_scope, PAR_scope_cab, rfluo_diurnal, rgppfluo_diurnal
 
   IMPLICIT NONE
 
@@ -378,8 +378,10 @@ SUBROUTINE diagout (ng,vp,scale,outint)
      CALL savefnc(TRIM(outdir)//'rpar.nc', rpar,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'par_scope.nc', PAR_scope,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'par_scope_cab.nc', PAR_scope_cab,lat,lon,nrun,outt,ng,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc', rfluo_diurnal,nrun,outt,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc', rgppfluo_diurnal,nrun,outt,24,vp,sp)
 
-     
+
   ELSEIF (scale==2) THEN ! SITE SCALE !
 
      rneppm = 0.
@@ -473,18 +475,18 @@ SUBROUTINE savefnc( filename, field,lat,lon,nm,ot,ng,binnm)
      DO i_m = 1, nm
         outfield( i, j,(i_m -1)* ot +1 : i_m * ot ) =  field( i_m, :, ig)
      END DO
-     
+
   END DO
 
   ! if the output is monthly then normalize to per year for fluxes
   IF( ot == 12) THEN
      DO i = 1, nm * ot
         j = MODULO(i-1,12)+ 1
-        
+
         outfield(:,:,i) = outfield(:,:,i) * 365./float(rdays(j))
      END DO
   END IF
-  
+
   ! make lat, lon and time arrays
   ALLOCATE( lats( nlat))
   ALLOCATE( lons( nlon))
@@ -515,7 +517,7 @@ SUBROUTINE savefnc( filename, field,lat,lon,nm,ot,ng,binnm)
   DO i=1,3
      nc_flux%dims(i)%p => nc_dims(i)
   END DO
-  
+
   nc_dims(1)%name = 'longitude'; nc_dims(1)%len = nlon
   nc_dims(3)%name = 'time'; nc_dims(3)%len = nm*ot
   nc_dims(2)%name ='latitude';  nc_dims(2)%len = nlat
@@ -523,7 +525,7 @@ SUBROUTINE savefnc( filename, field,lat,lon,nm,ot,ng,binnm)
      CALL ncdimdef(outfile, nc_dims(i))
   END DO
   CALL ncvardef(outfile, nc_lons)
-  
+
   CALL ncvardef(outfile, nc_lats)
   CALL ncvardef(outfile, nc_time)
   CALL ncvardef(outfile, nc_flux)
@@ -541,6 +543,111 @@ SUBROUTINE savefnc( filename, field,lat,lon,nm,ot,ng,binnm)
   RETURN
 
 END SUBROUTINE savefnc
+
+SUBROUTINE savefnc_diurnal( filename, field,nm,ot,nhrs,nvp,binnm)
+  ! pjr april 2002 for saving as netcdf output gridded
+  USE mo_netcdf
+  USE mo_namelist, ONLY : year0  ! avoiding name conflict
+  USE mo_constants, ONLY: rdays
+  USE mo_grid, ONLY: nlon, nlat
+
+  IMPLICIT NONE
+
+  CHARACTER(len=*) :: filename
+! .. Scalar Arguments ..
+  INTEGER, INTENT (IN) :: ot, nhrs, nvp, nm,  binnm
+
+! .. Array Arguments ..
+  REAL, DIMENSION (0:nm,ot,nhrs,nvp), INTENT (IN) :: field
+!  REAL, DIMENSION (ng), INTENT (IN) :: lon, lat
+
+! local variables
+  TYPE(ncfile) :: outfile
+  TYPE(ncvar) :: nc_vegp, nc_time, nc_flux
+  TYPE(ncdim), TARGET, DIMENSION(2) :: nc_dims
+  REAL, DIMENSION( nm* ot* nhrs, nvp ) :: outfield
+  REAL, DIMENSION(:), ALLOCATABLE :: vegp, time
+  INTEGER i, j, i_m, imon, idoy, ihr  ! index variables
+  REAL, DIMENSION(:), ALLOCATABLE :: doy, hrs
+
+  outfield = 0.
+
+  DO i_m= 1, nm
+     DO imon= 1,ot
+        DO ihr= 1,nhrs
+           i = (imon-1)*24 + ihr
+           outfield(i,:) = field(i_m,imon,ihr,:)
+        END DO
+     END DO
+  END DO
+
+  ! make veg-point and time arrays
+  ALLOCATE( vegp( nvp))
+  ALLOCATE( time( ot * nm * nhrs))
+  ALLOCATE( doy( ot))
+  ALLOCATE( hrs(nhrs))
+
+  ! determine approx mid-day of the month (Day Of Year)
+  DO i= 1,ot
+     doy(i) = SUM( rdays(1:i)) - 15    ! Note: not the same as the actual mid-period of forcings for which SCOPE is simulated
+  END DO
+
+  DO i= 1,nhrs
+     hrs(i) = i*1.
+  END DO
+
+  ! time array as fractional year
+  DO i= 1, nm * ot * nhrs
+     idoy = (i-1)/24 + 1
+     ihr = MOD(i-1, nhrs)+1 
+     time(i) = year0 + doy(idoy)/365. + hrs(ihr)/24/365. !
+  END DO
+  DO i= 1, nvp
+     vegp(i) = i*1.  !field(1,1,1,i) 
+  END DO
+!  DO i= 1,nlat
+!     lats( i) = -90. + (i-0.5) *180. /float (nlat)
+!  END DO
+!  DO i= 1, nlon
+!     lons( i) = (i -0.5) * 360./float( nlon)
+!  END DO
+  outfile%name =TRIM( filename)
+!  PRINT*,filename
+  CALL nccreate(outfile, incmode = nf_clobber)
+  nc_time%name = 'time'; nc_time%xtype= nf_float
+  nc_time%ndims = 1; nc_time%dims(1)%p => nc_dims(1)
+  nc_vegp%name = 'veg-point'; nc_vegp%xtype= nf_float
+  nc_vegp%ndims = 1; nc_vegp%dims(1)%p => nc_dims(2)
+  ! construct field name from filename
+  i = INDEX(filename, "/", back=.TRUE.) +1
+  j = INDEX( filename, ".", back=.TRUE.) -1
+  nc_flux%name = filename( i: j); nc_flux%xtype = nf_float
+  nc_flux%ndims = 2;
+  nc_flux%dims(1)%p => nc_dims(1)
+  nc_flux%dims(2)%p => nc_dims(2)
+
+  nc_dims(1)%name = 'time'; nc_dims(1)%len = nm*ot*nhrs
+  nc_dims(2)%name = 'veg-point'; nc_dims(2)%len = nvp
+  DO i=1,2
+     CALL ncdimdef(outfile, nc_dims(i))
+  END DO
+
+  CALL ncvardef(outfile, nc_time)
+  CALL ncvardef(outfile, nc_vegp)
+  CALL ncvardef(outfile, nc_flux)
+  CALL ncputatt(outfile, nc_vegp, "units", "veg-point number")
+  CALL ncputatt(outfile, nc_time, "units", "years")
+  CALL ncenddef(outfile)
+  CALL ncprint(outfile, nc_time, time)
+  CALL ncprint(outfile, nc_vegp, vegp)
+  CALL ncprint(outfile, nc_flux, outfield)
+  CALL ncclose(outfile)
+  DEALLOCATE( vegp, time)
+  DEALLOCATE( doy, hrs )
+
+  RETURN
+
+END SUBROUTINE savefnc_diurnal
 
 
 SUBROUTINE savefbin(unit,field,lat,lon,nm,ot,ng,binnm)
