@@ -561,6 +561,8 @@ INTEGER                                      :: faq
 INTEGER                                      :: jd 
 REAL                                         :: hm(24)
 
+INTEGER                                      :: it   ! time index for diurnal output arrays
+
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
 
@@ -637,7 +639,11 @@ CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 !  DO jd = 1, 1
 
 !     t = hm(jd)*1. 
-     t = hm(ihour)*1.
+!     t = hm(ihour)*1.
+
+! Removed a dependency of SCOPE sub-day timestep on BETHY looping var "its". 
+!   BETHY var "inho" (fluor ihour argument) corresponds to: actual_time (in 24hr time) = inho+1
+     t = MOD(ihour,24)+1     
 
 ! Computation of the sun zenith angle in radians
 ! We have the time at which the sun reaches its maximum
@@ -1002,6 +1008,7 @@ DEALLOCATE(lidf)
      zgppfluo(jj) = zgppfluo(jj)+Agtot*frac1     
 
      ! Output data per vegetation point and per diurnal time-step 
+     it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
      rfluo_diurnal(iyear,imonth,t,jl) = LoF_jl*frac1
      rgppfluo_diurnal(iyear,imonth,t,jl) = Agtot*frac1
 
