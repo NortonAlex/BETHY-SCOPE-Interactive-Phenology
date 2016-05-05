@@ -177,8 +177,6 @@ CONTAINS
        ENDDO
     ENDDO
 
-    print*,' shape of dswdown:', SHAPE(dswdown)
-
     DEALLOCATE (iload)
 
   END SUBROUTINE get_global_climate
@@ -295,7 +293,7 @@ CONTAINS
     atmean = r * SUM (dtmax(:,iday0:iday1)+dtmin(:,iday0:iday1),2) / 2.
     atrange = r * SUM (dtmax(:,iday0:iday1)-dtmin(:,iday0:iday1),2)
     aswdown = r * SUM (dswdown(:,iday0:iday1),2)
-  
+
 ! .. average actual / potential evapotranspiration over grid cell
     tfe=0
     DO i=1,vp
