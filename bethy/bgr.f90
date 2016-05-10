@@ -30,7 +30,7 @@ CONTAINS
     REAL :: x, t, fos_tot
     REAL, POINTER, DIMENSION(:) :: ocean_time
     REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ocean_fluxes, tm2_fluxes
-    INTEGER j,i1,j1, n_years,k
+    INTEGER j,j1, n_years,k
     CHARACTER( len=80) ::  head ! for reading graphz files
     INTEGER :: min_time ! index for start date into fossil amplitude array
     INTEGER :: i_time ! time index variable

@@ -105,6 +105,10 @@ MODULE mo_namelist
   ! end of second flux period
   INTEGER :: p2end = 1
 
+  ! vp block splitting parallelisation
+  INTEGER :: nblocks = -1
+  INTEGER :: iblock = -1 
+
 !HEW-CHG : all options read in here on namelist control:
 !HEW-CHG  NAMELIST /control/ firstdat, lastdat, datfile, param_file, mapping_file, &
 !HEW-CHG       & grid_file, interp_file, spinup_file, climate_file, dummyfluxes, jacdir, outdir, &
@@ -121,7 +125,7 @@ MODULE mo_namelist
        & dummyfluxes, jacdir, outdir, year0_site, year1_site, mapping_file_site, &
        & site_file, pattern_file, flux_temp_file,&
        & datdir, fluxdir, bgrdir, optpftg, optpftl, optbsmg, optbsml, &
-       & p1start, p1end, p2start, p2end
+       & p1start, p1end, p2start, p2end, nblocks, iblock
 
 
 CONTAINS
@@ -129,14 +133,30 @@ CONTAINS
   SUBROUTINE get_namelist
 
 !HEW-ADD: 050304:
-    USE mo_grid, ONLY: ng
+    USE mo_grid, ONLY: ng,vp,i1,i2,iblock,nblocks
     USE mo_constants
+    USE break_jobs
 
     INTEGER :: nruns
+    character(len=200) :: control_filename
+    logical :: file_exists
+
+    if( command_argument_count() .eq. 0) then
+        control_filename = 'control'
+    else if(command_argument_count() .eq. 1) then
+        call get_command_argument(1, control_filename)
+        inquire(file = trim(control_filename), exist = file_exists)
+        if( .not. file_exists ) then
+            write(0,*) 'control file "'//trim(control_filename)//'" not found ...'
+            stop 
+        end if
+    else
+        stop 'wrong number of arguments ...'
+    end if
 
 ! to read  namelist
 !HEW-CHG: 050304: all control files now in dir control_bethy
-    OPEN(unit=1, file='control', status='old')
+    OPEN(unit=1, file=trim(control_filename), status='old')
     REWIND 1 
     
     READ(1,NML=control)
@@ -172,6 +192,17 @@ CONTAINS
           STOP 'TM2 grid must have 170 land grid points'
        ENDIF
 
+! Split veg-points into blocks 
+       IF ((iblock==-1) .OR. (nblocks==-1)) THEN 
+           i1 = 1
+           i2 = vp
+       else if( (nblocks .ge. 1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) then
+           call get_splits(vp, nblocks, iblock, i1, i2)
+       else
+           stop 'iblock and/or nblocks not defined correctly...'
+       end if
+       write(*,*) 'veg-point block parallelisation: (i1,i2) =',i1,i2
+       write(*,*) 'nblocks, iblock =', nblocks, iblock
 
 ! Check timings
        IF (year0 < yearin0 .OR. year0 > yearin1) THEN

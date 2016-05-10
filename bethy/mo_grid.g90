@@ -35,6 +35,10 @@ MODULE mo_grid
   REAL, ALLOCATABLE, DIMENSION(:) :: frac, frac_p, frac_u, sumfrac
   REAL, DIMENSION (ng) :: lon, lat  
 
+! Block parallelization split per veg-points
+
+  INTEGER   :: i1,i2,iblock=-1,nblocks=-1
+
 !cccc elev     elevation [m]
 !cccc vg       vegetation types per gridcell
 !cccc vpb      index to first sub-pixel (1...vp) within grid cell

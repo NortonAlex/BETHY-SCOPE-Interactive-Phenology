@@ -593,9 +593,9 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal)
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,i1,i2)
 
-  DO jl = 1,vp
+  DO jl = i1,i2
         jj=gridp(jl)
 
  ! do jj = 1, ng

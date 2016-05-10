@@ -37,8 +37,14 @@ MODULE mo_grid
   REAL, DIMENSION (ng) :: lon, lat  
 
 !CCCC loaded in 'getsdata' from 'bethy'
+! Block parallelization split per veg-points
+
+  INTEGER   :: i1,i2,iblock=-1,nblocks=-1
+
 !cccc elev     elevation [m]
 !cccc vg       vegetation types per gridcell
+!cccc vpb      index to first sub-pixel (1...vp) within grid cell
+!cccc vpe      index to last sub-pixel (1...vp) within grid cell
 
 ! .. Local Scalars ..
     INTEGER :: vp, sp, nrs

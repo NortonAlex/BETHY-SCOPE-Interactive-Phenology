@@ -18,7 +18,7 @@ SRC = 	cbalance.f90 	 	budget.f90	\
 	veg_allocate.f90 		veg_deallocate.f90
 
 MSRC	=			\
-	constants_pjr.f90	mo_taf.f90		mo_netcdf.f90		\
+	break_jobs.f90	constants_pjr.f90	mo_taf.f90		mo_netcdf.f90		\
 	mo_constants.f90	mo_grid.f90		mo_namelist.f90		\
 	mo_calendar.f90		\
 	mo_carparams.f90	mo_carvar.f90				\

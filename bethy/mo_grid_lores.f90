@@ -36,6 +36,10 @@ MODULE mo_grid
   REAL, ALLOCATABLE, DIMENSION(:) :: frac, frac_p, frac_u, sumfrac
   REAL, DIMENSION (ng) :: lon, lat  
 
+! Block parallelization split per veg-points
+
+  INTEGER   :: i1,i2,iblock=-1,nblocks=-1
+
 !CCCC loaded in 'getsdata' from 'bethy'
 !cccc elev     elevation [m]
 !cccc vg       vegetation types per gridcell
