@@ -119,14 +119,14 @@ CONTAINS
     luc=luc/SUM(luc)
 
     ! get the time varying amplitude 
-    OPEN (1, file=TRIM(bgrdir)//"luc_amp.txt", status='old') ! shifted to background dir for consistency 
+    OPEN (1, file=TRIM(bgrdir)//"luc_amp_gcp.txt", status='old') ! shifted to background dir for consistency 
     REWIND 1
     CALL read_new( 1, head, time, luc_amp, t_length)
     ! now find first time that corresponds with our study period
     min_time = SUM( MINLOC( time, time > REAL( year0)))
     ! check that the fossil amplitudes stretch far enough to cover our study period
     IF( time( SIZE( time)) < REAL( year1)) THEN
-       WRITE(0,*) 'init_bgr: not enough luc amplitudes in ',TRIM(bgrdir)//"luc_amp.txt"
+       WRITE(0,*) 'init_bgr: not enough luc amplitudes in ',TRIM(bgrdir)//"luc_amp_gcp.txt"
        WRITE(0,*) 'init_bgr: filling in with last value of ',luc_amp( SIZE( time),1),' for the year ',time(SIZE(time))
        DO i=SIZE(time)+1,SIZE(luc_amp,1)
           luc_amp(i,:)=luc_amp(SIZE(time),:)
@@ -181,10 +181,11 @@ CONTAINS
     tm2_fluxes = - tm2_fluxes
     ! and finally select the years we need
     ! first year
+    ! FIX ME. If year0 > ocean_time(-1), use last year available
     i=1
-    DO 
+    DO i=1,thelens(3) 
        IF (ocean_time(i)+0.001 > float(year0)) EXIT
-       i=i+1
+!       i=i+1
     ENDDO
     ! last year, either end of period or end of tm2_fluxes
     k = MIN( i + (year1 - year0 +1)*12 -1, SIZE( tm2_fluxes, 3))

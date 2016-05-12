@@ -586,16 +586,19 @@ CALL pb_hour_bethy(hm)
 ! Read in modtran atmosphere transmittance files to variable array
 !CALL read_modtran_files
 
-!$OMP PARALLEL DO DEFAULT(PRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
+!$OMP PARALLEL DO DEFAULT(FIRSTPRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
 !$OMP& SHARED(jmf,Cw,N,fqe) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,i1,i2)
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,i1,i2) &
+!$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
+!$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
+!$OMP& PRIVATE(Ciu,Ccu,Tcu)
 
-  DO jl = i1,i2
+  DO jl = 1,vp,100
         jj=gridp(jl)
 
  ! do jj = 1, ng

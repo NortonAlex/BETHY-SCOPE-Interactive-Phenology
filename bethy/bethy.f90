@@ -159,16 +159,16 @@ print *, 'tdays =', tdays
            ENDIF
         ENDIF
 
-        IF (iday1>sdays) iday1=sdays
-
-        adayint=dayint
-        IF (idayint(rday)+adayint>tdays) adayint=tdays-idayint(rday)+1
-
         rmonth=amonth(rday)
 
         ! Calculate the first and last days of the month (to get monthly mean clim forcing)
         iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
         iday1=SUM(rdays(1:rmonth))
+
+        IF (iday1>sdays) iday1=sdays
+
+        adayint=dayint
+        IF (idayint(rday)+adayint>tdays) adayint=tdays-idayint(rday)+1
 
 !   print*,"rday,iday0,iday1,sdays,aday"
 !   PRINT*,rday,iday0,iday1,sdays,aday
@@ -246,7 +246,7 @@ print *, 'tdays =', tdays
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
-!              IF ( inho == 13 ) THEN
+              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
@@ -255,7 +255,7 @@ print *, 'tdays =', tdays
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
-!              ENDIF         ! for selected time of fluo computation
+              ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 

@@ -12,12 +12,17 @@ MODULE mo_grid
 !!MS$  INTEGER, PARAMETER :: ng = 11069  ! 1 deg equal area grid
 !!MS$  INTEGER :: nlon = 360
 !!MS$  INTEGER :: nlat = 180
-!!MS$  INTEGER, PARAMETER :: ng = 3462   ! 2 deg reg grid
-!!MS$  INTEGER :: nlon = 180
-!!MS$  INTEGER :: nlat = 90
-    INTEGER, PARAMETER :: ng = 170   ! TM2 grid
-    INTEGER :: nlon = 36
-    INTEGER :: nlat = 24
+
+
+
+
+
+
+
+ INTEGER, PARAMETER :: ng = 170   ! TM2 grid
+ INTEGER :: nlon = 36
+ INTEGER :: nlat = 24
+
 
 ! ANorton 12-2014 For fluorescence calculation
 !--------------------------------------------
@@ -25,8 +30,8 @@ MODULE mo_grid
  INTEGER, ALLOCATABLE, DIMENSION(:,:) :: gridvp
 !--------------------------------------------
 
-!cccc ng         number of land grid points \
-!cccc nlon       number of longitudes        >  grid resolution dependant
+!cccc ng         number of land grid points !cccc nlon       number of longitudes        >  grid resolution dependant
+
 !cccc nlat       number of latitudes        / 
 
 ! .. Local Arrays ..
@@ -36,7 +41,6 @@ MODULE mo_grid
   REAL, ALLOCATABLE, DIMENSION(:) :: frac, frac_p, frac_u, sumfrac
   REAL, DIMENSION (ng) :: lon, lat  
 
-!CCCC loaded in 'getsdata' from 'bethy'
 ! Block parallelization split per veg-points
 
   INTEGER   :: i1,i2,iblock=-1,nblocks=-1
