@@ -586,6 +586,8 @@ CALL pb_hour_bethy(hm)
 ! Read in modtran atmosphere transmittance files to variable array
 !CALL read_modtran_files
 
+!print*,'vp block:  i1=',i1,'i2=',i2
+
 !$OMP PARALLEL DO DEFAULT(FIRSTPRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
@@ -598,7 +600,8 @@ CALL pb_hour_bethy(hm)
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu)
 
-  DO jl = 1,vp,100
+  DO jl = 1,vp
+!  DO jl = i1,i2,10
         jj=gridp(jl)
 
  ! do jj = 1, ng
