@@ -64,6 +64,8 @@ SUBROUTINE numbmod( nx )
      WHERE (vtype > 0) help=1
      vp = SUM(help)
 
+     print*,'  ** check: vp is set (numbmod;) ** '
+
      IF (optpftg) THEN
         IF (optbsmg) THEN
            nx = nvar + vp + vp

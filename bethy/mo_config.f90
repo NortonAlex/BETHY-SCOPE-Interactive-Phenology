@@ -11,12 +11,15 @@ module mo_config
   IMPLICIT NONE
   INTEGER,DIMENSION(ng,nv) :: vtype,help
   REAL,DIMENSION(ng,nv) :: vfrac
+  INTEGER :: i1,i2
 
 contains
 
 SUBROUTINE init_config (npoint) 
 
-  
+USE mo_namelist, ONLY: nblocks,iblock 
+USE break_jobs
+ 
 ! .. Arguments 
   integer :: npoint
 ! .. Locals
@@ -32,6 +35,21 @@ SUBROUTINE init_config (npoint)
   help=0
   WHERE (vtype > 0) help=1
   vp = SUM(help)
+
+  ! Split veg-points into blocks 
+       IF ((iblock==-1) .OR. (nblocks==-1)) THEN
+!           print*,'  *  vp block par check 1 * :: vp=',vp
+           i1 = 1
+           i2 = vp
+       else if( (nblocks .ge. 1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) then
+!           print*,'  *  vp block par check 2 * :: vp=',vp
+           call get_splits(vp, nblocks, iblock, i1, i2)
+       else
+           stop 'iblock and/or nblocks not defined correctly...'
+       end if
+       write(*,*) 'veg-point block parallelisation: (i1,i2) =',i1,i2
+       write(*,*) 'nblocks, iblock =', nblocks, iblock
+
 
   call config_allocate(vp,npoint)
 

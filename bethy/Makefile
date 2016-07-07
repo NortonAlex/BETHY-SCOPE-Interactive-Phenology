@@ -27,11 +27,11 @@ MSRC	=			\
 	mo_diagnostics.f90	mo_helper.f90		mo_hydro.f90		\
 	mo_pheno.f90		mo_mapping.f90 		mo_trafo.f90 		\
 	fluo_func.f90		fluo_param.f90		mo_rtmo.f90 		\
-	chemical.f90		mo_rtmf.f90		fluo.f90		\
+	chemical.f90		mo_rtmf.f90		mo_config.f90		fluo.f90		\
 	integration.f90 	costf.f90 			\
 	mo_prog.f90		mo_carbon.f90		\
 	mo_io.f90		mo_surface.f90	\
-	bethy2tm.f90		bgr.f90			mo_config.f90 \
+	bethy2tm.f90		bgr.f90	 		\
 
 OBJ	= $(SRC:.f90=.o)
 MOBJ	= $(MSRC:.f90=.o)
@@ -630,6 +630,8 @@ tm.o : constants_pjr.o mo_netcdf.o
 mo_pheno.o : mo_constants.o mo_climate.o mo_namelist.o mo_grid.o mo_netcdf.o mo_diagnostics.o mo_helper.o
 mo_hydro.o : mo_constants.o mo_climate.o mo_namelist.o mo_grid.o mo_netcdf.o mo_helper.o
 mo_diagnostics.o : mo_constants.o
+mo_fluo.o: mo_config.o mo_constants.o constants_pjr.o mo_namelist.o mo_grid.o mo_netcdf.o  
+
 
 # DEPENDENCIES SRC-FILES
 #pfunc.f90 : pfunc.F90

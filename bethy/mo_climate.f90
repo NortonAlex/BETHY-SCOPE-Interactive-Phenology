@@ -168,7 +168,7 @@ CONTAINS
 !             IF (i.ge.1 .AND. i.le.8) THEN     ! Sth Hemis (90S-30S)
 !             IF (i.ge.9 .AND. i.le.16) THEN     ! Tropics (30S-30N)
 !             IF (i.ge.17 .AND. i.le.24) THEN     ! Nth Hemis (30N-90N)
-!                dswdown(n,:) = iload(j,i,:) + 0.01*(0.20*iload(j,i,:))   ! Adjust value by 1% of its uncertainty, where the uncertainty is 20% of the mean 
+!                dswdown(n,:) = iload(j,i,:) + 0.01*(0.06*iload(j,i,:))   ! Adjust value by 1% of its uncertainty, where the uncertainty is 6% of the mean (see Kato et al., 2012 Table 3) 
 !             ELSE
                 dswdown(n,:) = iload(j,i,:)
 !             print*,' n ',n

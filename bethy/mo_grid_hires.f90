@@ -38,7 +38,7 @@ MODULE mo_grid
 
 ! Block parallelization split per veg-points
 
-  INTEGER   :: i1,i2,iblock=-1,nblocks=-1
+  INTEGER   :: i1,i2     !,iblock=-1,nblocks=-1
 
 !CCCC loaded in 'getsdata' from 'bethy'
 !cccc elev     elevation [m]

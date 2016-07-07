@@ -176,9 +176,9 @@ print *, 'tdays =', tdays
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
-           print *, '..daycount = ', daycount(iday), iday
-           print*,'   rday,aday,iday0,iday1'
-           print*,rday,aday,iday0,iday1
+!           print *, '..daycount = ', daycount(iday), iday
+!           print*,'   rday,aday,iday0,iday1'
+!           print*,rday,aday,iday0,iday1
            inho=13
 
            CALL diagdayreset
@@ -194,7 +194,8 @@ print *, 'tdays =', tdays
 
            CALL climsubday1 (ng, vp, fe, iday0, iday1)
            keydayint = daycount(iday)+ (oday-1) * (dstep) + (scale-1) * (nchk*dstep)
-           print *,'    daycount(iday) = ', daycount(iday)  
+           print *,'    daycount(iday) = ', daycount(iday)
+           print *,'        diurnal simulation with mean state from ',iday0,' to ',iday1  
 !           print*, 'iday, keydayint = ',iday, keydayint
 !$TAF store mu, tmp, pair, cloudf  = dayint_tape, rec = keydayint
 
@@ -246,7 +247,7 @@ print *, 'tdays =', tdays
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
-              IF ( inho == 13 ) THEN
+!              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
@@ -255,7 +256,7 @@ print *, 'tdays =', tdays
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
-              ENDIF         ! for selected time of fluo computation
+!              ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 

@@ -43,7 +43,7 @@ MODULE mo_grid
 
 ! Block parallelization split per veg-points
 
-  INTEGER   :: i1,i2,iblock=-1,nblocks=-1
+!  INTEGER   :: i1,i2      !!,iblock=-1,nblocks=-1
 
 !cccc elev     elevation [m]
 !cccc vg       vegetation types per gridcell

@@ -133,9 +133,8 @@ CONTAINS
   SUBROUTINE get_namelist
 
 !HEW-ADD: 050304:
-    USE mo_grid, ONLY: ng,vp,i1,i2,iblock,nblocks
+    USE mo_grid, ONLY: ng   !,vp,i1,i2
     USE mo_constants
-    USE break_jobs
 
     INTEGER :: nruns
     character(len=200) :: control_filename
@@ -153,6 +152,8 @@ CONTAINS
     else
         stop 'wrong number of arguments ...'
     end if
+
+    WRITE(6,*) '# control file:                ',control_filename
 
 ! to read  namelist
 !HEW-CHG: 050304: all control files now in dir control_bethy
@@ -193,16 +194,18 @@ CONTAINS
        ENDIF
 
 ! Split veg-points into blocks 
-       IF ((iblock==-1) .OR. (nblocks==-1)) THEN 
-           i1 = 1
-           i2 = vp
-       else if( (nblocks .ge. 1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) then
-           call get_splits(vp, nblocks, iblock, i1, i2)
-       else
-           stop 'iblock and/or nblocks not defined correctly...'
-       end if
-       write(*,*) 'veg-point block parallelisation: (i1,i2) =',i1,i2
-       write(*,*) 'nblocks, iblock =', nblocks, iblock
+!       IF ((iblock==-1) .OR. (nblocks==-1)) THEN
+!           print*,'  *  vp block par check 1 * :: vp=',vp 
+!           i1 = 1
+!           i2 = vp
+!       else if( (nblocks .ge. 1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) then
+!           print*,'  *  vp block par check 2 * :: vp=',vp
+!           call get_splits(vp, nblocks, iblock, i1, i2)
+!       else
+!           stop 'iblock and/or nblocks not defined correctly...'
+!       end if
+!       write(*,*) 'veg-point block parallelisation: (i1,i2) =',i1,i2
+!       write(*,*) 'nblocks, iblock =', nblocks, iblock
 
 ! Check timings
        IF (year0 < yearin0 .OR. year0 > yearin1) THEN

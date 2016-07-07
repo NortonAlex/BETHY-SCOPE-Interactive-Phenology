@@ -404,6 +404,7 @@ USE mo_rtmo, ONLY : rtmo
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
 USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr
+USE mo_config, ONLY : i1,i2
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -598,7 +599,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu)
 
-  DO jl = 1,vp,100
+  DO jl = i1,i2
         jj=gridp(jl)
 
  ! do jj = 1, ng
