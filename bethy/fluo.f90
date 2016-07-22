@@ -501,7 +501,7 @@ REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope_cab
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
 REAL, DIMENSION(vp)                          :: daygpp, dayfluo
-REAL, DIMENSION(0:nrun,outt,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -1013,8 +1013,8 @@ DEALLOCATE(lidf)
 
      ! Output data per vegetation point and per diurnal time-step 
      it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
-     rfluo_diurnal(iyear,imonth,t,jl) = LoF_jl*frac1
-     rgppfluo_diurnal(iyear,imonth,t,jl) = Agtot*frac1
+     rfluo_diurnal(iyear,iday0,t,jl) = LoF_jl*frac1
+     rgppfluo_diurnal(iyear,iday0,t,jl) = Agtot*frac1
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1

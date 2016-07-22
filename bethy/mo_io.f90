@@ -378,8 +378,8 @@ SUBROUTINE diagout (ng,vp,scale,outint)
      CALL savefnc(TRIM(outdir)//'rpar.nc', rpar,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'par_scope.nc', PAR_scope,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'par_scope_cab.nc', PAR_scope_cab,lat,lon,nrun,outt,ng,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc', rfluo_diurnal,nrun,outt,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc', rgppfluo_diurnal,nrun,outt,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc', rfluo_diurnal,nrun,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc', rgppfluo_diurnal,nrun,365,24,vp,sp)
 
 
   ELSEIF (scale==2) THEN ! SITE SCALE !
@@ -547,13 +547,14 @@ END SUBROUTINE savefnc
 SUBROUTINE savefnc_diurnal( filename, field,nm,ot,nhrs,nvp,binnm)
   ! pjr april 2002 for saving as netcdf output gridded
   USE mo_netcdf
-  USE mo_namelist, ONLY : year0  ! avoiding name conflict
+  USE mo_namelist, ONLY : year0,day0  ! avoiding name conflict
   USE mo_constants, ONLY: rdays
   USE mo_grid, ONLY: nlon, nlat
 
   IMPLICIT NONE
 
   CHARACTER(len=*) :: filename
+  CHARACTER(len=80) :: attval
 ! .. Scalar Arguments ..
   INTEGER, INTENT (IN) :: ot, nhrs, nvp, nm,  binnm
 
@@ -567,16 +568,16 @@ SUBROUTINE savefnc_diurnal( filename, field,nm,ot,nhrs,nvp,binnm)
   TYPE(ncdim), TARGET, DIMENSION(2) :: nc_dims
   REAL, DIMENSION( nm* ot* nhrs, nvp ) :: outfield
   REAL, DIMENSION(:), ALLOCATABLE :: vegp, time
-  INTEGER i, j, i_m, imon, idoy, ihr  ! index variables
-  REAL, DIMENSION(:), ALLOCATABLE :: doy, hrs
+  INTEGER i, j, i_m, i_day, idoy, ihr  ! index variables
+!  REAL, DIMENSION(:), ALLOCATABLE :: hrs
 
   outfield = 0.
 
   DO i_m= 1, nm
-     DO imon= 1,ot
+     DO i_day= 1,ot
         DO ihr= 1,nhrs
-           i = (imon-1)*24 + ihr
-           outfield(i,:) = field(i_m,imon,ihr,:)
+           i = (i_day-1)*24 + ihr
+           outfield(i,:) = field(i_m,i_day,ihr,:)
         END DO
      END DO
   END DO
@@ -584,24 +585,28 @@ SUBROUTINE savefnc_diurnal( filename, field,nm,ot,nhrs,nvp,binnm)
   ! make veg-point and time arrays
   ALLOCATE( vegp( nvp))
   ALLOCATE( time( ot * nm * nhrs))
-  ALLOCATE( doy( ot))
-  ALLOCATE( hrs(nhrs))
+!  ALLOCATE( doy( ot))
+!  ALLOCATE( hrs(nhrs))
 
   ! determine approx mid-day of the month (Day Of Year)
-  DO i= 1,ot
-     doy(i) = SUM( rdays(1:i)) - 15    ! Note: not the same as the actual mid-period of forcings for which SCOPE is simulated
-  END DO
+!  DO i= 1,ot
+!     doy(i) = SUM( rdays(1:i))       ! Note: not the same as the actual mid-period of forcings for which SCOPE is simulated
+!  END DO
 
-  DO i= 1,nhrs
-     hrs(i) = i*1.
-  END DO
+!  DO i= 1,nhrs
+!     hrs(i) = i*1.
+!  END DO
 
   ! time array as fractional year
+!  DO i= 1, nm * ot * nhrs
+!     doy = (i-1)/24 + 1
+!     ihr = MOD(i-1, nhrs)+1 
+!     time(i) = year0 + doy/365. + hrs(ihr)/24/365.     !/365. + hrs(ihr)/24/365. !
+!  END DO
   DO i= 1, nm * ot * nhrs
-     idoy = (i-1)/24 + 1
-     ihr = MOD(i-1, nhrs)+1 
-     time(i) = year0 + doy(idoy)/365. + hrs(ihr)/24/365. !
+     time(i) = i*1.
   END DO
+
   DO i= 1, nvp
      vegp(i) = i*1.  !field(1,1,1,i) 
   END DO
@@ -632,18 +637,21 @@ SUBROUTINE savefnc_diurnal( filename, field,nm,ot,nhrs,nvp,binnm)
      CALL ncdimdef(outfile, nc_dims(i))
   END DO
 
+  write(attval,'(a40,2i4)') 'hours since midnight on (year,day) ',year0,day0
+
   CALL ncvardef(outfile, nc_time)
   CALL ncvardef(outfile, nc_vegp)
   CALL ncvardef(outfile, nc_flux)
-  CALL ncputatt(outfile, nc_vegp, "units", "veg-point number")
-  CALL ncputatt(outfile, nc_time, "units", "years")
+  CALL ncputatt(outfile, nc_vegp, "units", "vegetation-point number")
+  CALL ncputatt(outfile, nc_time, "comment", "first day of the averaging period")
+  CALL ncputatt(outfile, nc_time, "units", attval)
   CALL ncenddef(outfile)
   CALL ncprint(outfile, nc_time, time)
   CALL ncprint(outfile, nc_vegp, vegp)
   CALL ncprint(outfile, nc_flux, outfield)
   CALL ncclose(outfile)
   DEALLOCATE( vegp, time)
-  DEALLOCATE( doy, hrs )
+!  DEALLOCATE( doy, hrs )
 
   RETURN
 
