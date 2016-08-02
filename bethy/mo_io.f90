@@ -349,8 +349,8 @@ SUBROUTINE diagout (ng,vp,scale,outint)
 !     CALL savefield(149,'f8.2',nppp(:,:,:,3),lat,lon,nrun,outt,ng,year0)
 !MAS-ADD-END-040220 nppp
 !     CALL savefield(150,'f6.3',rrhos,lat,lon,nrun,outt,ng,year0)
-!     CALL savefield(151,'f8.1',rpasm,lat,lon,nrun,outt,ng,year0)
-!     CALL savefield(152,'f6.2',rlai,lat,lon,nrun,outt,ng,year0)
+     CALL savefield(151,'f8.1',rpasm,lat,lon,nrun,outt,ng,year0)
+     CALL savefield(152,'f6.2',rlai,lat,lon,nrun,outt,ng,year0)
 !     CALL savefield(153,'f6.3',rfpar,lat,lon,nrun,outt,ng,year0)
 !     CALL savefield(154,'f8.2',rrunoff,lat,lon,nrun,outt,ng,year0)
 !     CALL savefield(155,'f8.2',rsevp,lat,lon,nrun,outt,ng,year0)
@@ -370,6 +370,8 @@ SUBROUTINE diagout (ng,vp,scale,outint)
      CALL savefnc(TRIM(outdir)//'resf.nc', resf,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'rgrw.nc', rgrw,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'rmnt.nc', rmnt,lat,lon,nrun,outt,ng,sp)
+     CALL savefnc(TRIM(outdir)//'rpasm.nc', rpasm,lat,lon,nrun,outt,ng,sp)
+     CALL savefnc(TRIM(outdir)//'rlai.nc', rlai,lat,lon,nrun,outt,ng,sp)
 
 !ANorton. Fluorescence output fields
      CALL savefnc(TRIM(outdir)//'rfluo.nc', rfluo,lat,lon,nrun,outt,ng,sp)
@@ -479,13 +481,13 @@ SUBROUTINE savefnc( filename, field,lat,lon,nm,ot,ng,binnm)
   END DO
 
   ! if the output is monthly then normalize to per year for fluxes
-  IF( ot == 12) THEN
-     DO i = 1, nm * ot
-        j = MODULO(i-1,12)+ 1
-
-        outfield(:,:,i) = outfield(:,:,i) * 365./float(rdays(j))
-     END DO
-  END IF
+!  IF( ot == 12) THEN
+!     DO i = 1, nm * ot
+!        j = MODULO(i-1,12)+ 1
+!
+!        outfield(:,:,i) = outfield(:,:,i) * 365./float(rdays(j))
+!     END DO
+!  END IF
 
   ! make lat, lon and time arrays
   ALLOCATE( lats( nlat))
