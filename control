@@ -1,6 +1,6 @@
 &control
  year0        = 2010
- year1	      = 2010
+ year1	      = 2011
  irestart     = 0
  day0         = 1
  nspin        = 1
@@ -10,7 +10,7 @@
  dtime        = 60
  dayint       = 32
  outtime      = 1
- grdwid       = 10.0
+ grdwid       = 2.0
  lonw         = -180.0
  lone         = 180.0
  latn         = 85.5
@@ -20,18 +20,18 @@
  wiflg        = 0
  vflg         = 0
  param_file   = './control_bethy/95_paramslist'
- mapping_file_global = './control_bethy/lores_35params_scope.map'
+ mapping_file_global = './control_bethy/hires_35params_scope.map'
  datfile      = './control_bethy/gv41_data'
- grid_file    = './control_bethy/bethy_loresgrid3veg_faparratio.nc'
- interp_file  = './control_bethy/tm2tm.nc'
+ grid_file    = './control_bethy/bethy_grid3veg_v2.nc'
+ interp_file  = './control_bethy/bethy2tm.nc'
  faparfile    = 'fapar_redres_'
- faparfile_global = 'fapar_lores_serr.nc'
+ faparfile_global    = 'fapar_hires_serr.nc'
  yearin0      = 1979
  yearin1      = 2011
- dprecip_file = './inputs/climate/forcing.lores.precip.1979-2011.nc'
- dtmax_file   = './inputs/climate/forcing.lores.tmax.1979-2011.nc'
- dtmin_file   = './inputs/climate/forcing.lores.tmin.1979-2011.nc'
- dswdown_file = './inputs/climate/forcing.lores.swdown.1979-2011.nc'
+ dprecip_file = './inputs/climate/forcing.hires.precip.1979-2012.nc'
+ dtmax_file   = './inputs/climate/forcing.hires.tmax.1979-2012.nc'
+ dtmin_file   = './inputs/climate/forcing.hires.tmin.1979-2012.nc'
+ dswdown_file = './inputs/climate/forcing.hires.swdown.1979-2012.nc'
  dummyfluxes  = './inputs/co2fluxes.dat'
  jacdir       = './inputs/jactd/'
  datdir       = './inputs/gv08/'

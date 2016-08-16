@@ -144,18 +144,18 @@ print *, 'tdays =', tdays
         ryear=ayear(rday)
 
         IF (spin(rday)==0) THEN
-           iday0=rday-dspin
-           iday1=rday-dspin+dayint-1
+!           iday0=rday-dspin
+!           iday1=rday-dspin+dayint-1
            aday=rday-dspin
         ELSE
            IF (dspin>sdays) THEN
               aday = MOD(rday,sdays)
-              iday0 = MOD(rday,sdays)
-              iday1=MOD(rday,sdays)+dayint-1
+!              iday0 = MOD(rday,sdays)
+!              iday1=MOD(rday,sdays)+dayint-1
            ELSE
               aday = rday
-              iday0 = rday
-              iday1 = rday+dayint-1
+!              iday0 = rday
+!              iday1 = rday+dayint-1
            ENDIF
         ENDIF
 
@@ -163,8 +163,8 @@ print *, 'tdays =', tdays
 
         ! Use for monthly mean climate forcing (one diurnal cycle per month) for photosynthesis calcs
 	! Calculates the first and last days of the month.
-!        iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
-!        iday1=SUM(rdays(1:rmonth))
+        iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
+        iday1=SUM(rdays(1:rmonth))
 
         IF (iday1>sdays) iday1=sdays
 
@@ -248,7 +248,7 @@ print *, 'tdays =', tdays
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
-!              IF ( inho == 13 ) THEN
+              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
@@ -257,7 +257,7 @@ print *, 'tdays =', tdays
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
-!              ENDIF         ! for selected time of fluo computation
+              ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 
