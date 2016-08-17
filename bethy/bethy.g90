@@ -292,7 +292,7 @@ print *, 'tdays =', tdays
 
   ! .. update carbon balance (inc. soil respiration)
 !$TAF store dsleafshed,dspsoilst,rnppv = scale_tape, rec = scale
-  CALL cbalance (ng, vp, nrun, scale, lfac, cs)
+!  CALL cbalance (ng, vp, nrun, scale, lfac, cs)
 
 #ifdef FUTPROG
   OPEN(900,file='cs.bin',form='unformatted')
@@ -330,7 +330,7 @@ print *, 'tdays =', tdays
 !  enddo
 !  enddo
 !  enddo
-  CALL budget(ng, vp, nrun, outint, scale, cs, lfac, rnpp, resfv, ressv, ress, resf, rnep, rnepp, rnppv)
+!  CALL budget(ng, vp, nrun, outint, scale, cs, lfac, rnpp, resfv, ressv, ress, resf, rnep, rnepp, rnppv)
 !  do i=1,nrun
 !  do iday=1,outint
 !  do k=1,vp
