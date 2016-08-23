@@ -65,6 +65,7 @@ CONTAINS
 
     ! ANorton. SCOPE-GPP over vegetation points
     ALLOCATE ( zgppfluo (vp) )
+    zgppfluo = 0
 
   ! This array allows to have the number of bethy pixels for which observed fs
   ! are available 
@@ -1009,7 +1010,10 @@ DEALLOCATE(lidf)
      rgppfluo(iyear,imonth,jj) = rgppfluo(iyear,imonth,jj)+Agtot*frac1
 !     print*,'Agtot*frac1 equals: ',Agtot*frac1
 
-     zgppfluo(jj) = zgppfluo(jj)+Agtot*frac1     
+     zgppfluo(jl) = zgppfluo(jl)+Agtot*frac1     
+
+     ! Convert zgppfluo from umolC/m2/s to gC/m2/s
+     zgppfluo(jl) = zgppfluo(jl)*1.E-6*12.0
 
      ! Output data per vegetation point and per diurnal time-step 
      it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
