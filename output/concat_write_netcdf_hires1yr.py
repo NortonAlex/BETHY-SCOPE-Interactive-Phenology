@@ -22,8 +22,9 @@ else:
 path_to_output = '/home/563/ajn563/short/fluoro2/output/par%s/' % str(sys.argv[1])
 param = str(sys.argv[1])    # '16' 
 nsplits = 20
-dayint = 32   # from control file
+dayint = 0   # from control file. If using monthly average forcing, set this to 0.
 ndays = 365   # total number of days across simulation period 
+base = datetime(2015,1,1,0)    # starting datetime for simulated period
 
 print '   Output path:', path_to_output
 
@@ -124,20 +125,35 @@ for iblock in range(nsplits):
     vpblock = sif[i1block:i2block,:]
     sif_catblocks[i1block:i2block,:] = vpblock
 
+# Only keep the time slices where data exists. Missing value = -999 (see code).
+inds = np.squeeze(np.where(gpp_catblocks[0,:] > -990))    # indexes of time slices with real values (i.e. >-990) to keep.
+
+gpp_out = gpp_catblocks[:,inds]
+sif_out = sif_catblocks[:,inds]
 
 ## CREATE DATETIME ARRAY
 
-ind = np.arange(0,ndays,dayint)
-#ind = np.arange(15,365,30)
+if dayint == 0:
+    print 'dayint = 0'
+    # Assign the DOY index for the 1st of every month
+    first_idom = np.array([0,31,59,90,120,151,181,212,243,273,304,334])
+    
+    print '    hello, I hope these runs used monthly mean forcing for GPP'
+    print '    ...setting the datetime array to be first day of each month'
+    arr = np.array([base + timedelta(days=i) for i in range(ndays)])
 
-base = datetime(2010,1,1,0)
-arr = np.array([base + timedelta(days=i) for i in range(ndays)])
-#arr = np.array([base + timedelta(days=i) for i in range(365)])
-
-date_arr = []
-
-for i in range(len(ind)):
-    date_arr.append(pd.date_range(str(arr[ind][i]),freq='H',periods=24))
+    date_arr = []
+    
+    for i in range(len(first_idom)):
+        date_arr.append(pd.date_range(str(arr[first_idom][i]),freq='H',periods=24))
+    
+else:
+    ind = np.arange(0,ndays,dayint)
+    arr = np.array([base + timedelta(days=i) for i in range(ndays)])
+    date_arr = []
+    
+    for i in range(len(ind)):
+        date_arr.append(pd.date_range(str(arr[ind][i]),freq='H',periods=24))
 
 date_arr = np.datetime_as_string(date_arr,timezone='UTC')
 date_arr = date_arr.flatten().astype('datetime64')
@@ -182,8 +198,8 @@ nc_vegp[:] = df_vp.vegp.values
 nc_gridp[:] = df_vp.gridp.values
 nc_frac[:] = df_vp.frac.values
 nc_vtype[:] = df_vp.vtype.values
-nc_sif[:,:] = sif_catblocks
-nc_gpp[:,:] = gpp_catblocks
+nc_sif[:,:] = sif_out
+nc_gpp[:,:] = gpp_out
 
 dataset.close()
 

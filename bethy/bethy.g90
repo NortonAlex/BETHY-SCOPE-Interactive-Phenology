@@ -144,18 +144,18 @@ print *, 'tdays =', tdays
         ryear=ayear(rday)
 
         IF (spin(rday)==0) THEN
-           iday0=rday-dspin
-           iday1=rday-dspin+dayint-1
+!           iday0=rday-dspin
+!           iday1=rday-dspin+dayint-1
            aday=rday-dspin
         ELSE
            IF (dspin>sdays) THEN
               aday = MOD(rday,sdays)
-              iday0 = MOD(rday,sdays)
-              iday1=MOD(rday,sdays)+dayint-1
+!              iday0 = MOD(rday,sdays)
+!              iday1=MOD(rday,sdays)+dayint-1
            ELSE
               aday = rday
-              iday0 = rday
-              iday1 = rday+dayint-1
+!              iday0 = rday
+!              iday1 = rday+dayint-1
            ENDIF
         ENDIF
 
@@ -163,8 +163,8 @@ print *, 'tdays =', tdays
 
         ! Use for monthly mean climate forcing (one diurnal cycle per month) for photosynthesis calcs
 	! Calculates the first and last days of the month.
-!        iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
-!        iday1=SUM(rdays(1:rmonth))
+        iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
+        iday1=SUM(rdays(1:rmonth))
 
         IF (iday1>sdays) iday1=sdays
 

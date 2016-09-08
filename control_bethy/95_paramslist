@@ -70,8 +70,8 @@ p0    | p0su    | xpf  | xpfa | xpfb  | parname   | pftno | parano | paralist_no
 0.5     0.1       1	 0.	0.	PLGR 	  	-	68              26
 0.1     0.05      2  2.e-3	0.	PKL  		2,4,6,8-10,12,13 69	27
 3.e-3	0.5e-3    2  2.e-3	0.	PKL 		5,11	70
-30      15        3      0.	0.	PTAUW 		1,3,7	71		28
-30      15        3      0.	0.	PTAUW		2	72
+180     60        3      0.	0.	PTAUW 		1,3,7	71		28
+90      30        3      0.	0.	PTAUW		2	72
 30      15        3      0.	0.	PTAUW		9,10,12,13 73
 0.	1.e-2	  5  	 0.	0.	fbiasa   	-       74
 0.	1.e-2	  5  	 0.	0.	fbiasb   	-       75
