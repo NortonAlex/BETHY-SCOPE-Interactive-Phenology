@@ -171,8 +171,8 @@ print *, 'tdays =', tdays
         adayint=dayint
         IF (idayint(rday)+adayint>tdays) adayint=tdays-idayint(rday)+1
 
-!   print*,"rday,iday0,iday1,sdays,aday"
-!   PRINT*,rday,iday0,iday1,sdays,aday
+   print*,"rday,iday0,iday1,sdays,aday"
+   PRINT*,rday,iday0,iday1,sdays,aday
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
