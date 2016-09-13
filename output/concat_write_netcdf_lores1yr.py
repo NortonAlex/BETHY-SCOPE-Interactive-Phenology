@@ -101,6 +101,9 @@ ntimesteps = 8760
 
 gpp_catblocks = np.zeros((nvp,ntimesteps))    # shape(nvps,ntimesteps across whole sim period)
 sif_catblocks = np.zeros((nvp,ntimesteps))
+lai_catblocks = np.zeros((nvp,ntimesteps))
+par_catblocks = np.zeros((nvp,ntimesteps))
+parcab_catblocks = np.zeros((nvp,ntimesteps))
 
 blocks = np.arange(0,nvp,nvp/nsplits)
 blocks[-1] = nvp      # Set the last block to end at nvps (i.e. 506 for lores; 8776 for hires)
@@ -123,7 +126,33 @@ for iblock in range(nsplits):
     f.close()
     vpblock = sif[i1block:i2block,:]
     sif_catblocks[i1block:i2block,:] = vpblock
+    #Import LAI and splice into concatenated array
+    f = netCDF4.Dataset('%sjob{0:02d}/rlai_diurnal.nc'.format(iblock+1) % path_to_output,'r')
+    lai = f.variables['rlai_diurnal'][:]
+    f.close()
+    vpblock = lai[i1block:i2block,:]
+    lai_catblocks[i1block:i2block,:] = vpblock
+    #Import SCOPE PAR and splice into concatenated array
+    f = netCDF4.Dataset('%sjob{0:02d}/rpar_diurnal.nc'.format(iblock+1) % path_to_output,'r')
+    par = f.variables['rpar_diurnal'][:]
+    f.close()
+    vpblock = par[i1block:i2block,:]
+    par_catblocks[i1block:i2block,:] = vpblock
+    #Import SCOPE PAR (Cab) and splice into concatenated array
+    f = netCDF4.Dataset('%sjob{0:02d}/rparcab_diurnal.nc'.format(iblock+1) % path_to_output,'r')
+    parcab = f.variables['rparcab_diurnal'][:]
+    f.close()
+    vpblock = parcab[i1block:i2block,:]
+    parcab_catblocks[i1block:i2block,:] = vpblock
 
+# Only keep the time slices where data exists. Missing value = -999 (see code).
+inds = np.squeeze(np.where(gpp_catblocks[0,:] > -990))    # indexes of time slices with real values (i.e. >-990) to keep.
+
+gpp_out = gpp_catblocks[:,inds]
+sif_out = sif_catblocks[:,inds]
+lai_out = lai_catblocks[:,inds]
+par_out = par_catblocks[:,inds]
+parcab_out = parcab_catblocks[:,inds]
 
 ## CREATE DATETIME ARRAY
 
@@ -159,6 +188,9 @@ nc_frac = dataset.createVariable('frac', np.float64, ('vegp',))
 nc_vtype = dataset.createVariable('vtype', np.int32, ('vegp',))
 nc_sif = dataset.createVariable('SIF', np.float64, ('vegp','time'))
 nc_gpp = dataset.createVariable('GPP', np.float64, ('vegp','time'))
+nc_lai = dataset.createVariable('LAI', np.float64, ('vegp','time'))
+nc_par = dataset.createVariable('PAR', np.float64, ('vegp','time'))
+nc_parcab = dataset.createVariable('PAR_Cab', np.float64, ('vegp','time'))
 
 # Create some Global Attributes
 dataset.description = 'BETHY-SCOPE model simulation of SIF and GPP'
@@ -175,6 +207,12 @@ nc_sif.long_name = 'SCOPE Solar-Induced Fluorescence at 755 nm'
 nc_sif.units = 'W m-2 um-1 sr-1'
 nc_gpp.long_name = 'SCOPE Gross Primary Production'
 nc_gpp.units = 'umol C m-2 s-1'
+nc_lai.long_name = 'Leaf-Area Index'
+nc_lai.units = 'm2 m-2'
+nc_par.long_name = 'Absorbed Photosynthetically Active Radiation'
+nc_par.units = 'umol photons m-2 s-1'
+nc_parcab.long_name = 'Absorbed Photosynthetically Active Radiation by Chlorophyl a-b'
+nc_parcab.units = 'umol photons m-2 s-1' 
 
 # Fill variables with data
 nc_times[:] = date2num(dates_pd.astype(datetime), units=nc_times.units, calendar=nc_times.calendar)
@@ -184,6 +222,9 @@ nc_frac[:] = df_vp.frac.values
 nc_vtype[:] = df_vp.vtype.values
 nc_sif[:,:] = sif_catblocks
 nc_gpp[:,:] = gpp_catblocks
+nc_lai[:,:] = lai_catblocks
+nc_par[:,:] = par_catblocks
+nc_parcab[:,:] = parcab_catblocks
 
 dataset.close()
 

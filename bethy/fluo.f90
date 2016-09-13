@@ -150,7 +150,7 @@ SUBROUTINE read_radiation
 ! Monthly fields of longwave down and shortwave down
     ALLOCATE( lwd(ng,12))
     ALLOCATE( swd(ng,12))
-   
+
    ! We condider only the data for BETHY grid cells 
       DO ilat = 1,thelens(2)
         DO ilon = 1,thelens(1) 
@@ -378,7 +378,8 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & temp,pres,ea0,Cca,COa,zlai,&
                   & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
-                  & rfluo_diurnal,rgppfluo_diurnal)
+                  & rfluo_diurnal,rgppfluo_diurnal,&
+                  & rlai_diurnal,rpar_diurnal,rparcab_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -503,6 +504,7 @@ REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope_cab
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
 REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rpar_diurnal,rparcab_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -595,7 +597,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,i1,i2) &
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rpar_diurnal,rparcab_diurnal,i1,i2) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu)
@@ -1019,6 +1021,9 @@ DEALLOCATE(lidf)
      it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
      rfluo_diurnal(iyear,iday0,t,jl) = LoF_jl*frac1
      rgppfluo_diurnal(iyear,iday0,t,jl) = Agtot*frac1
+     rlai_diurnal(iyear,iday0,t,jl) = LAI
+     rpar_diurnal(iyear,iday0,t,jl) = Pntot*1e6*frac1
+     rparcab_diurnal(iyear,iday0,t,jl) = Pntot_Cab*1e6*frac1
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1

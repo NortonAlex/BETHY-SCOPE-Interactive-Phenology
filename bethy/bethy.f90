@@ -253,7 +253,8 @@ print *, 'tdays =', tdays
                                 & tmp(inho,:),pair,eamin,ca,OX,zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
-                                & rfluo_diurnal,rgppfluo_diurnal)             
+                                & rfluo_diurnal,rgppfluo_diurnal,&
+                                & rlai_diurnal,rpar_diurnal,rparcab_diurnal)             
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
