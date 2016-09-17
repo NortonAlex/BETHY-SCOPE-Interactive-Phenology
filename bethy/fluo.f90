@@ -406,7 +406,7 @@ USE mo_rtmo, ONLY : rtmo
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
 USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr
-USE mo_config, ONLY : i1,i2
+USE mo_config, ONLY : vps,block_vps
 
 !% Input:
 !% Esun_     [W m-2 um]          Vector of incoming shortwave radiation (=<2.5 um)
@@ -597,16 +597,16 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rpar_diurnal,rparcab_diurnal,i1,i2) &
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rpar_diurnal,rparcab_diurnal,vps,block_vps) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
-!$OMP& PRIVATE(Ciu,Ccu,Tcu)
+!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j)
 
-  DO jl = i1,i2
-        jj=gridp(jl)
+  DO j = 1,vps
+      jl = block_vps(j)   ! jl = vp  
+        jj=gridp(jl)      ! jj = gp
 
  ! do jj = 1, ng
-!print*,'In fluo, inside vp loop at: ', jl
 
 ALLOCATE(MfI(size(wlf),size(wle)))
 ALLOCATE(MbI(size(wlf),size(wle)))

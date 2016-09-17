@@ -107,7 +107,8 @@ MODULE mo_namelist
 
   ! vp block splitting parallelisation
   INTEGER :: nblocks = -1
-  INTEGER :: iblock = -1 
+  INTEGER :: iblock = -1
+  CHARACTER(len=80) :: blockvpfile = "no_file"    ! default is no_file i.e. run without block parallelisation. This file specifies the veg-points to run. 
 
 !HEW-CHG : all options read in here on namelist control:
 !HEW-CHG  NAMELIST /control/ firstdat, lastdat, datfile, param_file, mapping_file, &
@@ -125,7 +126,7 @@ MODULE mo_namelist
        & dummyfluxes, jacdir, outdir, year0_site, year1_site, mapping_file_site, &
        & site_file, pattern_file, flux_temp_file,&
        & datdir, fluxdir, bgrdir, optpftg, optpftl, optbsmg, optbsml, &
-       & p1start, p1end, p2start, p2end, nblocks, iblock
+       & p1start, p1end, p2start, p2end, nblocks, iblock, blockvpfile
 
 
 CONTAINS

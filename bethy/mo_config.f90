@@ -11,19 +11,21 @@ module mo_config
   IMPLICIT NONE
   INTEGER,DIMENSION(ng,nv) :: vtype,help
   REAL,DIMENSION(ng,nv) :: vfrac
-  INTEGER :: i1,i2
+  INTEGER :: i1,i2,vps             ! vps=number of veg-points for fluo to loop over
+  INTEGER, DIMENSION(:), ALLOCATABLE :: block_vps    ! number of veg-points for fluo to loop over 
 
 contains
 
 SUBROUTINE init_config (npoint) 
 
-USE mo_namelist, ONLY: nblocks,iblock 
+USE mo_namelist, ONLY: nblocks,iblock,blockvpfile 
 USE break_jobs
  
 ! .. Arguments 
   integer :: npoint
 ! .. Locals
-  INTEGER :: CTYPE, j, vl, k
+  INTEGER :: CTYPE, j, vl, k, i, ncounter
+  INTEGER :: ncols, nrowskip           ! used for running selected grid points
 
   ! ANorton ...load initialization fields for fluorescence calcs
   ALLOCATE (vg_nv(vp))
@@ -36,20 +38,56 @@ USE break_jobs
   WHERE (vtype > 0) help=1
   vp = SUM(help)
 
-  ! Split veg-points into blocks 
-       IF ((iblock==-1) .OR. (nblocks==-1)) THEN
-!           print*,'  *  vp block par check 1 * :: vp=',vp
-           i1 = 1
-           i2 = vp
-       else if( (nblocks .ge. 1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) then
-!           print*,'  *  vp block par check 2 * :: vp=',vp
-           call get_splits(vp, nblocks, iblock, i1, i2)
-       else
-           stop 'iblock and/or nblocks not defined correctly...'
-       end if
-       write(*,*) 'veg-point block parallelisation: (i1,i2) =',i1,i2
-       write(*,*) 'nblocks, iblock =', nblocks, iblock
 
+  ! Determine which type of run it is based on whether certain variables were
+  ! set in the control file. 
+  IF ((blockvpfile .eq. 'no_file') .and. (nblocks .eq. -1) .and. (iblock .eq. -1)) THEN
+      print*,'  running fluo as normal '
+      vps = vp
+      i1 = 1
+      i2 = vp
+      ALLOCATE(block_vps(vps))
+      ncounter=0
+      do i=i1,i2
+         block_vps(i) = i1+ncounter
+         ncounter = ncounter+1
+      end do
+  ELSE IF((blockvpfile .ne. 'no_file') .and. (nblocks.ge.1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) THEN
+      print*,'  running fluo vp in blocks with specified vps from file:',TRIM(blockvpfile)
+      print*,'  iblock,nblocks:',iblock,nblocks
+      OPEN(unit=30,file=TRIM(blockvpfile),status='old')
+      ! skip the first unwanted rows
+      nrowskip = iblock*2 - 2
+      do i=1,nrowskip
+          read(30,*)
+      end do
+      read(30,*),ncols
+      ALLOCATE(block_vps(ncols))
+      read(30,*) block_vps
+      !print*,'     running fluo only on these vps:',block_vps
+      vps = size(block_vps)
+  ELSE IF((blockvpfile .ne. 'no_file') .and. (nblocks .eq. -1) .and. (iblock .eq. -1)) THEN
+      print*,'   running selected vps from file:',TRIM(blockvpfile)
+      print*,'   no block parallelisation'
+      OPEN(unit=30,file=TRIM(blockvpfile),status='old')
+      ! skip the first unwanted rows
+      read(30,*),ncols
+      ALLOCATE(block_vps(ncols))
+      read(30,*) block_vps
+      !print*,'     running fluo only on these vps:',block_vps
+      vps = size(block_vps)
+  ELSE IF((nblocks.ge.1) .and. (iblock .ge. 1) .and. (iblock .le. nblocks)) THEN
+      print*,'  running scope vp in blocks, split evenly'
+      print*,'  iblock,nblocks:',iblock,nblocks
+      CALL get_splits(vp,nblocks,iblock,i1,i2)
+      vps = i2-i1+1
+      ALLOCATE(block_vps(vps))
+      ncounter=0
+      do i=i1,i2
+         block_vps(i) = i1+ncounter
+         ncounter = ncounter+1
+      end do
+  END IF
 
   call config_allocate(vp,npoint)
 

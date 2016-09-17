@@ -10,6 +10,7 @@ from netCDF4 import num2date, date2num
 ## Command line arguments
 #  first argument = experiment name (e.g. par01)
 #  second argument = spatial resolution of model run (i.e. lores or hires)
+#  third argument = number of blocks/splits 
 
 # Command line arguments 
 
@@ -25,7 +26,7 @@ else:
 resolution = str(sys.argv[2])    # 'lores' (10x7.5) or 'hires' (2x2)
 path_to_output = '/home/563/ajn563/short/fluoro2/output/%s/' % str(sys.argv[1])
 exp = str(sys.argv[1])    # 'par16' 
-nsplits = 20
+nsplits = int(sys.argv[3])  
 base = datetime(2010,1,1,0)    # starting datetime for simulated period
 dayint = 0   # if using monthly mean forcing for photosynthesis use dayint=0, otherwise use same as in control file
 ndays = 365   # total number of days across simulation period 
