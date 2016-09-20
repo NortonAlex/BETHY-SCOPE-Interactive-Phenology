@@ -248,6 +248,8 @@ SUBROUTINE config_global (grid_file)
      ENDDO
   ENDDO
 
+  print*,'  ng = ',ng
+
   ! .. check if number of grid points matches
   IF (n-1/=ng) THEN
     WRITE (*,*) 'Number of grid cells in input does not match grid information.'

@@ -144,8 +144,8 @@ SUBROUTINE read_radiation
     CALL ncread( infile_sw, nc_lon, lonr)
     CALL ncread( infile_sw, nc_lat, latr)
 
-!    print*, ' lon ', minval(lonr), maxval(lonr)
-!    print*, ' lat ', minval(latr), maxval(latr)
+    print*, ' lon ', minval(lonr), maxval(lonr)
+    print*, ' lat ', minval(latr), maxval(latr)
     
 ! Monthly fields of longwave down and shortwave down
     ALLOCATE( lwd(ng,12))
