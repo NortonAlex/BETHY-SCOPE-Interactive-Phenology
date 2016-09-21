@@ -108,10 +108,8 @@ REAL, DIMENSION(npts)                :: effcon,a1,a2,fo
 REAL, DIMENSION(npts)                :: temp
 REAL                                 :: po0 
 REAL                                 :: Kcopt1,Koopt1 
-REAL                                 :: fo0,fm0
 REAL                                 :: Tref,slti,shti,Thl,Thh,Trdm 
 INTEGER                              :: C4
-LOGICAL, SAVE 	     		     :: testa=.TRUE.
 
 ! Type of plant             C4: 0 (C3 plant), 1 (C4 plant)
 C4 = option 
@@ -377,7 +375,7 @@ ENDWHERE
 
 ! To see 
 ![eta,qE,qQ,fs,fo,fm,fo0,fm0,Kn]    = TB12(ps,Kp,Kf,Kd)
-CALL TB12 (npts,ps,Kpc,Kf,Kd,eta,qE,qQ,fs,fo,fm,fo0,fm0,Kn)
+CALL TB12 (npts,ps,Kpc,Kf,Kd,eta,qE,qQ,fs,fo,fm,Kn)
 
 !print*, ' eta ', minval(eta), maxval(eta), sum(eta)
 !print*, 'qE', minval(qE), maxval(qE), sum(qE) 
@@ -411,11 +409,6 @@ Ci          = Ci*1e6/ p * 1E5
 !biochem_out.qQ      = qQ
 !biochem_out.Vcmax   = Vcmax
 
-!IF (testa) THEN
-!	print *, 'biochemical was called'
-!	testa = .FALSE.
-!END IF 
-!print *, ' biochemical was called '
 
 END SUBROUTINE biochemical  
 !%%% end of function biochemical
@@ -495,7 +488,7 @@ END SUBROUTINE abc
 !RETURN
 !END SUBROUTINE satvap
 
-SUBROUTINE TB12 (npt,ps,Kp,Kf,Kd, eta,qE,qQ,fs,fo,fm,fo0,fm0,Kn)
+SUBROUTINE TB12 (npt,ps,Kp,Kf,Kd, eta,qE,qQ,fs,fo,fm,Kn)
 !function [eta,qE,qQ,fs,fo,fm,fo0,fm0,Kn] = TB12(ps,Kp,Kf,Kd)
 
 IMPLICIT NONE 
@@ -506,13 +499,13 @@ REAL, DIMENSION(npt), INTENT(IN)   :: ps
 REAL, INTENT(IN)                   :: Kp,Kf,Kd
 
 
-! Out put variables 
-REAL, INTENT(OUT)                  :: fo0,fm0
+! Output variables 
 REAL, DIMENSION(npt),INTENT(OUT)   :: fo,eta,qE,qQ,fs,fm,Kn
 
 ! Local variables 
 REAL, DIMENSION(npt)               :: x
 REAL                               :: po0 
+REAL                               :: fo0,fm0
 
 
 po0         = Kp/(Kf+Kd+Kp)  !     % dark photochemistry fraction (Genty et al., 1989)
