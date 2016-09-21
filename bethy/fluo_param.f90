@@ -504,8 +504,8 @@ modtran_sum = trim(path_atmos_file)//'FLEX-S3_Mar.atm'
 
 CALL read_modtran_files
 
-! Here GOSAT frequency used for fluo data retrieval in nm  
-freq_sat =  755.                      
+! Here select SIF frequency (nm) to write to output (e.g. SIF retrieval wavelength)
+freq_sat =  757.                      
 
 
 ! ============================================================================
