@@ -96,7 +96,7 @@ USE break_jobs
   vpb=0
   vpe=0
   k=0
-  ca=355.e-6  ! mol co2/mol air
+  ca=397.e-6  ! mol co2/mol air
   tmade=.FALSE.
 
   !ANorton, for additional fluorescence fields.   
