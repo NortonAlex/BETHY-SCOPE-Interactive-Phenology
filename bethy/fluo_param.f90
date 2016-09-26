@@ -950,11 +950,11 @@ IF (.NOT.ALLOCATED(wlP)) ALLOCATE(wlP(n1))
 !print*, ' wlE ', wlE 
 
 !    spectral.wlF   = 640:1:850;                       % chlorophyll fluorescence in E-F matrix
-  nF = int((756 -754)/1)+1
+  nF = int((757 -755)/1)+1
   ntot =  1
  IF (.NOT.ALLOCATED(wlF)) ALLOCATE(wlF(nF))
    do k=1,nF
-   wlF(k) = 754.+(k-1)*1.
+   wlF(k) = 755.+(k-1)*1.
       ntot = ntot +1
       
 ! Find the indice for the frequency freq_gosat (here 755nm) used for fluo data retrieval
