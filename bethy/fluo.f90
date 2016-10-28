@@ -590,6 +590,8 @@ CALL pb_hour_bethy(hm)
 ! Read in modtran atmosphere transmittance files to variable array
 !CALL read_modtran_files
 
+print*,'   In fluorescence. Starting vp loop.'
+
 !$OMP PARALLEL DO DEFAULT(FIRSTPRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
