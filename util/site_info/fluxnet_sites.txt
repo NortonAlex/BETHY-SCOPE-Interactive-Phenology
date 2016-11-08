@@ -1,0 +1,108 @@
+FLUXNET test sites:
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=730
+Norunda Sweden
+60.0862222N 17.498833E
+SE-Nor
+=> asked for registration at CarboEurope web site
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=710
+Fedorovskoje-old spruce forest Russia
+56.4477778N 32.901944E
+RU-Fy2
+=> no flux data seem available,
+local climate indices from FAO LOCCLIM
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=234
+BOREAS NSA - Old Black Spruce Canada
+55.8796200N 98.480810W
+CA-Man
+=> contacted Fluxnet Canada
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=120
+British Columbia- Campbell River - Mature Forest Site Canada
+49.8672500N 125.333600W
+CA-Ca1
+=> contacted Fluxnet Canada
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=613
+Arvaikheer Mongolia
+46.2338167N	102.825117E
+MN-Arv
+=> very short measurement period on the summer of 1998,
+local climate indices from FAO LOCCLIM
+	
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=340
+Dongwu_grassland China
+45.5601389N 117.000278E
+CN-Dwu
+=> data hard to get
+local climate indices from FAO LOCCLIM
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=886
+Harvard Forest EMS Tower (HFR1), MA USA
+42.5377556N 72.171478W
+US-Ha1
+data here: http://harvardforest.fas.harvard.edu:8080/exist/xquery/data.xq?id=hf004
+wolfgang.knorr@bristol.ac.uk
+6944
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=1009
+Northern Plains Site, WY USA
+42.3128889N 106.557111W
+US-NPn
+=> no data link, only contact email
+local climate indices from FAO LOCCLIM
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=999
+Cedar Bridge, NJ USA
+39.8379417N 74.379101W
+US-Ced
+=> given link not obvious
+local climate indices from FAO LOCCLIM
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=1078
+Tonzi Ranch, CA USA
+38.4316000N 120.965983W
+US-Ton
+data available here: http://www.cnr.berkeley.edu/biometlab/BiometWeb/FieldStudies.html
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=2643
+ARM Southern Great Plains control site, OK USA
+35.5464900N 98.040060W
+US-ARc
+=> signed up to ARM as wolfgang1k
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=2710
+Sevilleta Desert Grassland (LTER), NM USA
+34.3623300N 106.70195W
+??
+=> data link given but not working
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=522
+Yatir Israel
+31.3470000N	35.052000E
+IL-Yat
+=> extensive site description with meteorological data and NEE plots
+also links to CarboEurope for data network
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=1112
+Ganaderos Venezuela
+8.9001056N 68.150944W
+VE-Gan
+=> given link not obvious
+local climate indices from FAO LOCCLIM
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=31
+Daly River Savanna Australia
+14.1592830S 131.388000E
+AU-Da2
+=> extensive info here: http://www.arts.monash.edu.au/ges/research/climate/budgets/index.php
+with link to data
+
+http://www.fluxnet.ornl.gov/fluxnet/sitepage.cfm?SITEID=2694
+Skukuza South Africa
+25.0197000S 31.496900E
+ZA-Kru
+=> no data link, only contact email
+local climate indices from FAO LOCCLIM

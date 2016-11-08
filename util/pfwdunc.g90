@@ -1,0 +1,84 @@
+program pfwdunc
+  ! calculates uncertainties for prognostics from hessian and jacobian
+  ! dec. 2002, marko scholze
+  ! uses now inverse Hessian and Jacobian has to be computed in forward mode
+  implicit none
+  
+  real, allocatable, dimension( :, :) :: inverse_hess, jactransp, proj, p_unc, p_unc_projected
+  real, dimension(:), allocatable :: sigma, sigma_projected
+  integer, parameter :: n=NPTLM, nprogs=NPADM, nproj=NPROJ
+  integer :: i, j
+  character (len= 40):: filename_inverse_hes, filename_jac, filename_posterior_p_unc, filename_prior_p_unc
+
+  filename_jac = 'output/pjaccolfwd.bin'
+  filename_inverse_hes = 'output/denoised_inverse_hess_x.bin'
+  filename_posterior_p_unc = 'output/p_covariance_matrix.bin'
+  filename_prior_p_unc = 'output/prior_p_covariance_matrix.bin'
+
+  allocate( inverse_hess( n, n), jactransp( n, nprogs),p_unc(nprogs,nprogs))
+  allocate( proj( nproj, nprogs), p_unc_projected (nproj, nproj), sigma(nproj), sigma_projected(nproj))
+
+! Jacobian and projection
+  proj = 0.
+  do i=1, nproj
+     do j=48*(i-1)+13,48*i
+        proj(i,j) = 1/3.
+     enddo
+  enddo
+  open(unit=1,file=filename_jac,form='unformatted')
+  read(1) jactransp
+  close(1)
+
+! posterior analysis
+  open(unit=1,file=filename_inverse_hes,form='unformatted')
+  read(1) inverse_hess
+  close(1)
+
+  p_unc = 0.
+  p_unc = matmul( transpose(jactransp), matmul( inverse_hess,  jactransp))
+
+  p_unc_projected = 0.
+  p_unc_projected = matmul( proj, matmul( p_unc,  transpose(proj)))
+
+  open(unit=1, file=filename_posterior_p_unc, form='unformatted')
+  write(1) p_unc
+  close(1)
+
+  write(6,*) 'posterior'
+  write(6,*) 'number,   uncertainty'
+  do i=1,nprogs
+     write(6,*) i, sqrt( p_unc(i,i))
+  end do
+  write(6,*) 'projected'
+  do i=1,nproj
+     sigma(i) = sqrt( p_unc_projected(i,i))
+     write(6,*) i, sqrt( p_unc_projected(i,i))
+  end do
+ 
+! prior analysis
+  p_unc = 0.
+  p_unc = matmul( transpose(jactransp), jactransp)
+
+  p_unc_projected = 0.
+  p_unc_projected = matmul( proj, matmul( p_unc,  transpose(proj)))
+
+  open(unit=1, file=filename_prior_p_unc, form='unformatted')
+  write(1) p_unc
+  close(1)
+
+  write(6,*) 'number,   uncertainty'
+  do i=1,nprogs
+     write(6,*) i, sqrt( p_unc(i,i))
+  end do
+
+! projection table
+  write(6,*) 'projected'
+  write(6,*) 'number,   prior uncertainy,   posterior unc., reduction'
+  do i=1,nproj
+     write(6,*) i, sqrt( p_unc_projected(i,i)), sigma(i), 100*(1.-sigma(i)/sqrt( p_unc_projected(i,i)))
+  end do
+    
+  deallocate( inverse_hess, jactransp, p_unc)
+  deallocate( proj, p_unc_projected, sigma, sigma_projected)
+
+end program pfwdunc
