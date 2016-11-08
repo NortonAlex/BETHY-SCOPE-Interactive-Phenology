@@ -1,0 +1,24 @@
+/zone=
+Tapajos
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	-2.9375161
+/Latitude_Maximum=
+	-2.7758179
+/Longitude_Minimum=
+	-55.0398397
+/Longitude_Maximum=
+	-54.8779403
+/SamplingInterval_X=
+	0.0107933
+/SamplingInterval_Y=
+	0.0107799
+/SamplingInterval_Units=
+deg

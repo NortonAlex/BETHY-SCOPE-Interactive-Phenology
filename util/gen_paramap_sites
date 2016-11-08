@@ -1,0 +1,20 @@
+#!/bin/bash
+TMPFILE=idl_tmp.bat
+SVDIR=`pwd`
+DIR=../control_bethy
+if [ -f $TMPFILE ] ; then
+  rm $TMPFILE
+fi
+touch $TMPFILE
+cd $DIR
+list=`ls site_specs*.dat`
+cd $SVDIR
+for f in $list ; do
+  cat >> $TMPFILE << EOF
+gen_paramap, site='$f'
+EOF
+done
+#/Applications/itt/idl64/bin/idl < $TMPFILE
+idl < $TMPFILE
+rm $TMPFILE
+

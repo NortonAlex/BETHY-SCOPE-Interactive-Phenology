@@ -1,0 +1,24 @@
+/zone=
+Sodankyla
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	67.2807810
+/Latitude_Maximum=
+	67.4429412
+/Longitude_Minimum=
+	26.4271859
+/Longitude_Maximum=
+	26.8484801
+/SamplingInterval_X=
+	0.0280863
+/SamplingInterval_Y=
+	0.0108107
+/SamplingInterval_Units=
+deg

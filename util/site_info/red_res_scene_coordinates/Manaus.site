@@ -1,0 +1,24 @@
+/zone=
+Manaus
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	-2.6700518
+/Latitude_Maximum=
+	-2.5083538
+/Longitude_Minimum=
+	-60.1958346
+/Longitude_Maximum=
+	-60.0339714
+/SamplingInterval_X=
+	0.0107909
+/SamplingInterval_Y=
+	0.0107799
+/SamplingInterval_Units=
+deg

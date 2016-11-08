@@ -1,0 +1,24 @@
+/zone=
+Loobos
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	52.0868390
+/Latitude_Maximum=
+	52.2488754
+/Longitude_Minimum=
+	5.6118668
+/Longitude_Maximum=
+	5.8760492
+/SamplingInterval_X=
+	0.0176122
+/SamplingInterval_Y=
+	0.0108024
+/SamplingInterval_Units=
+deg

@@ -1,0 +1,24 @@
+/zone=
+Zotino
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	60.7197415
+/Latitude_Maximum=
+	60.8818529
+/Longitude_Minimum=
+	89.1846563
+/Longitude_Maximum=
+	89.5169557
+/SamplingInterval_X=
+	0.0221533
+/SamplingInterval_Y=
+	0.0108074
+/SamplingInterval_Units=
+deg

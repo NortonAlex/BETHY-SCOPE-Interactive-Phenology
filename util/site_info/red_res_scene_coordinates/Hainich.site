@@ -1,0 +1,24 @@
+/zone=
+Hainich
+/surface=
+land
+/Number_of_Rows=
+	15
+/Number_of_Cols=
+	15
+/projection=
+Rectangular
+/Latitude_Minimum=
+	50.9982536
+/Latitude_Maximum=
+	51.1602798
+/Longitude_Minimum=
+	10.3230484
+/Longitude_Maximum=
+	10.5809516
+/SamplingInterval_X=
+	0.0171935
+/SamplingInterval_Y=
+	0.0108018
+/SamplingInterval_Units=
+deg
