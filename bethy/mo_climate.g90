@@ -104,7 +104,7 @@ CONTAINS
     DO i = nlat,1,-1
 !$taf loop = parallel
        DO j = 1,nlon      
-          IF (iload(j,i,1)<1e20) THEN 
+          IF (iload(j,i,1).gt.-1000) THEN 
              n=n+1
              dprecip(n,:) = iload(j,i,:)
           ENDIF
@@ -123,7 +123,7 @@ CONTAINS
     DO i = nlat,1,-1
 !$taf loop = parallel
        DO j = 1,nlon      
-          IF (iload(j,i,1)<1e20) THEN        
+          IF (iload(j,i,1).gt.-1000) THEN        
              n=n+1
              dtmax(n,:) = iload(j,i,:)
           ENDIF
@@ -141,7 +141,7 @@ CONTAINS
     DO i = nlat,1,-1
 !$taf loop = parallel
        DO j = 1,nlon      
-          IF (iload(j,i,1)<1e20) THEN        
+          IF (iload(j,i,1).gt.-1000) THEN        
              n=n+1
              dtmin(n,:) = iload(j,i,:)
           ENDIF
@@ -159,7 +159,7 @@ CONTAINS
     DO i = nlat,1,-1
 !$taf loop = parallel
        DO j = 1,nlon      
-          IF (iload(j,i,1)<1e20) THEN        
+          IF (iload(j,i,1).gt.-1000) THEN        
              n=n+1
              dswdown(n,:) = iload(j,i,:)
           ENDIF

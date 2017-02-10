@@ -156,23 +156,12 @@ CONTAINS
     CALL ncclose(infile)
     n=0
 !$taf loop = parallel
-!print*,' mo_climate.f90: nlat ',nlat,' nlon ',nlon
     DO i = nlat,1,-1
-!    print*,' lat ',i
 !$taf loop = parallel
-       DO j = 1,nlon
-!       print*,' lon ',j      
+       DO j = 1,nlon      
           IF (iload(j,i,1).gt.-1000) THEN        
              n=n+1
-             ! If the grid point falls within the given latitude band where we adjust to test for sensitivity
-!             IF (i.ge.1 .AND. i.le.8) THEN     ! Sth Hemis (90S-30S)
-!             IF (i.ge.9 .AND. i.le.16) THEN     ! Tropics (30S-30N)
-!             IF (i.ge.17 .AND. i.le.24) THEN     ! Nth Hemis (30N-90N)
-!                dswdown(n,:) = iload(j,i,:) + 0.01*(0.06*iload(j,i,:))   ! Adjust value by 1% of its uncertainty, where the uncertainty is 6% of the mean (see Kato et al., 2012 Table 3) 
-!             ELSE
-                dswdown(n,:) = iload(j,i,:)
-!             print*,' n ',n
-!             ENDIF
+             dswdown(n,:) = iload(j,i,:)
           ENDIF
        ENDDO
     ENDDO
@@ -293,7 +282,7 @@ CONTAINS
     atmean = r * SUM (dtmax(:,iday0:iday1)+dtmin(:,iday0:iday1),2) / 2.
     atrange = r * SUM (dtmax(:,iday0:iday1)-dtmin(:,iday0:iday1),2)
     aswdown = r * SUM (dswdown(:,iday0:iday1),2)
-
+  
 ! .. average actual / potential evapotranspiration over grid cell
     tfe=0
     DO i=1,vp
