@@ -32,6 +32,7 @@
  dtmax_file   = './inputs/climate/cruncep_forcing.daily.Tmax.1980-2015.nc'
  dtmin_file   = './inputs/climate/cruncep_forcing.daily.Tmin.1980-2015.nc'
  dswdown_file = './inputs/climate/cruncep_forcing.daily.SWdown.1980-2015.nc'
+ plai_file    = './inputs/prescribed_lai/modislai_yuan_2015_vp.txt'
  dummyfluxes  = './inputs/co2fluxes.dat'
  jacdir       = './inputs/jactd/'
  datdir       = './inputs/gv08/'

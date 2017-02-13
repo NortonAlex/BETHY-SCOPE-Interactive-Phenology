@@ -78,6 +78,8 @@ MODULE mo_namelist
   ! data for SCOPE model
   CHARACTER(len=80) :: scopedir = "input/scope/"
 
+  ! prescribed lai 
+  CHARACTER(len=80) :: plai_file = "inputs/prescribed_lai/modislai_yuan_2015_vp.txt"
 
   ! Test in the use of fs data: 0 = do not use, 1 = use
   INTEGER :: ifs = 1
@@ -122,7 +124,7 @@ MODULE mo_namelist
        & wetflg, rflg, wiflg, vflg, &
        & datfile, param_file, mapping_file_global, &
        & grid_file, interp_file, faparfile,faparfile_global, &
-       & yearin0, yearin1, dprecip_file, dtmax_file, dtmin_file, dswdown_file, &
+       & yearin0, yearin1, dprecip_file, dtmax_file, dtmin_file, dswdown_file, plai_file, &
        & dummyfluxes, jacdir, outdir, year0_site, year1_site, mapping_file_site, &
        & site_file, pattern_file, flux_temp_file,&
        & datdir, fluxdir, bgrdir, optpftg, optpftl, optbsmg, optbsml, &
@@ -170,6 +172,7 @@ CONTAINS
     WRITE(6,*) dtmax_file
     WRITE(6,*) dtmin_file
     WRITE(6,*) dswdown_file
+    WRITE(6,*) '# prescribed lai file:         ',plai_file
     WRITE(6,*) '# grid file:                   ',grid_file
     WRITE(6,*) '# initial year input data:     ',yearin0
     WRITE(6,*) '# end year input data:         ',yearin1

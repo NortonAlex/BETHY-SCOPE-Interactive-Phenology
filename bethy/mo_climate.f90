@@ -57,7 +57,7 @@ MODULE mo_climate
 
 ! declarations for daily climate input data
 ! precipitation in mm/day
-  REAL, ALLOCATABLE, DIMENSION (:,:) :: dprecip, dtmin, dtmax, dswdown
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: dprecip, dtmin, dtmax, dswdown, prescribed_lai
 
 CONTAINS
 
@@ -67,9 +67,9 @@ CONTAINS
   ! .. Use Statements ..
     USE mo_netcdf
     USE mo_constants
-    USE mo_namelist, ONLY : dprecip_file, dtmax_file, dtmin_file, dswdown_file
+    USE mo_namelist, ONLY : dprecip_file, dtmax_file, dtmin_file, dswdown_file, plai_file
     USE mo_calendar
-    USE mo_grid, ONLY : nlon, nlat
+    USE mo_grid, ONLY : nlon, nlat, vp
 
     IMPLICIT NONE
 
@@ -168,6 +168,15 @@ CONTAINS
 
     DEALLOCATE (iload)
 
+    ! read prescribed LAI
+    ! assume unit number 79 unused
+    open(unit=79,file=plai_file,form='formatted',status='old')
+    rewind 79
+    do i = 1,vp
+       read(79,*) (prescribed_lai(i,j),j=1,12)
+    end do
+    close(79)
+
   END SUBROUTINE get_global_climate
 
   SUBROUTINE climate_allocate(ng,vp,sdays)
@@ -187,6 +196,7 @@ CONTAINS
     ALLOCATE (coszen(ng), spds(ng), cpds(ng))
     ALLOCATE (htmp(ng,tspd))
     ALLOCATE (zrhos(vp))
+    ALLOCATE (prescribed_lai(vp,12))
 
     CALL climsubday_allocate(ng)
 
@@ -215,6 +225,7 @@ CONTAINS
     DEALLOCATE (htmp) 
 !$taf next required = vp
     DEALLOCATE (zrhos) 
+    DEALLOCATE (prescribed_lai)
 
     CALL climsubday_deallocate
     

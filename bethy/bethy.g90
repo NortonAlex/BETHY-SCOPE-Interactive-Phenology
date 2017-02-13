@@ -248,9 +248,12 @@ print *, 'tdays =', tdays
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
+              ! option to give prescribed lai (from file) to fluorescence calculations
+              zlai = prescribed_lai(:,rmonth)
 !              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
-                                & tmp(inho,:),pair,eamin,ca,OX,zlai, &
+                                & tmp(inho,:),pair,eamin,ca,OX, & 
+                                & zlai, &
                                 & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                                 & rfluo_diurnal,rgppfluo_diurnal,&

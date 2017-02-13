@@ -608,17 +608,6 @@ CALL pb_hour_bethy(hm)
 
  ! do jj = 1, ng
 
-ALLOCATE(MfI(size(wlf),size(wle)))
-ALLOCATE(MbI(size(wlf),size(wle)))
-ALLOCATE(MfII(size(wlf),size(wle)))
-ALLOCATE(MbII(size(wlf),size(wle)))
-ALLOCATE(rho(nwl))
-ALLOCATE(tau(nwl))
-ALLOCATE(rs(nwl))
-ALLOCATE(kClrel(nwlP))
-
-ALLOCATE(lidf(nli))
-
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
       sum_frac_tot = 0.
@@ -703,6 +692,17 @@ pft_dominant_cell = -999
 
 ! We consider only grid cells with PFTs having LAI greater than 0.
   IF (zlai(jl) >0.) THEN
+
+     ALLOCATE(MfI(size(wlf),size(wle)))
+     ALLOCATE(MbI(size(wlf),size(wle)))
+     ALLOCATE(MfII(size(wlf),size(wle)))
+     ALLOCATE(MbII(size(wlf),size(wle)))
+     ALLOCATE(rho(nwl))
+     ALLOCATE(tau(nwl))
+     ALLOCATE(rs(nwl))
+     ALLOCATE(kClrel(nwlP))
+
+     ALLOCATE(lidf(nli))
 
                ok = ok +1
 
@@ -1000,6 +1000,8 @@ DEALLOCATE(lidf)
 
 ! Fluorescence
 
+ENDIF      ! Test on LAI if > 0 then calculation made
+
 !    For daily output files
         dayfluo(jl) = LoF_jl
         daygpp(jl) = Agtot
@@ -1029,7 +1031,6 @@ DEALLOCATE(lidf)
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
 PAR_scope_cab(iyear,imonth,jj) =  PAR_scope_cab(iyear,imonth,jj) +Pntot_Cab*1e6*frac1
 
-ENDIF      ! Test on LAI if > 0 then calculation made
 
 ! write(6,'(a4,3(1x,i5),1x,f6.3,8(1x,f7.2),2(1x,f5.2),1x,i4,3(1x,f5.1),2(1x,f8.2))') 'FLUO',imonth,jj,jl,LoF_jl,Agtot,Actot,Long,Lati,&
 !& Rin,Ta,ea,pa,LAI,frac1,pft,Vcmo,Cab,tts,Pntot*1e6,Pntot_Cab*1.e6
