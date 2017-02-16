@@ -690,9 +690,6 @@ pft_dominant_cell = -999
            LIDFa = 0.
            LIDFb = 0.
 
-! We consider only grid cells with PFTs having LAI greater than 0.
-  IF (zlai(jl) >0.) THEN
-
      ALLOCATE(MfI(size(wlf),size(wle)))
      ALLOCATE(MbI(size(wlf),size(wle)))
      ALLOCATE(MfII(size(wlf),size(wle)))
@@ -703,6 +700,9 @@ pft_dominant_cell = -999
      ALLOCATE(kClrel(nwlP))
 
      ALLOCATE(lidf(nli))
+
+! We consider only grid cells with PFTs having LAI greater than 0.
+  IF (zlai(jl) >0.) THEN
 
                ok = ok +1
 
@@ -976,19 +976,6 @@ DEALLOCATE(Agu,Au,rcwu,Fu)
 DEALLOCATE(A1,Ag1,rcw1,F1a,F1,W1)
 DEALLOCATE(Ciu,Ccu,Tcu)
 
-!Deallocate fluspect output arrays
-DEALLOCATE(MfI)
-DEALLOCATE(MbI)
-DEALLOCATE(MfII)
-DEALLOCATE(MbII)
-DEALLOCATE(rho)
-DEALLOCATE(tau)
-DEALLOCATE(rs)
-DEALLOCATE(kClrel)
-
-!Deallocate leafangles output
-DEALLOCATE(lidf)
-
 ! This activate if we want to calculate the number of layers as function of
 ! pft... There is memory leaks so far ... 
 ! Deallocate fields dependent to the layer
@@ -1031,6 +1018,18 @@ ENDIF      ! Test on LAI if > 0 then calculation made
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
 PAR_scope_cab(iyear,imonth,jj) =  PAR_scope_cab(iyear,imonth,jj) +Pntot_Cab*1e6*frac1
 
+!Deallocate fluspect output arrays
+DEALLOCATE(MfI)
+DEALLOCATE(MbI)
+DEALLOCATE(MfII)
+DEALLOCATE(MbII)
+DEALLOCATE(rho)
+DEALLOCATE(tau)
+DEALLOCATE(rs)
+DEALLOCATE(kClrel)
+
+!Deallocate leafangles output
+DEALLOCATE(lidf)
 
 ! write(6,'(a4,3(1x,i5),1x,f6.3,8(1x,f7.2),2(1x,f5.2),1x,i4,3(1x,f5.1),2(1x,f8.2))') 'FLUO',imonth,jj,jl,LoF_jl,Agtot,Actot,Long,Lati,&
 !& Rin,Ta,ea,pa,LAI,frac1,pft,Vcmo,Cab,tts,Pntot*1e6,Pntot_Cab*1.e6
