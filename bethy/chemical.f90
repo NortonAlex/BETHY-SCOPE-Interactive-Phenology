@@ -390,7 +390,7 @@ CALL TB12 (npts,ps,Kpc,Kf,Kd,eta,qE,qQ,fs,fo,fm,Kn)
 
 
 !%% convert back to ppm
-Ci          = Ci*1e6/ p * 1E5
+Ci          = Ci*1e6/ p * 1E3
 
 !print*, ' Ci ', minval(Ci), maxval(Ci), sum(Ci) 
 

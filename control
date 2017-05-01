@@ -19,7 +19,7 @@
  rflg         = 0
  wiflg        = 0
  vflg         = 0
- param_file   = './control_bethy/101_paramslist'
+ param_file   = './control_parameter_update/hires/101_paramslist_adjplaimax_forpresclai'
  mapping_file_global = './control_bethy/hires_35params_scope_npars101.map'
  datfile      = './control_bethy/gv41_data'
  grid_file    = './control_bethy/bethy_grid3veg_v2.nc'

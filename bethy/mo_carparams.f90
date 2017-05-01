@@ -3,7 +3,7 @@ MODULE mo_carparams
   IMPLICIT NONE
 
 ! WOK-CHG-2007-07-01 removed tphen0, tphena0, tlmax0, will not be used
-  REAL, PARAMETER  :: LAIMAX0       = 5.
+  REAL, PARAMETER  :: LAIMAX0       = 6.
   REAL, PARAMETER  :: FCMAX0        = 1.0
   REAL, PARAMETER  :: LAILIM0       = 3.0      
 !  REAL, PARAMETER  :: TPHEN0        = 5.0

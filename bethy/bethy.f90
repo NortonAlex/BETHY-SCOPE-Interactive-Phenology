@@ -174,6 +174,10 @@ print *, 'tdays =', tdays
    print*,"rday,iday0,iday1,sdays,aday"
    PRINT*,rday,iday0,iday1,sdays,aday
 
+        ! Use prescribed LAI for simulated period (not spin-up)
+        !lai = prescribed_lai(:,rmonth)
+        IF (rday > sdays) lai = prescribed_lai(:,rmonth)
+
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
            IF (outyear<1) ryear0 = ryear
@@ -227,7 +231,7 @@ print *, 'tdays =', tdays
 !              print *, 'swdown shape:', shape(swdown)
 !              print *, 'SWDOWN ARRAY:', swdown
 !$TAF store swdown  = diurnal_tape, rec = keydiurnal
-              ! .. calculate stomatal conductance 
+              ! .. calculate stomatal conductance
               zlai = lai
 !$TAF store zrhos = diurnal_tape, rec = keydiurnal
 !FastOpt !$TAF store pardown, zgc, pgs, rbe = diurnal_tape, rec = keydiurnal
@@ -249,7 +253,6 @@ print *, 'tdays =', tdays
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
               ! option to give prescribed lai (from file) to fluorescence calculations
-!              zlai = prescribed_lai(:,rmonth)
 !              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX, & 
