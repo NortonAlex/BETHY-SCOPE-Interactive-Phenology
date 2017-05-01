@@ -293,6 +293,7 @@ CONTAINS
     REAL, DIMENSION(ng) :: zirrin, zpar,coszen
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon, fcinh
+    REAL, DIMENSION(vp) :: dapar
 
     coszen(:)=mu(ts,:)
     klon=vp
@@ -309,6 +310,7 @@ CONTAINS
        ZRDC(JL)       = 0.
        ZRPHC(JL)      = 0.
        ZRAUT(JL)      = 0.
+       DAPAR(JL)      = 0.
     END DO
 
     DO  IL = 1, NL
@@ -480,6 +482,12 @@ CONTAINS
        END DO  ! Longitudes for Integrartion
     END DO     ! Canopy layers for calling PHYSN
 
+    DO IL = 1,NL
+       DO JL = 1,NVEGLIST
+          JJ = gridp(JL)
+          DAPAR(JL) = DAPAR(JL) + ZAPAR(JL,IL) * PPAR(JJ) ! use ZPAR for umol m-2 -s1 and PPAR for W m-2
+       ENDDO
+    ENDDO
 
 !$TAF STORE ZASSC, ZRDC  = carbon_tape, key = keydiurnal
 
