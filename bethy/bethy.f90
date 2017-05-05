@@ -165,10 +165,11 @@ print *, 'tdays =', tdays
 	! Calculates the first and last days of the month.
         iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
         iday1=SUM(rdays(1:rmonth))
+        adayint=iday1-iday0+1
 
         IF (iday1>sdays) iday1=sdays
 
-        adayint=dayint
+        !adayint=dayint
         IF (idayint(rday)+adayint>tdays) adayint=tdays-idayint(rday)+1
 
    print*,"rday,iday0,iday1,sdays,aday"
