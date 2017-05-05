@@ -566,6 +566,7 @@ INTEGER                                      :: jd
 REAL                                         :: hm(24)
 
 INTEGER                                      :: it   ! time index for diurnal output arrays
+REAL                                         :: a,b,c,phase    ! sine curve scaling parameters
 
 !INTEGER, DIMENSION (12)                      ::  rdays
 !DATA rdays /31, 28, 31, 30, 31, 30, 31, 31, 30, 31,30, 31/
@@ -600,14 +601,13 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rpar_diurnal,rparcab_diurnal,vps,block_vps) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
-!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j)
+!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,a,b,c,phase)
 
   DO j = 1,vps
       jl = block_vps(j)   ! jl = vp  
         jj=gridp(jl)      ! jj = gp
 
  ! do jj = 1, ng
-
 ! We verif the frac of the FTs over the selected grid cells. The maximum has to
 ! be 1
       sum_frac_tot = 0.
@@ -713,6 +713,26 @@ pft_dominant_cell = -999
              Vcmo = vm(jl)*1.e6
             frac1 = frac(jl)
               Cab = Chl(jl)
+
+! Create seasonally varying parameters
+!  - if utilizing this, make sure to comment out assignment of parameters above.
+!     IF (lat(jj).gt.0.) THEN
+!        phase = 80.    ! shift in sine scaling curve (days). = 80 for jun 22nd
+!     ELSE
+!        phase = 265.   ! shift in sine scaling curve (days). = 265 for dec 22nd
+!     ENDIF
+!
+!     ! Set amplitude of seasonal variation per pft (as fraction of the parameter mean)
+!     IF ((pft.eq.1).or.(pft.eq.3).or.(pft.eq.5).or.(pft.eq.7).or.(pft.eq.11).or.(pft.eq.12)) THEN    ! evergreen vegetation
+!        a = 0.10
+!     ELSE           ! deciduous, grass, crop pfts
+!        a = 0.50
+!     ENDIF
+!                b = (2.*3.141593)/365.    ! period = 2pi/b, therefore b = 2pi/period
+!                c = -b * phase     ! phase shift
+!
+!             Vcmo = (a*vm(jl)*1.e6) * sin( b*doy + c ) + vm(jl)*1.e6
+!              Cab = (a*Chl(jl)) * sin( b*doy + c ) + Chl(jl)
 
 ! Concentration of CO2 and O2 in the atmosphere, i.e, at the boundary of the
 ! leaves
@@ -996,10 +1016,10 @@ ENDIF      ! Test on LAI if > 0 then calculation made
                         LoF_jl = LoF(ifreq_sat)
 ! IF (isNaN(LoF_jl))     LoF_jl = 0.
         rfluo(iyear,imonth,jj) = rfluo(iyear,imonth,jj) +LoF_jl*frac1
-!        print*,'LoF_jl*frac1 equals: ',LoF_jl*frac1
+!        print*,'SIF = LoF_jl*frac1 equals: ',LoF_jl*frac1
 ! GPP
      rgppfluo(iyear,imonth,jj) = rgppfluo(iyear,imonth,jj)+Agtot*frac1
-!     print*,'Agtot*frac1 equals: ',Agtot*frac1
+!     print*,'GPP = Agtot*frac1 equals: ',Agtot*frac1
 
      zgppfluo(jl) = zgppfluo(jl)+Agtot*frac1     
 

@@ -176,7 +176,7 @@ print *, 'tdays =', tdays
 
         ! Use prescribed LAI for simulated period (not spin-up)
         !lai = prescribed_lai(:,rmonth)
-        IF (rday > sdays) lai = prescribed_lai(:,rmonth)
+        !IF (rday > sdays) lai = prescribed_lai(:,rmonth)
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
@@ -253,6 +253,7 @@ print *, 'tdays =', tdays
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
               ! option to give prescribed lai (from file) to fluorescence calculations
+              zlai = prescribed_lai(:,rmonth)
 !              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX, & 
