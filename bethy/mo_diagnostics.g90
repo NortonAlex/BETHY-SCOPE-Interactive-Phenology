@@ -14,12 +14,14 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ress, resf
   REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ressv, resfv
 !WOK-ADD-070725 monthly diagnostics of various status variables
-  REAL, ALLOCATABLE, DIMENSION (:,:,:) :: rrhos, rpasm, rlai, rfpar
+  REAL, ALLOCATABLE, DIMENSION (:,:,:) :: rrhos, rpasm, rlai, rfpar, rdapar
   REAL, ALLOCATABLE, DIMENSION (:,:,:) :: rrunoff, rsevp, rsnmelt
 !MAS-ADD-040220  nppp            
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: nppp
 !WOK-ADD-070625 daily storage of carbon fluxes
   REAL, ALLOCATABLE, DIMENSION (:) :: dgpp, dnpp, drgrw, drmnt
+!AJN-ADD-170508 daily storage of apar
+  REAL, ALLOCATABLE, DIMENSION (:) :: ddapar
 !MAS-CHG-091106 dsleafshed, dspsoilst for cbalance spin-up
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dsleafshed, dspsoilst
 !WOK-ADD-071031 daily mean surface reflectance
@@ -143,6 +145,8 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   dgpp = 0.
   ALLOCATE( drhos(vp) )
   drhos = 0.
+  ALLOCATE( rdapar(0:nrun,outt,ng) )
+  rdapar = 0.
 #endif 
 
 END SUBROUTINE diagnostics_allocate
@@ -209,6 +213,7 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( nppp )  
   DEALLOCATE( dgpp )
   DEALLOCATE( drhos )
+  DEALLOCATE( rdapar )
   !ANorton-ADD-150107. Fluorescence
   DEALLOCATE( rfluo )
   DEALLOCATE( rgppfluo )

@@ -18,7 +18,7 @@ MODULE mo_vegetation
 !WOK-ADD-070612 ztrans
 !WOK-CHG-070626 removed zctrans
 !WOK-CHG-070626 removed zctrans
-  REAL, ALLOCATABLE, DIMENSION(:) :: zfpar, zgc, ptv, zfc, zlai, lai
+  REAL, ALLOCATABLE, DIMENSION(:) :: zfpar, zgc, ptv, zfc, zlai, lai, dapar
   REAL, ALLOCATABLE, DIMENSION(:) :: zassc, zraut, zrphc,zmaint,zgrowth
   REAL, ALLOCATABLE, DIMENSION(:) :: ztrans, zptrans, zpcevp, zpsevp
   REAL, ALLOCATABLE, DIMENSION(:,:) :: pgs

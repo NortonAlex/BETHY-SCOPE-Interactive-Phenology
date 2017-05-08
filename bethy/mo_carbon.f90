@@ -257,7 +257,7 @@ CONTAINS
   SUBROUTINE photo2 (ng,vp, psradsd,ptv,paps, &
                   & zrhos,ppar,zpdir,zlai,zgc,pgs,zfpar,zfc,zassc,zraut,ts, &
                   & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
-                  & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint) 
+                  & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint,dapar) 
 
 !-----------------------------------------------------------------------
 ! used Module variables
@@ -278,6 +278,7 @@ CONTAINS
     REAL, DIMENSION(vp), INTENT(inout) :: zgc
     REAL, DIMENSION(vp,nl), INTENT(inout) :: pgs
     REAL, DIMENSION(vp), INTENT(out) :: zfpar,zassc,zraut,zrphc,zgrowth,zmaint
+    REAL, DIMENSION(vp), INTENT(out) :: dapar
     INTEGER, DIMENSION (vp), INTENT(in) :: c4flg, ph, class
     REAL, DIMENSION(vp), INTENT(in) :: jmf, ptv
     REAL, DIMENSION(vp), INTENT(in) :: vm
@@ -293,7 +294,6 @@ CONTAINS
     REAL, DIMENSION(ng) :: zirrin, zpar,coszen
     REAL, DIMENSION(0:nl) :: dl
     REAL :: zrmnt, zrcon, fcinh
-    REAL, DIMENSION(vp) :: dapar
 
     coszen(:)=mu(ts,:)
     klon=vp
@@ -418,6 +418,15 @@ CONTAINS
           ZFPAR(JL) = ZFPAR(JL) + ZAPAR(JL,IL)
        ENDDO
     ENDDO     
+
+    ! Calculate APAR per vegetation point (umol m-2 s-1)
+    DO IL = 1,NL
+       DO JL = 1,NVEGLIST
+          JJ = gridp(JL)
+          DAPAR(JL) = DAPAR(JL) + ZAPAR(JL,IL) * ZPAR (JJ) *1e6  ! x1e6 to convert mol photons to umol photons
+       ENDDO
+    ENDDO
+
  
 !RG split loop for TAF
 !----------------------------------------------------------------------
@@ -482,12 +491,6 @@ CONTAINS
        END DO  ! Longitudes for Integrartion
     END DO     ! Canopy layers for calling PHYSN
 
-    DO IL = 1,NL
-       DO JL = 1,NVEGLIST
-          JJ = gridp(JL)
-          DAPAR(JL) = DAPAR(JL) + ZAPAR(JL,IL) * PPAR(JJ) ! use ZPAR for umol m-2 -s1 and PPAR for W m-2
-       ENDDO
-    ENDDO
 
 !$TAF STORE ZASSC, ZRDC  = carbon_tape, key = keydiurnal
 

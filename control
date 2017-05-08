@@ -8,7 +8,7 @@
  inkind       = 3
  trans        = 0
  dtime        = 60
- dayint       = 32
+ dayint       = 10
  outtime      = 1
  grdwid       = 2.0
  lonw         = -180.0

@@ -316,7 +316,7 @@ SUBROUTINE diagout (ng,vp,scale,outint)
                        &   rrhos,rpasm,rlai,rfpar,rrunoff,rsevp,rsnmelt,rnppp, &
                        &   rgppp, rfparp, rnepp, rfluo, rgppfluo, rrad, rpar, &
                        &   PAR_scope, PAR_scope_cab, rfluo_diurnal, rgppfluo_diurnal, &
-                       &   rlai_diurnal, rpar_diurnal, rparcab_diurnal
+                       &   rlai_diurnal, rpar_diurnal, rparcab_diurnal, rdapar
 
   IMPLICIT NONE
 
@@ -373,6 +373,9 @@ SUBROUTINE diagout (ng,vp,scale,outint)
 !     CALL savefnc(TRIM(outdir)//'rmnt.nc', rmnt,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'rpasm.nc', rpasm,lat,lon,nrun,outt,ng,sp)
      CALL savefnc(TRIM(outdir)//'rlai.nc', rlai,lat,lon,nrun,outt,ng,sp)
+     CALL savefnc(TRIM(outdir)//'rdapar.nc', rdapar,lat,lon,nrun,outt,ng,sp)
+     CALL savefnc(TRIM(outdir)//'rfpar.nc', rfpar,lat,lon,nrun,outt,ng,sp)
+
 
 !ANorton. Fluorescence output fields
      CALL savefnc(TRIM(outdir)//'rfluo.nc', rfluo,lat,lon,nrun,outt,ng,sp)

@@ -3,7 +3,7 @@
 !*  organizes diagnostic ouput
 !*********************************************************
 
-SUBROUTINE diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
+SUBROUTINE diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp,dapar)
 
 ! .. Use Statements ..
   USE mo_constants
@@ -20,6 +20,7 @@ SUBROUTINE diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,z
   INTEGER, INTENT(in) :: ng, vp
   REAL, DIMENSION(vp), INTENT(in) :: zassc,zraut,zgrowth,zmaint
   REAL, DIMENSION(vp), INTENT(in) :: ztrans,zptrans,zpcevp,zpsevp
+  REAL, DIMENSION(vp), INTENT(in) :: dapar
 
 ! .. Local Scalars ..
    INTEGER :: j, k, np, jold
@@ -228,7 +229,7 @@ SUBROUTINE ddiagnostics (nrun, outint, ng,vp,daysinmonth, aday, scale, fapar)
   USE mo_grid, ONLY: gridp, frac
 !  USE mo_climate, ONLY: zrhos
   USE mo_hydro, ONLY: pasm, runoff, dsevp, dsnmelt
-  USE mo_vegetation, ONLY: lai, zfpar
+  USE mo_vegetation, ONLY: lai, zfpar, dapar
 
   IMPLICIT NONE
   
@@ -269,6 +270,7 @@ SUBROUTINE ddiagnostics (nrun, outint, ng,vp,daysinmonth, aday, scale, fapar)
     rsevp(outyear,rmonth,j) = rsevp(outyear,rmonth,j) + dsevp(k) * frac(k)
     rsnmelt(outyear,rmonth,j) = rsnmelt(outyear,rmonth,j) + dsnmelt(k) * frac(k)
     rfpar(outyear,rmonth,j) = rfpar(outyear,rmonth,j) + zfpar(k) * frac(k) / daysinmonth
+    rdapar(outyear,rmonth,j) = rdapar(outyear,rmonth,j) + dapar(k) * frac(k) / daysinmonth
 #endif
   ENDDO
 
