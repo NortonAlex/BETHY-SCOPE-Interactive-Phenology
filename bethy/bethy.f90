@@ -144,18 +144,18 @@ print *, 'tdays =', tdays
         ryear=ayear(rday)
 
         IF (spin(rday)==0) THEN
-!           iday0=rday-dspin
-!           iday1=rday-dspin+dayint-1
+           iday0=rday-dspin
+           iday1=rday-dspin+dayint-1
            aday=rday-dspin
         ELSE
            IF (dspin>sdays) THEN
               aday = MOD(rday,sdays)
-!              iday0 = MOD(rday,sdays)
-!              iday1=MOD(rday,sdays)+dayint-1
+              iday0 = MOD(rday,sdays)
+              iday1=MOD(rday,sdays)+dayint-1
            ELSE
               aday = rday
-!              iday0 = rday
-!              iday1 = rday+dayint-1
+              iday0 = rday
+              iday1 = rday+dayint-1
            ENDIF
         ENDIF
 
@@ -163,13 +163,13 @@ print *, 'tdays =', tdays
 
         ! Use for monthly mean climate forcing (one diurnal cycle per month) for photosynthesis calcs
 	! Calculates the first and last days of the month.
-        iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
-        iday1=SUM(rdays(1:rmonth))
-        adayint=iday1-iday0+1
+        !iday0=SUM(rdays(1:rmonth))-rdays(rmonth)+1
+        !iday1=SUM(rdays(1:rmonth))
+        !adayint=iday1-iday0+1
 
         IF (iday1>sdays) iday1=sdays
 
-        !adayint=dayint
+        adayint=dayint
         IF (idayint(rday)+adayint>tdays) adayint=tdays-idayint(rday)+1
 
    print*,"rday,iday0,iday1,sdays,aday"
@@ -255,14 +255,14 @@ print *, 'tdays =', tdays
               ! .. do diurnal diagnostics 
               ! option to give prescribed lai (from file) to fluorescence calculations
 !              IF ( inho == 13 ) THEN
-              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
-                                & tmp(inho,:),pair,eamin,ca,OX, & 
-                                & zlai, &
-                                & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
-                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
-                                & rfluo_diurnal,rgppfluo_diurnal,&
-                                & rlai_diurnal,rpar_diurnal,rparcab_diurnal)             
-              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
+!              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
+!                                & tmp(inho,:),pair,eamin,ca,OX, & 
+!                                & zlai, &
+!                                & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
+!                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
+!                                & rfluo_diurnal,rgppfluo_diurnal,&
+!                                & rlai_diurnal,rpar_diurnal,rparcab_diurnal)             
+!              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
 !              ENDIF         ! for selected time of fluo computation
