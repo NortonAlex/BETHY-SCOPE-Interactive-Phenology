@@ -379,7 +379,7 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                   & rfluo_diurnal,rgppfluo_diurnal,&
-                  & rlai_diurnal,rpar_diurnal,rparcab_diurnal)
+                  & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -504,7 +504,7 @@ REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: PAR_scope_cab
 REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
 REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
-REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rpar_diurnal,rparcab_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -597,10 +597,11 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
-!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rpar_diurnal,rparcab_diurnal,vps,block_vps) &
+!$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
+!$OMP& SHARED (rpar_diurnal,vps,block_vps) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
-!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j)
+!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P)
 
   DO j = 1,vps
       jl = block_vps(j)   ! jl = vp  
@@ -674,6 +675,7 @@ pft_dominant_cell = -999
 
  !             jl = gridvp(jj,k)
 
+               P = 0.
            Pntot = 0.
        Pntot_Cab = 0.
            Agtot = 0.
@@ -965,7 +967,6 @@ CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),
 ! Fluo per jl and for the wavelenght of the studied satellite 
                   LoF_jl = LoF(ifreq_sat)
 
-
 ! We free the local arrays 
 DEALLOCATE(Agh,Ah,rcwh,Fh)
 DEALLOCATE(A0,Ag0,rcw0,F0a,F0,W0)
@@ -1011,8 +1012,9 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      rfluo_diurnal(iyear,iday0,t,jl) = LoF_jl*frac1
      rgppfluo_diurnal(iyear,iday0,t,jl) = Agtot*frac1
      rlai_diurnal(iyear,iday0,t,jl) = LAI
-     rpar_diurnal(iyear,iday0,t,jl) = Pntot*1e6*frac1
-     rparcab_diurnal(iyear,iday0,t,jl) = Pntot_Cab*1e6*frac1
+     rapar_diurnal(iyear,iday0,t,jl) = Pntot*1e6*frac1
+     raparcab_diurnal(iyear,iday0,t,jl) = Pntot_Cab*1e6*frac1
+     rpar_diurnal(iyear,iday0,t,jl) = P*1e3*frac1
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1

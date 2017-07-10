@@ -175,8 +175,8 @@ print *, 'tdays =', tdays
    print*,"rday,iday0,iday1,sdays,aday"
    PRINT*,rday,iday0,iday1,sdays,aday
 
-        ! Use prescribed LAI for simulated period (not spin-up)
-        !lai = prescribed_lai(:,rmonth)
+        ! Option to use monthly prescribed LAI.
+        !  - lai is forced for simulated period, not spin-up.
         IF (rday > sdays) lai = prescribed_lai(:,rmonth)
 
         IF (rday == idayint(rday)) THEN

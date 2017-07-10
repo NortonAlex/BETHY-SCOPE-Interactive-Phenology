@@ -316,7 +316,7 @@ SUBROUTINE diagout (ng,vp,scale,outint)
                        &   rrhos,rpasm,rlai,rfpar,rrunoff,rsevp,rsnmelt,rnppp, &
                        &   rgppp, rfparp, rnepp, rfluo, rgppfluo, rrad, rpar, &
                        &   PAR_scope, PAR_scope_cab, rfluo_diurnal, rgppfluo_diurnal, &
-                       &   rlai_diurnal, rpar_diurnal, rparcab_diurnal
+                       &   rlai_diurnal, rapar_diurnal, raparcab_diurnal, rpar_diurnal
 
   IMPLICIT NONE
 
@@ -384,8 +384,9 @@ SUBROUTINE diagout (ng,vp,scale,outint)
      CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc', rfluo_diurnal,nrun,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc', rgppfluo_diurnal,nrun,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rlai_diurnal.nc',rlai_diurnal,nrun,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rapar_diurnal.nc',rapar_diurnal,nrun,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'raparcab_diurnal.nc',raparcab_diurnal,nrun,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rpar_diurnal.nc',rpar_diurnal,nrun,365,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rparcab_diurnal.nc',rparcab_diurnal,nrun,365,24,vp,sp)
 
   ELSEIF (scale==2) THEN ! SITE SCALE !
 

@@ -32,8 +32,9 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfluo_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rgppfluo_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rlai_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rapar_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: raparcab_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpar_diurnal
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rparcab_diurnal
 
 contains
 
@@ -113,10 +114,12 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   rgppfluo_diurnal = -999.9
   ALLOCATE( rlai_diurnal (0:nrun,365,tspd,vp) )
   rlai_diurnal = -999.9
+  ALLOCATE( rapar_diurnal (0:nrun,365,tspd,vp) )
+  rapar_diurnal = -999.9
+  ALLOCATE( raparcab_diurnal (0:nrun,365,tspd,vp) )
+  raparcab_diurnal = -999.9
   ALLOCATE( rpar_diurnal (0:nrun,365,tspd,vp) )
   rpar_diurnal = -999.9
-  ALLOCATE( rparcab_diurnal (0:nrun,365,tspd,vp) )
-  rparcab_diurnal = -999.9
   !WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
   ALLOCATE( raet(0:nrun,outt,ng) )
   raet = 0.
@@ -218,6 +221,9 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( PAR_scope_cab )
   DEALLOCATE( rfluo_diurnal )
   DEALLOCATE( rgppfluo_diurnal )
+  DEALLOCATE( rapar_diurnal )
+  DEALLOCATE( raparcab_diurnal)
+  DEALLOCATE( rpar_diurnal )
 
 
 END SUBROUTINE diagnostics_deallocate
