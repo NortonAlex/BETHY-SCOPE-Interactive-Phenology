@@ -871,7 +871,7 @@ CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
 !for shaded (h) and sunlit (u) leaves
 
 ! Correction of the temperature ... To fix this 
-       tempcor = 0
+       tempcor = 1
 
 ! Shaded leaves 
 !print*, ' Pnhc*1E6 ', minval(Pnhc*1E6), maxval(Pnhc*1E6), sum(Pnhc*1E6)

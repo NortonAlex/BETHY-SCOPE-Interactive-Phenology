@@ -208,7 +208,10 @@ Koopt1       = ako * 1e-3
 
 !%% temperature corrections
 qt          = 0.1 * (T-Tref) * tempcor
-TH          = 1 + tempcor* exp(shti * (T   -Thh))
+! high-temperature (>35oC) correction for Vcmax (see Collatz et al., 1991 eq A13)
+!TH          = 1 + tempcor* exp(shti * (T   -Thh))
+TH          = 1 + tempcor * exp((-220E3 + 703*T)/(8.314*T))
+! low-temperature correction for Vcmax (C4) 
 TL          = 1 + tempcor* exp(slti * (Thl -T))
 
 !print*, 'qt ', minval(qt), maxval(qt), sum(qt) 
