@@ -77,7 +77,7 @@ CONTAINS
 SUBROUTINE biochemical(npts,Q,T1,Csi,ea,Oa,p,akc,ako,Vcmo,option,Ag,A,eta,rcw,Ci,avovc,ardvc)
 
 USE fluo_param, ONLY : Rdparam,Tparams,m,tempcor,stressfactor
-USE fluo_param, ONLY :  Kcopt, Koopt,Kf,Kd,Kpc,atheta
+USE fluo_param, ONLY :  Kcopt, Koopt,Kf0,Kd0,Kpc0,atheta
 
 IMPLICIT NONE 
 
@@ -104,9 +104,9 @@ REAL, DIMENSION(npts)                :: spfy,gam,Vc,Vs
 REAL, DIMENSION(npts)                :: RH,es,s,Je,Ve,V,Ja
 REAL, DIMENSION(npts)                :: V0,V1
 REAL, DIMENSION(npts)                :: ps,qQ,fm,Kn 
+REAL, DIMENSION(npts)                :: Kpc,Kd,po0,Kf
 REAL, DIMENSION(npts)                :: effcon,a1,a2,fo
 REAL, DIMENSION(npts)                :: temp
-REAL                                 :: po0 
 REAL                                 :: Kcopt1,Koopt1 
 REAL                                 :: Tref,slti,shti,Thl,Thh,Trdm 
 INTEGER                              :: C4
@@ -160,6 +160,8 @@ ENDWHERE
 !Kf          = 0.05 ! % []            rate constant for fluorescence
 !Kd          = 0.95 !             % []            rate constant for thermal deactivation at Fm
 !Kpc         = 4.0 !  % []            rate constant for photochemisty
+Kpc          = Kpc0
+Kf           = Kf0
 
 kpopt       = Vcmo/56*1E6 ! % []     PEPcase rate constant for C02, 
                           ! used here: Collatz et al: Vcmo = 39 umol m-1 s-1; kp = 0.7 mol m-1 s-1.
@@ -222,6 +224,14 @@ Kc          = Kcopt1 * 2.1**qt
 Ko          = Koopt1 * 1.2**qt
 kp          = kpopt*1.8**qt
 
+! high-temperature increase in Kd (thermal energy dissipation)
+! scope v1.60 (increased Kd for T>26oC)
+WHERE (T > 299.65)
+   Kd   = 0.0301*(T-273.15)+0.0773
+ELSEWHERE
+   Kd   = Kd0
+ENDWHERE
+
 !Rd          = Rdparam * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 Rd          = ardvc * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 
@@ -256,7 +266,6 @@ po0         = Kpc/(Kf+Kd+Kpc)  !  % dark photochemistry fraction (Genty et al., 
 !print*, ' Q ', minval(Q), maxval(Q), sum(Q) 
 
 Je          = 0.5*po0 * Q   !         % electron transport rate
-
 !print*, 'Je ', minval(Je), maxval(Je), sum(Je) 
 
 !%% calculation of the intersection of enzyme and light limited curves
@@ -394,7 +403,6 @@ CALL TB12 (npts,ps,Kpc,Kf,Kd,eta,qE,qQ,fs,fo,fm,Kn)
 !print*, ' Kn  ', minval(Kn), maxval(Kn), sum(Kn)
 
 
-
 !%% convert back to ppm
 Ci          = Ci*1e6/ p * 1E3
 
@@ -502,16 +510,14 @@ IMPLICIT NONE
 ! Input variables 
 INTEGER, INTENT(IN)                :: npt
 REAL, DIMENSION(npt), INTENT(IN)   :: ps
-REAL, INTENT(IN)                   :: Kp,Kf,Kd
+REAL, DIMENSION(npt), INTENT(IN)   :: Kp,Kf,Kd
 
 
 ! Output variables 
 REAL, DIMENSION(npt),INTENT(OUT)   :: fo,eta,qE,qQ,fs,fm,Kn
 
 ! Local variables 
-REAL, DIMENSION(npt)               :: x
-REAL                               :: po0 
-REAL                               :: fo0,fm0
+REAL, DIMENSION(npt)               :: x,po0,fo0,fm0
 
 
 po0         = Kp/(Kf+Kd+Kp)  !     % dark photochemistry fraction (Genty et al., 1989)
