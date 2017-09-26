@@ -229,6 +229,8 @@ REAL                                      :: atheta
 REAL                                      :: lam     ![]    Cowan's stomatal parameter (not used in this version of SCOPE) 
 REAL                                      :: Jmo     ! Jmax : maximum electron transport rate table  (not used in this version of scope)
 
+REAL                                      :: avovc   ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
+REAL                                      :: ardvc   ! ratio of Rd to Vcmax (equivalent to Rdparam in original SCOPE model)
 
 !3. Fluorescence
 REAL                                      :: fqe     ! Fluorescence quantum yield efficiency at photosystem level
@@ -414,6 +416,9 @@ Kpc          = 4.0                         !% [] rate constant for photochemisty
 atheta       = 0.8
 lam          = 750.                        ![]    Cowan's stomatal parameter (not used in this version of SCOPE)
                                            ! TO CLARIFY THIS .....
+avovc        = 0.22                        ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
+ardvc        = 0.015                       ! ratio of Rd to Vcmax (equivalent to Rdparam but an input parameter from paramlist)
+
 !3. Fluorescence 
 fqe          = 0.02                        ! Fluorescence quantum yield efficiency at photosystem level  
 prat         = 1.                       ! %  PSI/PSII peak ratio

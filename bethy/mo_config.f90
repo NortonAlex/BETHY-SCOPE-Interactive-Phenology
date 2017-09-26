@@ -11,7 +11,7 @@ module mo_config
   IMPLICIT NONE
   INTEGER,DIMENSION(ng,nv) :: vtype,help
   REAL,DIMENSION(ng,nv) :: vfrac
-  INTEGER :: i1,i2,vps             ! vps=number of veg-points for fluo to loop over
+!  INTEGER :: i1,i2,vps             ! vps=number of veg-points for fluo to loop over
   INTEGER, DIMENSION(:), ALLOCATABLE :: block_vps    ! number of veg-points for fluo to loop over 
 
 contains

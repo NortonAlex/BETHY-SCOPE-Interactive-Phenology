@@ -376,7 +376,7 @@ END SUBROUTINE read_radiation
 
 SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & temp,pres,ea0,Cca,COa,zlai,&
-                  & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
+                  & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,vomf,rdf,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                   & rfluo_diurnal,rgppfluo_diurnal,&
                   & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal)
@@ -395,7 +395,7 @@ USE mo_grid
 ! Fluo 
 USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
                       & spectral_res,tts,tto,Rin,Rli,Ta,pa,ea,LAI,Vcmo,Oa,Cab,option, &
-                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe, &
+                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe,avovc,ardvc, &
                       & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
@@ -406,6 +406,7 @@ USE mo_rtmo, ONLY : rtmo
 USE chemical, ONLY : biochemical_faq, biochemical
 USE mo_rtmf, ONLY : rtmf  
 USE mo_vegetation, ONLY : Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr
+                      
 USE mo_config, ONLY : vps,block_vps
 
 !% Input:
@@ -480,6 +481,8 @@ REAL, DIMENSION(vp), INTENT(in)            :: EC, EO, EV, ER, EK  ! Energy activ
 REAL, DIMENSION(vp), INTENT(in)            :: kc0, ko0
 REAL, DIMENSION(vp), INTENT(in)            :: vm                  ! Vcmax for the various PFTs
 REAL, DIMENSION(vp), INTENT(in)            :: jmf                 ! jmf --> ajv
+REAL, DIMENSION(vp), INTENT(in)            :: vomf                ! Vomax as fraction of Vcmax
+REAL, DIMENSION(vp), INTENT(in)            :: rdf                 ! Rd as fraction of Vcmax
 
 ! PFT characteristics
 REAL, DIMENSION(vp), INTENT(in)            :: zlai       ! LAI data
@@ -598,7 +601,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
-!$OMP& SHARED (rpar_diurnal,vps,block_vps) &
+!$OMP& SHARED (rpar_diurnal,vps,block_vps,vomf,rdf) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P)
@@ -691,6 +694,8 @@ pft_dominant_cell = -999
            frac1 = 0. 
            LIDFa = 0.
            LIDFb = 0.
+           avovc = -1.
+           ardvc = -1.
 
      ALLOCATE(MfI(size(wlf),size(wle)))
      ALLOCATE(MbI(size(wlf),size(wle)))
@@ -715,6 +720,9 @@ pft_dominant_cell = -999
              Vcmo = vm(jl)*1.e6
             frac1 = frac(jl)
               Cab = Chl(jl)
+
+            avovc = vomf(jl)    ! ratio of Vomax to Vcmax
+            ardvc = rdf(jl)     ! ratio of Rd to Vcmax
 
 ! Concentration of CO2 and O2 in the atmosphere, i.e, at the boundary of the
 ! leaves
@@ -932,10 +940,10 @@ ENDIF
 
 ! Collatz used or GPP 
 ! Shaded leaves 
-CALL biochemical(nlh,Pnhc*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agh,Ah,Fh,rcwh,Cih)
+CALL biochemical(nlh,Pnhc*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agh,Ah,Fh,rcwh,Cih,avovc,ardvc)
 
 ! Sunlit leaves 
-CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu)
+CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc)
 
 
 ! 3. Calculation of the fluorescence 

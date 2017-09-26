@@ -177,7 +177,7 @@ print *, 'tdays =', tdays
 
         ! Option to use monthly prescribed LAI.
         !  - lai is forced for simulated period, not spin-up.
-        IF (rday > sdays) lai = prescribed_lai(:,rmonth)
+        !IF (rday > sdays) lai = prescribed_lai(:,rmonth)
 
         IF (rday == idayint(rday)) THEN
            ryear0 = outyear
@@ -258,7 +258,7 @@ print *, 'tdays =', tdays
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX, & 
                                 & zlai, &
-                                & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,&
+                                & jmf,vms,EC,EO,EV,ER,EK,kc0s,ko0s,vomf,rdf,&
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                                 & rfluo_diurnal,rgppfluo_diurnal,&
                                 & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal)             

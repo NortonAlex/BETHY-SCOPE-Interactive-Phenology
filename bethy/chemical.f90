@@ -74,7 +74,7 @@ IMPLICIT NONE
 
 CONTAINS 
 
-SUBROUTINE biochemical(npts,Q,T1,Csi,ea,Oa,p,akc,ako,Vcmo,option,Ag,A,eta,rcw,Ci)
+SUBROUTINE biochemical(npts,Q,T1,Csi,ea,Oa,p,akc,ako,Vcmo,option,Ag,A,eta,rcw,Ci,avovc,ardvc)
 
 USE fluo_param, ONLY : Rdparam,Tparams,m,tempcor,stressfactor
 USE fluo_param, ONLY :  Kcopt, Koopt,Kf,Kd,Kpc,atheta
@@ -88,12 +88,12 @@ REAL, DIMENSION(npts),INTENT(IN)     :: Q,T1
 REAL, DIMENSION(npts), INTENT(IN)    :: Csi
 INTEGER ,INTENT(IN)                  :: option
 REAL, INTENT(IN)                     :: akc,ako
-
+REAL, INTENT(IN)                     :: avovc,ardvc      ! avovc = ratio of Vomax to Vcmax; ardvc = ratio of Rd to Vcmax
 
 ! Output variables 
 REAL, DIMENSION(npts),INTENT(OUT)    :: A,eta,rcw, Ag
 REAL, DIMENSION(npts),INTENT(OUT)    :: Ci
-REAL, DIMENSION(npts)                :: qE,Vcmax
+REAL, DIMENSION(npts)                :: qE,Vcmax,Vomax
 
 ! Local variables 
 REAL, DIMENSION(npts)                :: Cs, O,eb
@@ -222,7 +222,8 @@ Kc          = Kcopt1 * 2.1**qt
 Ko          = Koopt1 * 1.2**qt
 kp          = kpopt*1.8**qt
 
-Rd          = Rdparam * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
+!Rd          = Rdparam * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
+Rd          = ardvc * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 
 !print*, ' Kc ', minval(Kc), maxval(Kc), sum(Kc) 
 !print*, ' Ko ', minval(Ko), minval(Ko), maxval(Ko) 
@@ -233,12 +234,14 @@ Rd          = Rdparam * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 ! C4 plant 
  IF (C4) THEN 
  Vcmax   =   Vcmo * 2.1**qt/(TL*TH) * 0.5
+ Vomax   =   avovc * Vcmax    ! Vomax not used in Collatz
  ELSE 
 ! C3 plant
  Vcmax   =   Vcmo * 2.1**qt/TH * 0.5
+ Vomax   =   avovc * Vcmax
  ENDIF
 
-!print*, ' Vcmax ', minval(Vcmax), minval(Vcmax), maxval(Vcmax) 
+!print*, ' Vcmax ', minval(Vcmax), minval(Vcmax), maxval(Vcmax)
 
 spfy        = 2600 * 0.75 **qt ! % This is, in theory, Vcmax/Vomax.*Ko./Kc, but used as a separate parameter
 

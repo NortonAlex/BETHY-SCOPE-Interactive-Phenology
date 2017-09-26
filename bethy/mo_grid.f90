@@ -13,10 +13,15 @@ MODULE mo_grid
 !!MS$  INTEGER :: nlon = 360
 !!MS$  INTEGER :: nlat = 180
 
- INTEGER, PARAMETER :: ng = 3462   ! 2 deg reg grid
- INTEGER :: nlon = 180
- INTEGER :: nlat = 90
+!#ifdef hires
+! INTEGER, PARAMETER :: ng = 3462   ! 2 deg reg grid
+! INTEGER :: nlon = 180
+! INTEGER :: nlat = 90
+!#endif hires
 
+ INTEGER, PARAMETER :: ng = 170   ! TM2 grid
+ INTEGER :: nlon = 36
+ INTEGER :: nlat = 24
 
 
 ! ANorton 12-2014 For fluorescence calculation
@@ -38,7 +43,7 @@ MODULE mo_grid
 
 ! Block parallelization split per veg-points
 
-!  INTEGER   :: i1,i2      !!,iblock=-1,nblocks=-1
+  INTEGER   :: i1,i2,vps,iblock=-1,nblocks=-1
 
 !cccc elev     elevation [m]
 !cccc vg       vegetation types per gridcell

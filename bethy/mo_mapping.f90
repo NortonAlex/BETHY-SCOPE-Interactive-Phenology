@@ -248,6 +248,26 @@ SUBROUTINE mapping(par,nvar,nxp, scale)
      ipar = paramap(ileafwidth,i)
      leafwidth_arr (i) = par(ipar)
 
+     ! vms (Vcmax for SCOPE only)
+     ipar = paramap(ivms,i)
+     vms (i) = par(ipar)
+
+     ! kc0s (kc0 for SCOPE only)
+     ipar = paramap(ikc0s,i)
+     kc0s (i) = par(ipar)
+
+     ! ko0s (ko0 for SCOPE only)
+     ipar = paramap(iko0s,i)
+     ko0s (i) = par(ipar)
+
+     ! vomf (Vomax as fraction of Vcmax, for SCOPE only)
+     ipar = paramap(ivomf,i)
+     vomf (i) = par(ipar)
+
+     ! rdf (Rd as fraction of Vcmax, for SCOPE only)
+     ipar = paramap(irdf,i)
+     rdf (i) = par(ipar)
+
      ! pks
 !     ipar = paramap(ipks,i)
 !     pks(i) = par(ipar)
