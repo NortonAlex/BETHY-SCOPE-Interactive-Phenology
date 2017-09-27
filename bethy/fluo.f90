@@ -754,7 +754,7 @@ if (zlai(jl).gt.LAI_max) LAI_max = zlai(jl)
 ! option = 0: C3 plant    1: C4 plant
                option = 0       ! it is put to 0 for C3 plant
 if (pft == 10) option = 1  ! C4 crop plant only
-if (pft == 13) option = 1  ! C3 crop plant only
+!if (pft == 13) option = 1  ! C3 crop plant only
 
 
 ! Concentration of the fluorescence of the leaves We assume this for the moment
