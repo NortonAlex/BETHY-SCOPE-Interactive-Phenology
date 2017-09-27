@@ -243,11 +243,11 @@ Rd          = ardvc * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 
 ! C4 plant 
  IF (C4) THEN 
- Vcmax   =   Vcmo * 2.1**qt/(TL*TH) * 0.5
+ Vcmax   =   Vcmo * 2.1**qt/(TL*TH) * stressfactor
  Vomax   =   avovc * Vcmax    ! Vomax not used in Collatz
  ELSE 
 ! C3 plant
- Vcmax   =   Vcmo * 2.1**qt/TH * 0.5
+ Vcmax   =   Vcmo * 2.1**qt/TH * stressfactor
  Vomax   =   avovc * Vcmax
  ENDIF
 

@@ -406,7 +406,7 @@ Tparams      = [0.2, 0.3,281., 308., 328.] ! See PFT.xls file. These are five pa
 
 tempcor      = 1                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
                                            ! applied.
-stressfactor = 0.5                          !  []   optional input: stress factor to reduce Vcmax (for example
+stressfactor = 1.                          !  []   optional input: stress factor to reduce Vcmax (for example
                                            !  soil moisture, leaf age). Default value =  1.
 Kcopt        = 350                         !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 Koopt        = 450                         !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
