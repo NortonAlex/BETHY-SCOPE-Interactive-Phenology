@@ -284,7 +284,7 @@ RH = eb/es
 !print*, ' RH ', minval(RH), maxval(RH), sum(RH) 
 
 !Ci          = max(.2*Cs,Cs.*(1-1.6./(m.*RH)))
-Ci          = max(.2*Cs,Cs*(1.-1.6/(m*RH)))
+!Ci          = max(.2*Cs,Cs*(1.-1.6/(m*RH)))
 
 !print*, ' O ', minval(O), maxval(O),sum(O)
 !print*, ' Ci ', minval(Ci), maxval(Ci), sum(Ci) 
@@ -292,16 +292,18 @@ Ci          = max(.2*Cs,Cs*(1.-1.6/(m*RH)))
 
 
 IF (C4) THEN                
-! C4 plant 
+! C4 plant
+        Ci          = max(.1*Cs,Cs*(1.-1.6/(m*RH))) 
         Vc          = Vcmax
         Vs          = kp*Ci
         effcon      = 1/6.                   ! % Berry and Farquhar (1978): 1/0.167
 ELSE 
 ! C3 plant
+        Ci          = max(.3*Cs,Cs*(1.-1.6/(m*RH)))
         Vc          = Vcmax*(Ci-gam)/((Kc * (1.+O/Ko)) + Ci)
         Vs          = Vcmo/2.* 1.8**qt    
-        effcon      = 1./(4.5+10.5*gam/Ci)! ; % Von Caemmerer and Farquhar (1981)
-
+        !effcon      = 1./(4.5+10.5*gam/Ci)! ; % Von Caemmerer and Farquhar (1981)
+        effcon      = 0.2
 !print*, ' C3 ' 
 ENDIF 
 
