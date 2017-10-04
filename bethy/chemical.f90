@@ -253,7 +253,9 @@ Rd          = ardvc * Vcmo * 1.8**qt/(1+exp(1.3*(T-Trdm)))
 
 !print*, ' Vcmax ', minval(Vcmax), minval(Vcmax), maxval(Vcmax)
 
-spfy        = 2600 * 0.75 **qt ! % This is, in theory, Vcmax/Vomax.*Ko./Kc, but used as a separate parameter
+! calculate relative specificity of Rubisco 
+!spfy        = 2600 * 0.75 **qt ! % This is, in theory, Vcmax/Vomax.*Ko./Kc, but used as a separate parameter
+spfy        = Vcmax/Vomax * Ko/Kc  ! We calculate this now, as avovc affects it 
 
 !print*, ' spfy ', minval(spfy), minval(spfy), maxval(spfy) 
 
