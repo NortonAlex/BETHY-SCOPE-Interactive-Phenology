@@ -8,7 +8,7 @@
  inkind       = 3
  trans        = 0
  dtime        = 60
- dayint       = 10
+ dayint       = 32
  outtime      = 1
  grdwid       = 10.0
  lonw         = -180.0
@@ -19,7 +19,7 @@
  rflg         = 0
  wiflg        = 0
  vflg         = 0
- param_file   = './control_bethy/112_scope_paramslist'
+ param_file   = './control_bethy/112_scope_paramslist_deltax'
  mapping_file_global = './control_bethy/lores_40params_scope_npars112.map'
  datfile      = './control_bethy/gv41_data'
  grid_file    = './control_bethy/bethy_loresgrid3veg_faparratio.nc'
