@@ -423,7 +423,7 @@ Rdparam      = 0.015                       ! Respiration  = Rdparam * Vcmax
 Tparams      = [0.2, 0.3,281., 308., 328.] ! See PFT.xls file. These are five parameters specifying the temperature response 
                                            ! TO CLARIFY THIS .....
 
-tempcor      = 0                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
+tempcor      = 1                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
                                            ! applied.
 stressfactor = 1.                          !  []   optional input: stress factor to reduce Vcmax (for example
                                            !  soil moisture, leaf age). Default value =  1.
