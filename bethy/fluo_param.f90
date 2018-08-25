@@ -218,9 +218,9 @@ REAL                                      ::  stressfactor !  []   optional inpu
 
 REAL                                      :: Kcopt   !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 REAL                                      :: Koopt   !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
-REAL                                      :: Kf      !% [] rate constant for fluorescence
-REAL                                      :: Kd      !% [] rate constant for thermal deactivation at Fm
-REAL                                      :: Kpc     !% [] rate constant for photochemisty
+REAL                                      :: Kf0     !% [] rate constant for fluorescence
+REAL                                      :: Kd0     !% [] rate constant for thermal deactivation at Fm
+REAL                                      :: Kpc0    !% [] rate constant for photochemisty
 REAL                                      :: atheta 
 REAL                                      :: lam     ![]    Cowan's stomatal parameter (not used in this version of SCOPE) 
 REAL                                      :: Jmo     ! Jmax : maximum electron transport rate table  (not used in this version of scope)
@@ -421,9 +421,9 @@ stressfactor = 1.                          !  []   optional input: stress factor
                                            !  soil moisture, leaf age). Default value =  1.
 Kcopt        = 350                         !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 Koopt        = 450                         !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
-Kf           = 0.05                        !% [] rate constant for fluorescence
-Kd           = 0.95                        !% [] rate constant for thermal deactivation at Fm
-Kpc          = 4.0                         !% [] rate constant for photochemisty
+Kf0          = 0.05                        !% [] rate constant for fluorescence
+Kd0          = 0.95                        !% [] rate constant for thermal deactivation at Fm
+Kpc0         = 4.0                         !% [] rate constant for photochemisty
 atheta       = 0.8
 lam          = 750.                        ![]    Cowan's stomatal parameter (not used in this version of SCOPE)
 
