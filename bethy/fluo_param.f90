@@ -360,7 +360,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
 CONTAINS 
 
-SUBROUTINE initparam 
+SUBROUTINE fluo_initparam 
 
 IMPLICIT NONE 
 
@@ -380,6 +380,14 @@ INTEGER                              :: i,j
 INTEGER, PARAMETER                   :: inunit = 2
 
 INTEGER                              :: ireg 
+
+!Fluspect output
+REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
+REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
+REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
+
+!Leafangles output
+REAL, ALLOCATABLE, DIMENSION(:)      :: lidf
 
 ! ---------------------------------------------------------------------
 ! Now we assign the default values of these parameters 
@@ -523,7 +531,8 @@ gcmin           = 1E-6                    ! %[m s-1]            minimum stomatal
                                           ! %                   ... this parameter is used to avoid instability
                                                                     
 ! File MODTRAN for default  standard atmosphere
-atmos_file = trim(path_atmos_file)//'FLEX-S3_std.atm'
+modtran_std = trim(path_atmos_file)//'FLEX-S3_std.atm'
+atmos_file = modtran_std
 
 ! File for tropics
 modtran_trop = trim(path_atmos_file)//'FLEX-S3_Trop.atm'
@@ -588,7 +597,8 @@ CALL define_bands
 !print*,'spectral_end ', spectral_end
 !print*, ' spectral_res ', spectral_res
 
-CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
+jatmos_file = 1
+CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
 !END DO 
@@ -676,6 +686,11 @@ nwl = nwlS
 IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(nwlS))
 wl =  wlS
 
+IF (.NOT.ALLOCATED(MfI)) ALLOCATE(MfI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbI)) ALLOCATE(MbI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
+
 IF (.NOT.ALLOCATED(rho)) ALLOCATE(rho(nwl))
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(tau(nwl))
 IF (.NOT.ALLOCATED(rs)) ALLOCATE(rs(nwl))
@@ -695,7 +710,7 @@ leafbio(7)  = fqe2
 leafbio(8)  = rho_thermal
 leafbio(9)  = tau_thermal
 
-CALL  fluspect(leafbio)
+CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel)
 
 !print*, 'size wlT ', size(wlT)  
 !print*, 'size wlP ', size(wlP)  
@@ -766,7 +781,19 @@ CALL field_allocate
 !print*, ' apres field_allocate'
 CALL fieldlayer_allocate 
 
-END SUBROUTINE initparam 
+!Deallocate fluspect output
+DEALLOCATE(MfI)
+DEALLOCATE(MbI)
+DEALLOCATE(MfII)
+DEALLOCATE(MbII)
+DEALLOCATE(rho)
+DEALLOCATE(tau)
+DEALLOCATE(rs)
+DEALLOCATE(kClrel)
+!Deallocate leafangles output
+DEALLOCATE(lidf)
+
+END SUBROUTINE fluo_initparam 
 
 SUBROUTINE field_allocate
 IMPLICIT NONE
