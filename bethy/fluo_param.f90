@@ -326,18 +326,18 @@ CHARACTER(len=80)                        :: line
 
 ! 10. Files and related fields 
 ! 10.1 Leaf file
-CHARACTER(len=80)                        :: leaf_file = '../input/fluspect_parameters/optipar_fluspect.txt'  !
+CHARACTER(len=80)                        :: leaf_file = './input/scope/fluspect_parameters/optipar_fluspect.txt'  !
 INTEGER                                  :: nopti ! lines in the optipar file with
 REAL,  ALLOCATABLE,DIMENSION(:,:)        :: opticoef
 
 
 ! 10.2  Soil file
-CHARACTER(len=80)                        :: soil_file = '../input/soil_spectrum/soilnew.txt' ! soil file file
+CHARACTER(len=80)                        :: soil_file = './input/scope/soil_spectrum/soilnew.txt' ! soil file file
 INTEGER                                  :: nsoil 
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: rsfile
 
 ! 10.3 MODTRAN output spectrum (used as input for SCOPE)
-CHARACTER(len=80)                        :: path_atmos_file = '../input/radiationdata/'
+CHARACTER(len=80)                        :: path_atmos_file = './input/scope/radiationdata/'
 CHARACTER(len=80)                        :: atmos_file
 CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
 CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
@@ -347,7 +347,7 @@ REAL, ALLOCATABLE,DIMENSION(:,:)         :: atmoM
 
 
 ! 10.4 observation angles in case of BRDF calculation
-CHARACTER(len=80)                        :: brdf_file = '../input/directional/brdf_angles2.dat'
+CHARACTER(len=80)                        :: brdf_file = './input/scope/directional/brdf_angles2.dat'
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
