@@ -78,7 +78,7 @@ MODULE fluo_param
 !    return    
 !end
 
-USE fluo_func
+USE bio_func
 
 IMPLICIT NONE 
 
@@ -97,10 +97,6 @@ IMPLICIT NONE
 !resolution
 !global psi tto tto_ psi_ noa 
 
-INTEGER, PARAMETER                       :: natmosfiles = 4
-REAL, ALLOCATABLE, DIMENSION(:,:,:)      :: xdata
-INTEGER                                  :: nwM
-
 INTEGER                                  :: nlazi,nli,noa,nwl,nl
 INTEGER                                  :: nwlfi,nwlfo,nwlt 
 INTEGER                                  :: nwlP,nwlF,nwlS,nwlO,nwlE,nwlPAR
@@ -113,12 +109,12 @@ REAL, ALLOCATABLE, DIMENSION(:)          :: wl,resolution,xlay
 REAL, ALLOCATABLE, DIMENSION(:)          :: psi_,tto_
 REAL, ALLOCATABLE, DIMENSION(:)          :: fEsun, fEsky
 REAL, ALLOCATABLE, DIMENSION(:)          :: wlfi,wlfo
-!REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
-REAL, ALLOCATABLE, DIMENSION(:)          :: tran, refl 
-!REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
+REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
+REAL, ALLOCATABLE, DIMENSION(:)          :: kChlrel, tran, refl 
+REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
 REAL, ALLOCATABLE, DIMENSION(:)          :: prm
-!REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfI, MbI
-!REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfII, MbII
+REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfI, MbI
+REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: prm_
 
 INTEGER, ALLOCATABLE, DIMENSION(:)       :: iwlo,iwlt, litab,lazitab
@@ -126,7 +122,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:)       :: iwlfi,iwlfo
 INTEGER, ALLOCATABLE, DIMENSION(:)       :: IwlP
 
 REAL                                     :: dx
-REAL                                     :: gbs 
+REAL                                     :: gbs,w 
 REAL                                     :: Vcmax_ref ! %[umol/m2/s]        maximum carboxylation capacity
 REAL                                     :: Jmax_ref  ! %[umol/m2/s]        maximum electron transport rate (~100;120;270)
 
@@ -191,7 +187,7 @@ REAL                                     :: N      ! %  thickness parameter (~1.
 
 !%1.2 leaf parameters
 REAL                                     :: f_b    ! %   fraction of brown material
-REAL, DIMENSION(8)                       :: leafbio 
+REAL, DIMENSION(9)                       :: leafbio 
 
 !%1.2. brown leaves (currently not used)
 REAL                                     :: Cab_b  ! %[ug/cm2] Concentration chlorophyl (~60)
@@ -222,20 +218,36 @@ REAL                                      ::  stressfactor !  []   optional inpu
 
 REAL                                      :: Kcopt   !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 REAL                                      :: Koopt   !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
-REAL                                      :: Kf0     !% [] rate constant for fluorescence
-REAL                                      :: Kd0     !% [] rate constant for thermal deactivation at Fm (at 25oC) (scope v1.60)
-REAL                                      :: Kpc0    !% [] rate constant for photochemisty
+REAL                                      :: Kf      !% [] rate constant for fluorescence
+REAL                                      :: Kd      !% [] rate constant for thermal deactivation at Fm
+REAL                                      :: Kpc     !% [] rate constant for photochemisty
 REAL                                      :: atheta 
 REAL                                      :: lam     ![]    Cowan's stomatal parameter (not used in this version of SCOPE) 
 REAL                                      :: Jmo     ! Jmax : maximum electron transport rate table  (not used in this version of scope)
 
-REAL                                      :: avovc   ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
-REAL                                      :: ardvc   ! ratio of Rd to Vcmax (equivalent to Rdparam in original SCOPE model)
+
+
+INTEGER                                   ::  model_choice    ! Fluorescence model_choice integer with
+                                       !  0: with sustained quenching after
+                                       !  drought, as in Lee et al. (2013)
+                                       !  1: calibrated for cotton data set: no
+                                       !  drought
+!Leaf biochemical (Magnani model) 
+REAL                                       :: Tyear  ! % [oC] mean annual temperature
+REAL                                       :: beta   ! % [] fraction of photons partitioned to PSII !(0.507 for C3, 0.4 for C4; Yin et al. 2006; Yin and Struik 2012)
+REAL                                       :: NPQs   ! !% NPQs   % [s-1] rate constant of sustained thermal !dissipation, normalized to (kf+kD) (=kNPQs'; Porcar-Castell 2011)  
+REAL                                       :: qLs   !  !% qLs  % [] fraction of functional reaction centres !(Porcar-Castell 2011)
+ 
 
 !3. Fluorescence
-REAL                                      :: fqe     ! Fluorescence quantum yield efficiency at photosystem level
+REAL                                      :: fqe1     ! Fluorescence quantum yield efficiency at photosystem level
+REAL                                      :: fqe2     ! Fluorescence quantum yield efficiency at photosystem level
 REAL                                      :: prat    ! %  PSI/PSII peak ratio
 REAL                                      :: gcmin   ! %[m s-1] minimum stomatal conductance (if stomata are closed).
+
+REAL                                      :: freq_Fsmin                         ! Minimum frequeency to compute Fs
+REAL                                      :: Freq_Fsmax                         ! Maximum frequency to compute Fs
+
 
 
 !4. Soil
@@ -302,44 +314,53 @@ REAL                                      :: Wc_Tc        ! %   Weight coefficie
 REAL                                      :: freq_sat     ! in nm 
 INTEGER                                   :: ifreq_sat    ! indice of this frequency in the wave length wlF 
 
+REAL, ALLOCATABLE, DIMENSION(:)           :: list_freq_sat 
+INTEGER, ALLOCATABLE, DIMENSION(:)        :: ilist_freq_sat 
+
+INTEGER                                   :: nfreq       ! number of frequency
+REAL                                      :: dfreq       ! step of frequency
+REAL                                      :: freq0     ! Start of the calcualtion
+
+
 CHARACTER(len=80)                        :: line
 
 ! 10. Files and related fields 
 ! 10.1 Leaf file
-CHARACTER(len=80)                        :: leaf_file = './input/scope/fluspect_parameters/optipar_fluspect.txt'  !
+CHARACTER(len=80)                        :: leaf_file = '../input/fluspect_parameters/optipar_fluspect.txt'  !
 INTEGER                                  :: nopti ! lines in the optipar file with
 REAL,  ALLOCATABLE,DIMENSION(:,:)        :: opticoef
 
 
 ! 10.2  Soil file
-CHARACTER(len=80)                        :: soil_file = './input/scope/soil_spectrum/soilnew.txt' ! soil file file
+CHARACTER(len=80)                        :: soil_file = '../input/soil_spectrum/soilnew.txt' ! soil file file
 INTEGER                                  :: nsoil 
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: rsfile
 
 ! 10.3 MODTRAN output spectrum (used as input for SCOPE)
-CHARACTER(len=80)                        :: path_atmos_file = './input/scope/radiationdata/'
+CHARACTER(len=80)                        :: path_atmos_file = '../input/radiationdata/'
 CHARACTER(len=80)                        :: atmos_file
-CHARACTER(len=80)                        :: modtran_std   ! The atmosphere files, std for standard atmosphere
-CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
-CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
-CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics 
+CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
+CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
+CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
 
 REAL, ALLOCATABLE,DIMENSION(:,:)         :: atmoM
-INTEGER                                  :: jatmos_file
+
 
 ! 10.4 observation angles in case of BRDF calculation
-CHARACTER(len=80)                        :: brdf_file = './input/scope/directional/brdf_angles2.dat'
+CHARACTER(len=80)                        :: brdf_file = '../input/directional/brdf_angles2.dat'
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
-!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl,atmoM)
+
+
+
 
 ! ------------------------------------------------------------------------------------------------
 
 
 CONTAINS 
 
-SUBROUTINE fluo_initparam 
+SUBROUTINE initparam 
 
 IMPLICIT NONE 
 
@@ -360,22 +381,12 @@ INTEGER, PARAMETER                   :: inunit = 2
 
 INTEGER                              :: ireg 
 
-!Fluspect output
-REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
-REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
-REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
-
-!Leafangles output
-REAL, ALLOCATABLE, DIMENSION(:)      :: lidf
-
-print*,'In subroutine: fluo_initparam'
-
 ! ---------------------------------------------------------------------
 ! Now we assign the default values of these parameters 
 
 !1. PROSPECT 
 !%1.1 green leaves
-Cab          = 10.00                       ! %[ug/cm2] Chorophyl AB content (~60)
+Cab          = 80.00                       ! %[ug/cm2] Chorophyl AB content (~60)
 Cdm          =  0.012                      ! %[g/cm2]  Dry matter content (~0.012;0.07)
 Cw           =  0.009                      ! %[cm]     Leaf water equivalent laye r(~0.009)
 Csm          =  0.0                        ! %         Senescent material fraction (~0.0)
@@ -394,7 +405,7 @@ rho_thermal  = 0.01                        ! % Broadband thermal reflectance
 tau_thermal  = 0.01                        ! % Broadband thermal translisttance
 
 ! 2. Leaf biochemical 
-Vcmo         = 30                          ! (um m-2 s) Maximum carboxylation capacity (at optimum temperature)  
+Vcmo         = 60                          ! (um m-2 s) Maximum carboxylation capacity (at optimum temperature)  
 Jmo          = 2.*Vcmo                     ! Jmax : maximum electron transport rate table  (not used in this version of scope) 
 m            = 8                           ! Ball-Berry stomatal conductance parameter 
 option       = 0                           ! Photoochemicl pathway : 0=C3, 1=C4  
@@ -404,24 +415,42 @@ Rdparam      = 0.015                       ! Respiration  = Rdparam * Vcmax
 Tparams      = [0.2, 0.3,281., 308., 328.] ! See PFT.xls file. These are five parameters specifying the temperature response 
                                            ! TO CLARIFY THIS .....
 
-tempcor      = 1                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
+tempcor      = 0                           ! [] boolean (0 or 1) whether or not temperature correction to Vcmax has to be
                                            ! applied.
 stressfactor = 1.                          !  []   optional input: stress factor to reduce Vcmax (for example
                                            !  soil moisture, leaf age). Default value =  1.
 Kcopt        = 350                         !% [ubar] kinetic coefficient for CO2 (Von Caemmerer and Furbank, 1999)
 Koopt        = 450                         !% [mbar] kinetic coeeficient for  O2 (Von Caemmerer and Furbank, 1999)
-Kf0          = 0.05                        !% [] rate constant for fluorescence
-Kd0          = 0.8738                      !% [] rate constant for thermal deactivation at Fm (at 25oc) (scope v1.60)
-Kpc0         = 4.0                         !% [] rate constant for photochemisty
+Kf           = 0.05                        !% [] rate constant for fluorescence
+Kd           = 0.95                        !% [] rate constant for thermal deactivation at Fm
+Kpc          = 4.0                         !% [] rate constant for photochemisty
 atheta       = 0.8
 lam          = 750.                        ![]    Cowan's stomatal parameter (not used in this version of SCOPE)
-                                           ! TO CLARIFY THIS .....
-avovc        = 0.22                        ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
-ardvc        = 0.015                       ! ratio of Rd to Vcmax (equivalent to Rdparam but an input parameter from paramlist)
 
+model_choice = 0                       ! Fluorescence model_choice integer with
+                                       !  0: with sustained quenching after
+                                       !  drought, as in Lee et al. (2013)
+                                       !  1: calibrated for cotton data set: no
+                                       !  drought
+!Leaf biochemical (Magnani model)
+ Tyear    =   15.                      ! % [oC] mean annual temperature
+ beta     = 0.507                      ! % [] fraction of photons partitioned to PSII !(0.507 for C3, 0.4 for C4; Yin et al. 2006; Yin and Struik 2012)
+ NPQs     = 0.                         ! !% NPQs   % [s-1] rate constant of sustained thermal !dissipation, normalized to (kf+kD) (=kNPQs'; Porcar-Castell 2011)
+ qLs      = 1.                         !  !% qLs  % [] fraction of functional reaction centres !(Porcar-Castell 2011)
+
+                                           ! TO CLARIFY THIS .....
 !3. Fluorescence 
-fqe          = 0.02                        ! Fluorescence quantum yield efficiency at photosystem level  
-prat         = 1.                       ! %  PSI/PSII peak ratio
+fqe2          = 0.02                     ! Fluorescence quantum yield efficiency at photosystem level  
+fqe1          = fqe2/5.                  ! Fluorescence quantum yield efficiency at photosystem level  
+prat         = 1.                        ! %  PSI/PSII peak ratio
+
+! Here we can choose the range of frequency we want to process  --> 640-850  
+!freq_Fsmin   = 755.                      ! Minimum frequeency to compute Fs
+!Freq_Fsmax   = 755.                      ! Maximum frequency to compute Fs 
+
+freq_Fsmin   = 640.                      ! Minimum frequeency to compute Fs
+Freq_Fsmax   = 850.                      ! Maximum frequency to compute Fs
+
 
 !4. Soil 
 spectrum     = 1                           ! Spectrum number (column in the data base soil_file)
@@ -468,7 +497,7 @@ SoilHeatMethod =1
 ! 8. Angles 
 tts          = 30.                         ! (deg) Solar zenith angle  
 tto          = 0.                          ! (deg) Observation zenith angle 
-psi          = 0.                          ! (deg) Azimuthal difference between solar and observations angles 
+psi          = 90.                          ! (deg) Azimuthal difference between solar and observations angles 
 
 ! 
 !%9. Energy balance 
@@ -493,25 +522,27 @@ Jmax_ref        = 2.5*Vcmax_ref           ! %[umol/m2/s]        maximum electron
 gcmin           = 1E-6                    ! %[m s-1]            minimum stomatal conductance (if stomata are closed). 
                                           ! %                   ... this parameter is used to avoid instability
                                                                     
-! File MODTRAN for default  standard atmosphere 
-!atmos_file = trim(path_atmos_file)//'FLEX-S3_std.atm'
-modtran_std = trim(path_atmos_file)//'FLEX-S3_std.atm'
-atmos_file = modtran_std
+! File MODTRAN for default  standard atmosphere
+atmos_file = trim(path_atmos_file)//'FLEX-S3_std.atm'
 
-! File for tropics 
+! File for tropics
 modtran_trop = trim(path_atmos_file)//'FLEX-S3_Trop.atm'
 
-! Winter 
+! Winter
 modtran_wint = trim(path_atmos_file)//'FLEX-S3_Wint.atm'
 
-! Summer 
+! Summer
 modtran_sum = trim(path_atmos_file)//'FLEX-S3_Mar.atm'
 
-CALL read_modtran_files
 
-! Here select SIF frequency (nm) to write to output (e.g. SIF retrieval wavelength)
-freq_sat =  757.                      
+! Here GOSAT frequency used for fluo data retrieval in nm  
+freq_sat =  755.                      
+!freq_sat =  740.      ! Zhang et al., 2014                     
 
+! To compute the sensibility of  Fs to the frequency 
+nfreq=31       ! number of frequency 
+dfreq =5       ! step of frequency 
+freq0=650.     ! freq from which we save the fluorescence
 
 ! ============================================================================
 !%% Appendix A. Fixed parameters (not to be changed)
@@ -558,8 +589,7 @@ CALL define_bands
 !print*,'spectral_end ', spectral_end
 !print*, ' spectral_res ', spectral_res
 
-jatmos_file = 1
-CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
+CALL aggreg (atmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 !print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
 !END DO 
@@ -643,22 +673,17 @@ CLOSE(inunit)
 !print*, ' nwlS ', nwlS 
 !print*, ' nwlP ', nwlP 
 !print*, ' nopti ', nopti 
-nwl = nwlS
+nwl = nwlS 
 IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(nwlS))
 wl =  wlS
 
-IF (.NOT.ALLOCATED(MfI)) ALLOCATE(MfI(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MbI)) ALLOCATE(MbI(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
-
-IF (.NOT.ALLOCATED(rho)) ALLOCATE(rho(nwl))
+IF (.NOT.ALLOCATED(tau)) ALLOCATE(rho(nwl))
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(tau(nwl))
 IF (.NOT.ALLOCATED(rs)) ALLOCATE(rs(nwl))
 
 IF (.NOT.ALLOCATED(tran)) ALLOCATE(tran(nwlP))
 IF (.NOT.ALLOCATED(refl)) ALLOCATE(refl(nwlP))
-IF (.NOT.ALLOCATED(kClrel)) ALLOCATE(kClrel(nwlP))
+IF (.NOT.ALLOCATED(kChlrel)) ALLOCATE(kChlrel(nwlP))
 
 
 leafbio(1)  = Cab
@@ -666,11 +691,12 @@ leafbio(2)  = Cdm
 leafbio(3)  = Cw
 leafbio(4)  = Csm
 leafbio(5)  = N
-leafbio(6)  = fqe
-leafbio(7)  = rho_thermal
-leafbio(8)  = tau_thermal
+leafbio(6)  = fqe1                           
+leafbio(7)  = fqe2                            
+leafbio(8)  = rho_thermal
+leafbio(9)  = tau_thermal
 
-CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
+CALL  fluspect(leafbio)
 
 !print*, 'size wlT ', size(wlT)  
 !print*, 'size wlP ', size(wlP)  
@@ -707,17 +733,16 @@ CALL  fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
 
 !% B.2 number of classes, leaf angle distribution, observation angles
 IF (.NOT.ALLOCATED(lidf)) ALLOCATE(lidf(nli))
-CALL leafangles(LIDFa,LIDFb,lidf)
+CALL leafangles(LIDFa,LIDFb)
 
 ! Define layers
 !IF (.NOT.ALLOCATED(xlay)) ALLOCATE(xlay(nl))
 !CALL layers
 !dx     = abs(xlay(2)-xlay(1))                          !  %
 
-!tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
-!psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
-noa    = size(angles(:,1),1)     !  %       Number of Observation Angles 
-!noa    = size(tto_,1)     !  %       Number of Observation Angles 
+tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
+psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
+noa    = size(tto_,1)     !  %       Number of Observation Angles 
 
 !print*, ' noa ', noa 
 
@@ -742,19 +767,7 @@ CALL field_allocate
 !print*, ' apres field_allocate'
 CALL fieldlayer_allocate 
 
-!Deallocate fluspect output
-DEALLOCATE(MfI)
-DEALLOCATE(MbI)
-DEALLOCATE(MfII)
-DEALLOCATE(MbII)
-DEALLOCATE(rho)
-DEALLOCATE(tau)
-DEALLOCATE(rs)
-DEALLOCATE(kClrel)
-!Deallocate leafangles output
-DEALLOCATE(lidf)
-
-END SUBROUTINE fluo_initparam 
+END SUBROUTINE initparam 
 
 SUBROUTINE field_allocate
 IMPLICIT NONE
@@ -763,13 +776,6 @@ IMPLICIT NONE
 ALLOCATE(Eout_(nwl))
 ALLOCATE(Lout_(nwl))
 ALLOCATE(Lo_(nwl))
-
-ALLOCATE(Esun_(nwl))
-ALLOCATE(Esky_(nwl))
-ALLOCATE(fEsuno(nwl))
-ALLOCATE(fEskyo(nwl))
-ALLOCATE(fEsunt(nwl))
-ALLOCATE(fEskyt(nwl))
 
 ! Output from rtmf 
 ALLOCATE(LoF(nwlfo))
@@ -780,6 +786,8 @@ END SUBROUTINE field_allocate
 SUBROUTINE field_deallocate
 IMPLICIT NONE
 DEALLOCATE(Lout_,Eout_,Lo_,LoF,Fhem)
+DEALLOCATE(list_freq_sat)
+DEALLOCATE(ilist_freq_sat)
 END SUBROUTINE field_deallocate
 
 SUBROUTINE fieldlayer_allocate
@@ -792,66 +800,53 @@ ALLOCATE(Pnuc_Cab(nli,nlazi,nl))
 ALLOCATE(Rnhc(nl),Pnhc(nl),Pnhc_Cab(nl))
 ALLOCATE(Eplu_(nl+1,nwl))
 ALLOCATE(Emin_(nl+1,nwl))
-!print*, ' fieldlayer_allocate 0a'
-!ALLOCATE(Ps(nl+1))
-!print*, ' fieldlayer_allocate 0b'
-!ALLOCATE(Po(nl+1))
-!print*, ' fieldlayer_allocate 0c'
-!ALLOCATE(Pso(nl+1))
-!print*, ' fieldlayer_allocate 01 '
-!ALLOCATE(Esun_(nwl))
-!ALLOCATE(Esky_(nwl))
-!ALLOCATE(fEsuno(nwl))
-!ALLOCATE(fEskyo(nwl))
-!ALLOCATE(fEsunt(nwl))
-!ALLOCATE(fEskyt(nwl))
+!print*, ' 0'
+ALLOCATE(Ps(nl+1))
+ALLOCATE(Po(nl+1))
+ALLOCATE(Pso(nl+1))
+!print*, ' 1 '
+ALLOCATE(Esun_(nwl))
+ALLOCATE(Esky_(nwl))
+ALLOCATE(fEsuno(nwl))
+ALLOCATE(fEskyo(nwl))
+ALLOCATE(fEsunt(nwl))
+ALLOCATE(fEskyt(nwl))
 
-!  print*, ' fieldlayer_deallocate 2'
+ ! print*, ' 2'
 ! Output variables from rtmt 
 ALLOCATE(Eplu(nl+1))
 ALLOCATE(Emin(nl+1))
 ALLOCATE(Rnhct(nl))
 ALLOCATE(Rnuct(nli,nlazi,nl))
 
-!  print*, ' fieldlayer_deallocate 3'
+ ! print*, ' 3'
 ! Output from rtmf 
 ALLOCATE(Fiprof(nl+1))
 
-!  print*, ' fieldlayer_deallocate 4'
+  !print*, ' 4'
 ! Other
 ALLOCATE(Rnch(nl))
 ALLOCATE(Rncu(nli,nlazi,nl))
 
 ALLOCATE(Fc(nl))
-ALLOCATE(Ps(nl+1))
-ALLOCATE(Po(nl+1))
-ALLOCATE(Pso(nl+1))
-
 END SUBROUTINE fieldlayer_allocate
 
 
 SUBROUTINE fieldlayer_deallocate
 IMPLICIT NONE
 
-! print*, 'fluo_param 01'
 DEALLOCATE(Rnuc,Pnuc,Pnuc_Cab)
-!print*, 'fluo_param 02'
 DEALLOCATE(Rnhc,Pnhc,Pnhc_Cab)
-!print*, 'fluo_param 03'
 DEALLOCATE(Eplu_,Emin_)
-!DEALLOCATE(Esun_,Esky_)
-!DEALLOCATE(fEsuno,fEskyo)
-!DEALLOCATE(fEsunt,fEskyt)
-!print*, 'fluo_param 04'
+DEALLOCATE(Esun_,Esky_)
+DEALLOCATE(fEsuno,fEskyo)
+DEALLOCATE(fEsunt,fEskyt)
 DEALLOCATE(Ps,Po,Pso)
-! print*, 'fluo_param 05'
 DEALLOCATE(xlay,Fc)
 
-! print*, 'fluo_param 06'
 DEALLOCATE(Eplu,Emin,Rnhct,Rnuct)
 DEALLOCATE(Rnch,Rncu)
 
-! print*, 'fluo_param 07'
 DEALLOCATE(Fiprof)
 
 END SUBROUTINE fieldlayer_deallocate
@@ -884,6 +879,7 @@ REAL                                                    :: minwlF, maxwlF
 
 INTEGER                                                 :: i
 
+INTEGER                                                 :: kf
 
 
 !    % Define spectral regions for SCOPE v_1.40
@@ -922,11 +918,11 @@ INTEGER                                                 :: i
   end do
 !  print*, ' n3 ', n3, ' ntot ', ntot
 
- ntot = n1      ! Just spectral region 1   
+    
 !    spectral.wlS  = [reg1 reg2 reg3];
-IF (.NOT.ALLOCATED(wlS)) ALLOCATE(wlS(ntot))
-IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(ntot))
-    wlS = [reg1]
+IF (.NOT.ALLOCATED(wlS)) ALLOCATE(wlS(ntot-1))
+IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(ntot-1))
+    wlS = [reg1, reg2, reg3]
      wl =  wlS     
 !print*, ' min max wlS ', minval(wlS), maxval(wlS), sum(wlS)
 !print*, ' wlS ', wlS 
@@ -955,17 +951,33 @@ IF (.NOT.ALLOCATED(wlP)) ALLOCATE(wlP(n1))
 !print*, ' wlE ', wlE 
 
 !    spectral.wlF   = 640:1:850;                       % chlorophyll fluorescence in E-F matrix
-  nF = int((757 -755)/1)+1
+  !nF = int((850 -640)/1)+1
+  nF = int((freq_Fsmax -freq_Fsmin)/1)+1
   ntot =  1
  IF (.NOT.ALLOCATED(wlF)) ALLOCATE(wlF(nF))
+
+
+
+IF (.NOT. ALLOCATED(list_freq_sat)) ALLOCATE(list_freq_sat(nfreq))
+IF (.NOT. ALLOCATED(ilist_freq_sat)) ALLOCATE(ilist_freq_sat(nfreq))
+
+  do kf=1,nfreq 
+   list_freq_sat(kf) = freq0+(kf-1)*dfreq 
+
    do k=1,nF
-   wlF(k) = 755.+(k-1)*1.
+   wlF(k) = freq_Fsmin+(k-1)*1.
       ntot = ntot +1
       
 ! Find the indice for the frequency freq_gosat (here 755nm) used for fluo data retrieval
       IF (wlF(k) .EQ. freq_sat) ifreq_sat = k 
+      IF (wlF(k) .EQ.  list_freq_sat(kf)) ilist_freq_sat(kf) = k 
+     
+    end do
 
-  end do
+ end do 
+
+
+
 
 
 !print*, ' nF ', nF, ' ntot ', ntot, ' notot-1 ', ntot-1
@@ -1118,8 +1130,6 @@ INTEGER                          :: i
 REAL                             :: x0
 
 !x  = (-1/nl:-1/nl:-1)   !%create layering of canopy (linear in this case)
-!print*, ' in layers nl ', nl 
-!IF (.NOT. ALLOCATED(xlay)) ALLOCATE(xlay(nl))
 ALLOCATE(xlay(nl))
 x0 = -1./nl
 DO i=1,nl
@@ -1132,7 +1142,7 @@ END SUBROUTINE layers
 
 
 !function [refl,tran,Mb,Mf] = fluspect(leafpar, optipar)
-SUBROUTINE fluspect(leafpar,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
+SUBROUTINE fluspect(leafpar)
 
 !% calculates reflection and transmission of a leaf using FLUSPECT
 !%
@@ -1180,13 +1190,9 @@ REAL, INTENT(IN), DIMENSION(:)                   :: leafpar
 
 ! Output variables 
 !REAL, INTENT(OUT),  DIMENSION(nwl)                :: tran,refl,kChrel
-REAL, DIMENSION(:,:), INTENT(OUT)                  :: MfI, MbI, MfII, MbII
-REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
-REAL, DIMENSION(:), INTENT(OUT)                    :: kClrel
-
 
 ! Local variables 
-REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe
+REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
 REAL, DIMENSION(nwlP)                               :: phiI, phiII, Kall,t1,t2,taut
 REAL, DIMENSION(nwlP)                               :: talf,ralf
@@ -1228,7 +1234,8 @@ REAL, ALLOCATABLE,DIMENSION(:,:)                   :: MfnII,MbnII
 REAL                                               :: wII,wI, eps 
 
 LOGICAL, ALLOCATABLE, DIMENSION(:)                 :: mask
-INTEGER, ALLOCATABLE, DIMENSION(:)                 :: j
+INTEGER, ALLOCATABLE, DIMENSION(:)                 :: j,jj
+INTEGER, ALLOCATABLE, DIMENSION(:)                 :: I_rt, I_a, I_an
 INTEGER, ALLOCATABLE, DIMENSION(:)                 :: Iwle, Iwlf 
 REAL, ALLOCATABLE,DIMENSION(:,:)                   :: Ih,Iv,we,wf
 REAL, ALLOCATABLE,DIMENSION(:,:)                   :: wxe,wxf,wre,wrf
@@ -1255,19 +1262,20 @@ Cdm         = leafpar(2)
 Cw          = leafpar(3)
 Csm         = leafpar(4)
 N           = leafpar(5)
-fqe         = leafpar(6)
-rho_thermal = leafpar(7)
-tau_thermal = leafpar(8)
+fqe1        = leafpar(6)
+fqe2        = leafpar(7)
+rho_thermal = leafpar(8)
+tau_thermal = leafpar(9)
 
 
-!print*, 'fluspect: Cab ', Cab 
-!print*, 'fluspect: Cdm ', Cdm 
-!print*, 'fluspect: Cw ', Cw 
-!print*, 'fluspect: Csm ', Csm 
-!print*, 'fluspect: N ', N 
-!print*, 'fluspect: fqe ', fqe 
-!print*, 'fluspect: rho_thermal ', rho_thermal 
-!print*, 'fluspect: tau_thermal ', tau_thermal 
+!print*, ' Cab ', Cab 
+!print*, ' Cdm ', Cdm 
+!print*, ' Cw ', Cw 
+!print*, ' Csm ', Csm 
+!print*, ' N ', N 
+!print*, ' fqe1 ', fqe1 , ' fqe2 ', fqe2
+!print*, 'rho_thermal ', rho_thermal 
+!print*, 'tau_thermal ', tau_thermal 
 
 !print*, ' size ', size(nr)
 !print*, ' opticoef ',minval(opticoef(2,:)), maxval(opticoef(2,:))
@@ -1279,6 +1287,15 @@ Kw          = opticoef(5,:)
 Ks          = opticoef(6,:)
 phiI        = opticoef(7,:)
 phiII       = opticoef(8,:)
+
+!print*, ' nr ', minval(nr), maxval(nr) 
+!print*, ' Kdm ',minval(Kdm), maxval(Kdm) 
+!print*, ' Kab ', minval(Kab), maxval(Kab) 
+!print*, ' Kw ', minval(Kw), maxval(Kw) 
+!print*, ' Ks ', minval(Ks), maxval(Ks) 
+!print*, ' phiI ', minval(phiI), maxval(phiI) 
+!print*, ' phiII ', minval(phiII),maxval(phiII) 
+
 
 !print*, ' hdjdjdjd ', size(wle), size(wlf), size(wlp)
 !print*, wle 
@@ -1342,8 +1359,8 @@ t2           = Kall**2.*intexp
 taut         = 1. 
 taut(j)      = t1(j)+t2(j)
 
-kClrel     = 0.
-kClrel(j)   = Cab*Kab(j)/(Kall(j)*N)
+kChlrel     = 0.
+kChlrel(j)   = Cab*Kab(j)/(Kall(j)*N)
 
 CALL  calctav(59,nr,talf)
 ralf        = 1.-talf
@@ -1365,12 +1382,20 @@ Ra          = ralf+r21*taut*Taf
 t           = t12*taut*t21/denom
 r           = r12+r21*taut*t
 
+!print*, ' before t ', minval(t), maxval(t), sum(t)
+!print*, ' before r ', minval(r), maxval(r), sum(r)
+
 !% Stokes equations to compute properties of next N-1 layers (N real) Normal case
 D           = sqrt((1.+r+t)*(1.+r-t)*(1.-r+t)*(1.-r-t))
 rq          = r**2
 tq          = t**2
 a           = (1.+rq-tq+D)/(2*r)
 b           = (1.-rq+tq+D)/(2*t)
+!print*, ' D = ', minval(D), maxval(D),sum(D)
+!print*, ' rq = ', minval(rq), maxval(rq),sum(rq)
+!print*, ' tq = ', minval(tq), maxval(tq), sum(tq)
+!print*, ' a = ', minval(a), maxval(a), sum(a)
+!print*, ' b = ', minval(b), maxval(b), sum(b)
 
 bNm1        = b**(N-1.)                 ! %** CHECK
 bN2         = bNm1**2.
@@ -1378,30 +1403,123 @@ a2          = a**2.
 denom       = a2*bN2-1.
 Rsub        = a*(bN2-1.)/denom
 Tsub        = bNm1*(a2-1.)/denom
-s           = r/t
-k           = (a-1.)/(a+1.)*log(b)
-kChl        = kClrel*k
 
- ! %Case of zero absorption
-DEALLOCATE(j,mask)
+!print*, ' a2 ', minval(a2), maxval(a2),sum(a2)
+!print*, ' bNm1 ', minval(bNm1), maxval(bNm1), sum(bNm1)
+!print*, ' denom ', minval(denom), maxval(denom), sum(denom)
+!print*, ' BEFORE Rsub ', minval(Rsub), maxval(Rsub), sum(Rsub)
+!print*, ' Tsub ', minval(Tsub), maxval(Tsub), sum(Tsub)
+
+
+
+s           = r/t    ! Conservative scattering (CS)
+
+!print*, ' s old ', minval(s), maxval(s), sum(s)
+
+
+! Version from V1.53   ---> EK Sept 2014
+!---------------------------------------------
+
+s(j)        = 2.*a(j)/(a(j)**2.-1)*log(b(j))   ! Normal case overwrites CS case 
+
+!print*, ' s new ', minval(s), maxval(s), sum(s)
+
+!print*, 'r+t ', minval(r+t), maxval(r+t), sum(r+t)
+
+
+! Case of zero absorption 
+IF (.NOT. ALLOCATED(mask)) ALLOCATE(mask(size(r+t)))
+mask = ((r+t) >=1.)
+IF (.NOT.ALLOCATED(jj)) ALLOCATE(jj(count(mask)))
+CALL mask_ind(size(mask),mask,jj)
+
+
+Tsub(jj)     = t(jj)/(t(jj)+(1.-t(jj))*(N-1.))
+Rsub(jj)     = 1.-Tsub(jj)
+
+
+!print*, 'AFTER  Rsub ', minval(Rsub), maxval(Rsub), sum(Rsub)
+!print*, ' Tsub ', minval(Tsub), maxval(Tsub), sum(Tsub)
+
+!print*, 'after t ', minval(t), maxval(t),sum(t)
+!print*, 'after r ', minval(r), maxval(r),sum(r)
+
+
+! Reflectance and transmisttance of the leaf: combine top layer with next N-1
+! layers 
+denom      =  1.-Rsub*r 
+ tran      =  Taf*Tsub/denom  
+ refl      =  Ra+Taf*Rsub*t/denom 
+
+ t        =   tran
+ r        =   refl
+
+!print*, ' after 2 t ', minval(t), maxval(t),sum(t)
+!print*, ' after 2 r ', minval(r), maxval(r),sum(r)
+!print*, ' r+t ', minval(r+t), maxval(r+t), sum(r+t)
+
+!I_rt     =   (r+t)<1
 IF (.NOT. ALLOCATED(mask)) ALLOCATE(mask(size(r)))
-mask = ((r+t)>=1.)
-IF (.NOT.ALLOCATED(j)) ALLOCATE(j(count(mask)))
-CALL mask_ind(size(mask),mask,j)
+mask = ((r+t)<1.)
+IF (.NOT.ALLOCATED(I_rt)) ALLOCATE(I_rt(count(mask)))
+CALL mask_ind(size(mask),mask,I_rt)
 
 
-Tsub(j)     = t(j)/(t(j)+(1-t(j))*(N-1))
-Rsub(j)     = 1-Tsub(j)
-k(j)        = 0.
-kChl(j)     = 0.
+D(I_rt)  =   sqrt((1 + r(I_rt) + t(I_rt)) * (1 + r(I_rt) - t(I_rt)) * &
+                  (1 - r(I_rt) + t(I_rt)) * (1 - r(I_rt) - t(I_rt)))
+a        = 1. 
+b        = 1. 
+
+a(I_rt)  =   (1 + r(I_rt)**2. - t(I_rt)**2. + D(I_rt)) / (2.*r(I_rt))
+b(I_rt)  =   (1 - r(I_rt)**2. + t(I_rt)**2. + D(I_rt)) / (2.*t(I_rt))
+
+!a(~I_rt) =   1.
+!b(~I_rt) =   1.
+
+!print*, ' D I_rt ', minval(D(I_rt)), maxval(D(I_rt)), sum(D(I_rt)) 
+!print*, ' a ', minval(a(I_rt)), maxval(a(I_rt)),sum(a(I_rt))
+!print*, ' b ', minval(b(I_rt)), maxval(b(I_rt)), sum(b(I_rt))
+
+
+!I_a      =   a>1;
+IF (.NOT. ALLOCATED(mask)) ALLOCATE(mask(size(a)))
+mask = (a>1.)
+IF (.NOT.ALLOCATED(I_a)) ALLOCATE(I_a(count(mask)))
+CALL mask_ind(size(mask),mask,I_a)
+
+s(I_a)   =   2.*a(I_a) / (a(I_a)**2. - 1.) * log(b(I_a))
+
+!I_an    = a <=1.
+IF (.NOT. ALLOCATED(mask)) ALLOCATE(mask(size(a)))
+mask = (a<=1.)
+IF (.NOT.ALLOCATED(I_an)) ALLOCATE(I_an(count(mask)))
+CALL mask_ind(size(mask),mask,I_an)
+
+!print*, ' I_an ', I_an 
+
+s(I_an)  =   r(I_an) / t(I_an)
+
+k        =   (a-1) / (a+1) * log(b)
+kChl      =   kChlrel * k
+k(jj)     = 0.
+kChl(jj)   = 0.
+
+
+!print*, 's I_a ', minval(s(I_a)), maxval(s(I_a)), sum(s(I_a))
+!print*, 's I_an ', minval(s(I_an)), maxval(s(I_an)), sum(s(I_an))
+
+!print*, 'BEFORE TEST  fqe1 ', fqe1, 'fqe2 ', fqe2
+
+
+! if fqe >0
+if ((fqe1.GT.0) .and. (fqe2.gt.0.))  then 
+
+!print*, ' fqe1 ', fqe1, 'fqe2 ', fqe2
 
 !% Reflectance and transmittance of the leaf: combine top layer with next N-1 layers
-IF (.NOT.ALLOCATED(tran)) ALLOCATE(tran(nwlP))
-IF (.NOT.ALLOCATED(refl)) ALLOCATE(refl(nwlP))
-
-denom = 1.-Rsub*r
-tran  = Taf*Tsub/denom
-refl  = Ra+Taf*Rsub*t/denom
+!denom = 1.-Rsub*r
+!tran  = Taf*Tsub/denom
+!refl  = Ra+Taf*Rsub*t/denom
 
 !print*, ' in fluspect Taf ', minval(Taf), maxval(Taf),sum(Taf)
 !print*, ' in fluspect r ', minval(r), maxval(r),sum(r)
@@ -1409,19 +1527,19 @@ refl  = Ra+Taf*Rsub*t/denom
 !print*, ' in fluspect denom ', minval(denom), maxval(denom),sum(denom)
 !print*, ' in fluspect refl ', minval(refl), maxval(refl),sum(refl)
 !print*, ' in fluspect tran ', minval(tran), maxval(tran), sum(tran)
-!print*, ' in fluspect kClrel ', minval(kClrel), maxval(kClrel),sum(kClrel)
+!print*, ' in fluspect kChlrel ', minval(kChlrel), maxval(kChlrel),sum(kChlrel)
 
 !print*, ' size wle ', size(wle), ' size wlE ', size(wlE)
 !print*, ' size wlf ', size(wlf), ' size wlF ', size(wlF)
 
-!IF (.NOT.ALLOCATED(MbI))  ALLOCATE(MbI(size(wlf),size(wle)))
-!IF (.NOT.ALLOCATED(MfI))  ALLOCATE(MfI(size(wlf),size(wle)))
-!IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
-!IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbI))  ALLOCATE(MbI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MfI))  ALLOCATE(MfI(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
+IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
 
-!print*, ' here 1 '
+print*, ' here 1 '
 
-wII         = prat/(1+prat)
+wII         = prat/(1.+prat)
 wI          = 1.-wII
 eps         = 2.**(-ndub)
 
@@ -1447,6 +1565,7 @@ IF (.NOT.ALLOCATED(wf))  ALLOCATE(wf(size(wlf),1))
 !print*, ' here 12 '
 
 !print*, ' s ', size(s) , ' k ', size(k), ' te ', size(te)
+!print*, ' eps ', eps
 te          = 1.-(k(Iwle)+s(Iwle))*eps
 !print*, ' here entre deux 0 '
 !print*, ' size s  ', size(s), ' size k ', size(k), size(Iwlf), minval(Iwlf), maxval(Iwlf)
@@ -1455,7 +1574,7 @@ tf          = 1.-(k(Iwlf)+s(Iwlf))*eps
 re          = s(Iwle)*eps
 rf          = s(Iwlf)*eps
 
-Ih(1,:)   =  1.
+Ih(1,:)   = 1.
 Iv(:,1)   = 1.
 
 !print*, ' entre deux 2 '
@@ -1487,13 +1606,15 @@ we(1,:) = kChl(Iwle)
 wf(:,1) = 0.5*phiI(Iwlf)*eps
 
 
-MfI = .5*fqe* (matmul(wf,we)*sigmoid)
+!MfI = .5*fqe* (matmul(wf,we)*sigmoid)
+MfI = fqe1* (matmul(wf,we)*sigmoid)
 MbI = MfI
 
 
 !wf(:,1) = (wII*phiII(Iwlf))*eps
 wf(:,1) = 0.5*phiII(Iwlf)*eps
-MfII = .5*fqe* (matmul(wf,we)*sigmoid)
+!MfII = .5*fqe* (matmul(wf,we)*sigmoid)
+MfII = fqe2* (matmul(wf,we)*sigmoid)
 MbII = MfII
 
 !print*, ' in fluspect MbI ', minval(MbI), maxval(MbI), sum(MbI)
@@ -1531,11 +1652,6 @@ DO i = 1,ndub
     wre(1,:) = re
     wrf(:,1) = rf
 
-!   print*,' in fluspect, wxe ', minval(wxe), maxval(wxe), sum(wxe)
-!   print*,' in fluspect, wxf ', minval(wxf), maxval(wxf), sum(wxf)
-!   print*,' in fluspect, wre ', minval(wre), maxval(wre), sum(wre)
-!   print*,' in fluspect, wrf ', minval(wrf), maxval(wrf), sum(wrf)  
-
  !   MfnI    = MfI  .*(xf*Ih + Iv*xe')         + MbI  .*(xf*xe').*(rf*Ih + Iv*re');
  !   MbnI    = MbI  .*(1+(xf*xe').*(1+rf*re')) + MfI.*((xf.*rf)*Ih+Iv*(xe.*re)');
  !   MfnII   = MfII .*(xf*Ih + Iv*xe')         + MbII .*(xf*xe').*(rf*Ih +Iv*re');
@@ -1572,7 +1688,13 @@ DEALLOCATE(MfnI,MbnI, MfnII,MbnII)
 
 !print*, ' in fluspect refl ', minval(refl), maxval(refl),sum(refl)
 !print*, ' in fluspect tran ', minval(tran), maxval(tran), sum(tran)
-!print*, ' in fluspect kClrel ', minval(kClrel), maxval(kClrel),sum(kClrel)
+!print*, ' in fluspect kChlrel ', minval(kChlrel), maxval(kChlrel),sum(kChlrel)
+
+!print*, ' in fluspect MbI ', minval(MbI), maxval(MbI), sum(MbI)
+!print*, ' in fluspect MbII ', minval(MbII), maxval(MbII), sum(MbII)
+!print*, ' in fluspect MfI ', minval(MfI), maxval(MfI), sum(MfI)
+!print*, ' in fluspect MfII ', minval(MfII), maxval(MfII), sum(MfII)
+
 !print*, 'size wlT ', size(wlT)
 !print*, 'size wlP ', size(wlP)
 !print*, 'size wlS ', size(wlS)
@@ -1592,9 +1714,8 @@ CALL mask_ind(size(mask),mask,IwlP)
 !print*, 'min max IwlT ', minval(IwlT),maxval(IwlT)
 !print*, 'size rsfile ', size(rsfile(:,2)), 'IwlP ', size(IwlP)
 
-!print*,' In fluspect, rho ', size(rho)
-!print*,' In fluspect, refl ', size(refl)
-!print*,' In fluspect, IwlP ', size(IwlP)
+ENDIF 
+
 
 rho(IwlP) = refl
 tau(IwlP) = tran
@@ -1604,8 +1725,8 @@ rho(IwlT) = rho_thermal
 tau(IwlT) = tau_thermal
 rs(IwlT)  = rs_thermal
 
-!print*, ' fluspect rho(iwlfo) ', minval(rho(iwlfo)), maxval(rho(iwlfo)),sum(rho(iwlfo))
-!print*, ' fluspect tau(iwlfo) ', minval(tau(iwlfo)), maxval(tau(iwlfo)),sum(tau(iwlfo))
+!print*, ' rho(iwlfo) ', minval(rho(iwlfo)), maxval(rho(iwlfo)),sum(rho(iwlfo))
+!print*, ' tau(iwlfo) ', minval(tau(iwlfo)), maxval(tau(iwlfo)),sum(tau(iwlfo))
 
 
 END SUBROUTINE fluspect 
@@ -1640,9 +1761,10 @@ a           = (nr+1)*(nr+1)/2
 k           = -(n2-1)*(n2-1)/4
 sa          = sin(alfa*rd)
 
+
+
 !b1          = (alfa~=90)*sqrt((sa**2-np/2)*(sa**2-np/2)+k)
 b1 = 0. 
-
 if (alfa.ne.90)  b1  = sqrt((sa**2-np/2)*(sa**2-np/2)+k)
 
 b2          = sa**2-np/2
@@ -1667,7 +1789,7 @@ END SUBROUTINE calctav
 !function [lidf]=  leafangles(a,b)
 !% Subroutine FluorSail_dladgen
 
-SUBROUTINE leafangles(a,b,lidf)
+SUBROUTINE leafangles(a,b)                                     
 
 !function [lidf]=  leafangles(a,b)                                     
 !% Subroutine FluorSail_dladgen
@@ -1691,44 +1813,41 @@ IMPLICIT NONE
 !Input variables 
 REAL, INTENT(IN)                    :: a,b
 
-!Output variables
-REAL, DIMENSION(:), INTENT(OUT)     :: lidf
-
 ! Local variables 
- REAL, DIMENSION(1,13)                :: FthetaL   ! Cumulative leaf inclination density 
+ REAL, DIMENSION(1,13)                :: F 
  REAL                                 :: theta 
  INTEGER                              :: i
 
 !F           =   zeros(1,13);
-FthetaL = 0.
+F = 0.
 
 DO i = 1, 8                                                               
     theta  =  i*10.             !% theta_l =  10:80
-    CALL dcum(a,b,theta,FthetaL(1,i))     !% F(theta)
+    CALL dcum(a,b,theta,F(1,i))     !% F(theta)
 END DO 
 
 DO i=9,12                                                              
     theta   =   80. + (i-8)*2.   !% theta_l = 82:88
-    CALL dcum(a,b,theta,FthetaL(1,i))  !% F(theta)
+    CALL dcum(a,b,theta,F(1,i))  !% F(theta)
 END DO 
 
-FthetaL(1,13) = 1.                     !%  theta_l = 90:90
+F(1,13) = 1.                     !%  theta_l = 90:90
 
 lidf = 0. 
 DO i=13,2,-1                                                           
-    lidf(i) =  FthetaL(1,i) -   FthetaL(1,i-1)  !% lidf   =   dF/dtheta;
+    lidf(i) =  F(1,i) -   F(1,i-1)  !% lidf   =   dF/dtheta;
     !lidf(i,1) =  F(1,i) -   F(1,i-1)  !% lidf   =   dF/dtheta;
 
 END DO 
 
 !lidf(1,1) =   F(1,1)                  !% Boundary condition
-lidf(1) =   FthetaL(1,1)                  !% Boundary condition
+lidf(1) =   F(1,1)                  !% Boundary condition
 
 END SUBROUTINE leafangles  
 
 !%
 !function [F]   =  dcum(a,b,theta)
-SUBROUTINE  dcum(a,b,theta,FthetaL)
+SUBROUTINE  dcum(a,b,theta,F)
 
 IMPLICIT NONE 
 
@@ -1738,7 +1857,7 @@ REAL, PARAMETER             :: pi = 3.1415926535879
 REAL, INTENT(IN)            :: a,b,theta 
 
 ! Output variables 
-REAL, INTENT(OUT)           :: FthetaL 
+REAL, INTENT(OUT)           :: F 
 
 ! Local variables 
 REAL                        :: rd,eps,delx,x1
@@ -1748,7 +1867,7 @@ REAL                        :: y,dx1,theta2
 rd  =   pi/180.                ! %   Geometrical constant
 
 if ( a>1. ) then  
-    FthetaL  = 1 - cos(theta*rd)
+    F  = 1 - cos(theta*rd)
 else
     eps     =   1e-8
     delx    =   1.
@@ -1761,7 +1880,7 @@ else
         x1   =   x1 + dx1
         delx =   abs(dx1)
   end do 
-    FthetaL    =   (2*y + theta2)/pi    ! %   Cumulative leaf inclination density function
+    F    =   (2*y + theta2)/pi    ! %   Cumulative leaf inclination density function
 
     !%pag 139 thesis says: F = 2*(y+p)/pi. 
     !%Since theta2=theta*2 (in rad), this makes F=(2*y + 2*theta)/pi    
@@ -1778,71 +1897,50 @@ END SUBROUTINE dcum
 
 END SUBROUTINE Nlayers
 
-SUBROUTINE read_modtran_files()
 
-IMPLICIT NONE
+ !function [M] = aggreg(atmfile,SCOPEspec)
 
-integer :: iatmosfile
-CHARACTER(len=80)                        :: atmfile
+ SUBROUTINE aggreg (atmosfile,nreg,streg,enreg,width) 
 
-print*,'In subroutine: read_modtran_files'
+ IMPLICIT NONE 
 
-! Use of standard atmosphere
-iatmosfile = 1
-atmfile = trim(modtran_std)
-call read_atm_files(iatmosfile, atmfile)
+!% Aggregate MODTRAN data over SCOPE bands by averaging (over rectangular band
+!% passes)
+! atmosphere file
+CHARACTER(len=120)                           :: header 
 
-! Use of tropical atmosphere
-iatmosfile = 2
-atmfile = trim(modtran_trop)
-call read_atm_files(iatmosfile, atmfile)
-!IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
+! Input variables 
+INTEGER, INTENT(IN)                          :: nreg 
+CHARACTER(len=80), INTENT(IN)                :: atmosfile 
+REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width 
 
+!Output variables 
+!REAL, ALLOCATABLE,DIMENSION(:,:),INTENT(OUT) :: atmoM 
 
-! NORTH HEMISPHERE 
-! Winter in mid-latitude in northern hemisphere 
-iatmosfile = 3
-atmfile = trim(modtran_wint)
-call read_atm_files(iatmosfile, atmfile)
-!If (lon.gt.30.) then
-! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
-!endif
+! Local variables 
+INTEGER                                      :: nwM 
+REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
+INTEGER,PARAMETER                            :: inunit = 2
+REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
+REAL,  ALLOCATABLE,DIMENSION(:,:)            :: U 
+INTEGER                                      :: iwl,r,i,k
+INTEGER                                      :: nwS
+INTEGER, DIMENSION(3)                        :: nwreg,off  
+REAL, ALLOCATABLE,DIMENSION(:,:)             :: S 
+INTEGER, ALLOCATABLE,DIMENSION(:)            :: n 
+INTEGER, ALLOCATABLE,DIMENSION(:)            :: j 
+REAL                                         :: w 
+ 
+!% Aggregate MODTRAN data over SCOPE bands by averaging (over rectangular band
+!% passes)
 
-! Summer  in mid-latitude in northern hemisphere
-iatmosfile = 4
-atmfile = trim(modtran_sum)
-call read_atm_files(iatmosfile, atmfile)
-!If (lon.gt.30.) then
-! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
-!endif
+print*, ' nreg ', nreg 
+print*,  'streg ', streg 
+print*, ' enreg ', enreg
+print*, 'width ', width
 
-! SOUTH HEMISPHERE 
-! Summer in mid-latitude in southern hemisphere
-!If (lon.lt.-30.) then
-! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
-!endif
-
-! Winter in mid-latitude in northern hemisphere
-!If (lon.lt.-30.) then
-! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_wint)
-!endif
-
-END SUBROUTINE read_modtran_files
-
-
-SUBROUTINE read_atm_files(iatmosfile, atmosfile)
-
-INTEGER, INTENT(IN)                          :: iatmosfile
-CHARACTER(len=80), INTENT(IN)                :: atmosfile
-
-character(len = 300) :: header
-!integer              :: nwM
-integer, parameter :: inunit = 1537
-integer              :: i
-
-print *,'In subroutine: read_atm_files'
-print *,'atmosfile: ', atmosfile
-
+!% Read .atm file with MODTRAN data
+!s   = importdata(atmfile);
 OPEN(unit=inunit,file=atmosfile,status='old')
 REWIND inunit
 READ(inunit,*) header
@@ -1854,9 +1952,9 @@ READ(inunit,*) header
     END DO
 1000 CONTINUE
 CLOSE(inunit)
-!print*, ' nwM ', nwM
+print*, ' nwM ', nwM 
 
-IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(natmosfiles,nwM,20))
+IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(nwM,20))
 
 OPEN(unit=inunit,file=atmosfile,status='old')
 REWIND inunit
@@ -1865,81 +1963,9 @@ READ(inunit,*) header
 !print*, header
 
 DO i=1, nwM
-READ(inunit,*)xdata(iatmosfile,i,:)
+READ(inunit,*)xdata(i,:)
 END DO
 CLOSE(inunit)
-
-END SUBROUTINE read_atm_files
-
- !function [M] = aggreg(atmfile,SCOPEspec)
-
- SUBROUTINE aggreg (iatmosfile,nreg,streg,enreg,width) 
-
- IMPLICIT NONE 
-
-!% Aggregate MODTRAN data over SCOPE bands by averaging (over rectangular band
-!% passes)
-! atmosphere file
-CHARACTER(len=120)                           :: header 
-
-! Input variables 
-INTEGER, INTENT(IN)                          :: nreg 
-!CHARACTER(len=80), INTENT(IN)                :: atmosfile 
-INTEGER, INTENT(IN)                          :: iatmosfile
-REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width 
-
-!Output variables 
-!REAL, ALLOCATABLE,DIMENSION(:,:),INTENT(OUT) :: atmoM 
-
-! Local variables 
-!INTEGER                                      :: nwM 
-!REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
-INTEGER,PARAMETER                            :: inunit = 2
-REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
-REAL,  ALLOCATABLE,DIMENSION(:,:)            :: Udata 
-INTEGER                                      :: iwl,r,i,k
-INTEGER                                      :: nwS
-INTEGER, DIMENSION(3)                        :: nwreg,off  
-REAL, ALLOCATABLE,DIMENSION(:,:)             :: S 
-INTEGER, ALLOCATABLE,DIMENSION(:)            :: nk    ! Counter 
-INTEGER, ALLOCATABLE,DIMENSION(:)            :: j 
-REAL                                         :: w 
- 
-!% Aggregate MODTRAN data over SCOPE bands by averaging (over rectangular band
-!% passes)
-
-!print*, ' nreg ', nreg 
-!print*,  'streg ', streg 
-!print*, ' enreg ', enreg
-!print*, 'width ', width
-
-!% Read .atm file with MODTRAN data
-!s   = importdata(atmfile);
-!OPEN(unit=inunit,file=atmosfile,status='old')
-!REWIND inunit
-!READ(inunit,*) header
-!READ(inunit,*) header
-! nwM = 0
-!    DO WHILE (.TRUE.)
-!       READ(inunit,*,END=1000) header ! just skip data
-!       nwM =  nwM+1
-!    END DO
-!1000 CONTINUE
-!CLOSE(inunit)
-!print*, ' nwM ', nwM 
-
-IF (.NOT.ALLOCATED(xdata)) stop 'xdata not available ....'
-
-!OPEN(unit=inunit,file=atmosfile,status='old')
-!REWIND inunit
-!READ(inunit,*) header
-!READ(inunit,*) header
-!print*, header
-
-!DO i=1, nwM
-!READ(inunit,*)xdata(i,:)
-!END DO
-!CLOSE(inunit)
 
 !print*, xdata(1,:)
 !print*
@@ -1947,7 +1973,7 @@ IF (.NOT.ALLOCATED(xdata)) stop 'xdata not available ....'
 
 IF (.NOT.ALLOCATED(wlM)) ALLOCATE(wlM(nwM))
 
-wlM = xdata(iatmosfile,:,2)
+wlM = xdata(:,2)
 !T  = s.data(:,3:20);
 
 !% Extract 6 relevant columns from T
@@ -1959,14 +1985,14 @@ wlM = xdata(iatmosfile,:,2)
 !% 16: <La(b)>
 
 !U     = [T(:,1) T(:,3) T(:,4) T(:,5) T(:,12) T(:,16)];
-IF (.NOT.ALLOCATED(Udata)) ALLOCATE(Udata(nwM,6))
+IF (.NOT.ALLOCATED(U)) ALLOCATE(U(nwM,6))
 !U     =  [xdata(:,3),xdata(:,5),xdata(:,6),xdata(:,7),xdata(:,14),xdata(:,18)]
-Udata(:,1) = xdata(iatmosfile,:,3)
-Udata(:,2) = xdata(iatmosfile,:,5)
-Udata(:,3) = xdata(iatmosfile,:,6)
-Udata(:,4) = xdata(iatmosfile,:,7)
-Udata(:,5) = xdata(iatmosfile,:,14)
-Udata(:,6) = xdata(iatmosfile,:,18)
+U(:,1) = xdata(:,3)
+U(:,2) = xdata(:,5)
+U(:,3) = xdata(:,6)
+U(:,4) = xdata(:,7)
+U(:,5) = xdata(:,14)
+U(:,6) = xdata(:,18)
 
 !DO  i=1,6
 !print*, ' U ',i, minval(U(:,i)), maxval(U(:,i)), sum(U(:,i))
@@ -1992,7 +2018,7 @@ Udata(:,6) = xdata(iatmosfile,:,18)
 !nwreg = int32((enreg-streg)./width)+1;
 nwreg = int((enreg-streg)/width)+1
 
-!print*, ' nwreg', nwreg 
+print*, ' nwreg', nwreg 
 
 !off   = int32(zeros(nreg,1));
 off   =  0
@@ -2009,11 +2035,11 @@ END DO
 
 !nwS = sum(nwreg);
 nwS = sum(nwreg)
-!print* , ' nwS ', nwS 
+print* , ' nwS ', nwS 
 
 !n   = zeros(nwS,1);    !% Count of MODTRAN data contributing to a band
-IF (.NOT.ALLOCATED(nk)) ALLOCATE(nk(nwS))
-nk = 0
+IF (.NOT.ALLOCATED(n)) ALLOCATE(n(nwS))
+n = 0
 
 
 !S   = zeros(nwS,6);    ! Intialize sums
@@ -2055,8 +2081,8 @@ DO iwl = 1,nwM
             !print*, ' k ', k, ' j r ', j(r), ' off ', off(r), ' n ', n(k) , iwl 
             !print*, 'BEFORE S ', S(k,:)
 
-            S(k,:) = S(k,:)+Udata(iwl,:)           !    % Accumulate from contributing MODTRAN data
-            nk(k)   = nk(k)+1                    !    % Increment count 
+            S(k,:) = S(k,:)+U(iwl,:)           !    % Accumulate from contributing MODTRAN data
+            n(k)   = n(k)+1                    !    % Increment count 
             !print*, '  U ', iwl,U(k,:) 
             !print*, 'AFTER S ', S(k,:) 
 
@@ -2069,14 +2095,14 @@ IF (.NOT.ALLOCATED(atmoM)) ALLOCATE(atmoM(nwS,6))
 atmoM = 0.
 DO  i = 1,6
 !print*, 'S ',  i,minval(S(:,i) ), maxval(S(:,i)), sum(S(:,i)) 
-    atmoM(:,i) = S(:,i)/nk      !% Calculate averages per SCOPE band
+    atmoM(:,i) = S(:,i)/n      !% Calculate averages per SCOPE band
 !print*, 'atmoM ',  i,minval(atmoM(:,i) ), maxval(atmoM(:,i)), sum(atmoM(:,i)) 
 !print*, 'n ',  i,minval(n), maxval(n), sum(n) 
 END DO 
 
-!print*,minval(atmoM), maxval(atmoM), sum(atmoM)
+print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
-DEALLOCATE(wlM,S,Udata,j,nk)
+DEALLOCATE(xdata,wlM,S,U,j,n)
 
 END SUBROUTINE aggreg
 
