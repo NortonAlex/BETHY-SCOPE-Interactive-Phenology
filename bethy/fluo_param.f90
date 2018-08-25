@@ -246,7 +246,7 @@ REAL                                      :: prat    ! %  PSI/PSII peak ratio
 REAL                                      :: gcmin   ! %[m s-1] minimum stomatal conductance (if stomata are closed).
 
 REAL                                      :: freq_Fsmin                         ! Minimum frequeency to compute Fs
-REAL                                      :: Freq_Fsmax                         ! Maximum frequency to compute Fs
+REAL                                      :: freq_Fsmax                         ! Maximum frequency to compute Fs
 
 
 
@@ -446,10 +446,10 @@ prat         = 1.                        ! %  PSI/PSII peak ratio
 
 ! Here we can choose the range of frequency we want to process  --> 640-850  
 !freq_Fsmin   = 755.                      ! Minimum frequeency to compute Fs
-!Freq_Fsmax   = 755.                      ! Maximum frequency to compute Fs 
+!freq_Fsmax   = 755.                      ! Maximum frequency to compute Fs 
 
-freq_Fsmin   = 640.                      ! Minimum frequeency to compute Fs
-Freq_Fsmax   = 850.                      ! Maximum frequency to compute Fs
+freq_Fsmin   = 755.                      ! Minimum frequeency to compute Fs
+freq_Fsmax   = 757.                      ! Maximum frequency to compute Fs
 
 
 !4. Soil 
