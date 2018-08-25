@@ -543,6 +543,7 @@ modtran_wint = trim(path_atmos_file)//'FLEX-S3_Wint.atm'
 ! Summer
 modtran_sum = trim(path_atmos_file)//'FLEX-S3_Mar.atm'
 
+CALL read_modtran_files
 
 ! Here select SIF frequency (nm) to write to output (e.g. SIF retrieval wavelength)
 freq_sat =  757.                      
@@ -1929,6 +1930,56 @@ END SUBROUTINE dcum
 
 END SUBROUTINE Nlayers
 
+SUBROUTINE read_modtran_files()
+
+IMPLICIT NONE
+
+integer :: iatmosfile
+CHARACTER(len=80)                        :: atmfile
+
+print*,'In subroutine: read_modtran_files'
+
+! Use of standard atmosphere
+iatmosfile = 1
+atmfile = trim(modtran_std)
+call read_atm_files(iatmosfile, atmfile)
+
+! Use of tropical atmosphere
+iatmosfile = 2
+atmfile = trim(modtran_trop)
+call read_atm_files(iatmosfile, atmfile)
+!IF ((lon.le.30.).and.(lon.ge.-30.)) atmos_file=trim(modtran_trop)
+
+
+! NORTH HEMISPHERE 
+! Winter in mid-latitude in northern hemisphere 
+iatmosfile = 3
+atmfile = trim(modtran_wint)
+call read_atm_files(iatmosfile, atmfile)
+!If (lon.gt.30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_wint)
+!endif
+
+! Summer  in mid-latitude in northern hemisphere
+iatmosfile = 4
+atmfile = trim(modtran_sum)
+call read_atm_files(iatmosfile, atmfile)
+!If (lon.gt.30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_sum)
+!endif
+
+! SOUTH HEMISPHERE 
+! Summer in mid-latitude in southern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.10).or.(month.le.3)) atmos_file=trim(modtran_sum)
+!endif
+
+! Winter in mid-latitude in northern hemisphere
+!If (lon.lt.-30.) then
+! if ((month.ge.4).and.(month.le.9)) atmos_file=trim(modtran_wint)
+!endif
+
+END SUBROUTINE read_modtran_files
 
  !function [M] = aggreg(atmfile,SCOPEspec)
 
