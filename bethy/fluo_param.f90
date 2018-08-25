@@ -1981,6 +1981,47 @@ call read_atm_files(iatmosfile, atmfile)
 
 END SUBROUTINE read_modtran_files
 
+SUBROUTINE read_atm_files(iatmosfile, atmosfile)
+
+INTEGER, INTENT(IN)                          :: iatmosfile
+CHARACTER(len=80), INTENT(IN)                :: atmosfile
+
+character(len = 300) :: header
+!integer              :: nwM
+integer, parameter :: inunit = 1537
+integer              :: i
+
+print *,'In subroutine: read_atm_files'
+print *,'atmosfile: ', atmosfile
+
+OPEN(unit=inunit,file=atmosfile,status='old')
+REWIND inunit
+READ(inunit,*) header
+READ(inunit,*) header
+ nwM = 0
+    DO WHILE (.TRUE.)
+       READ(inunit,*,END=1000) header ! just skip data
+       nwM =  nwM+1
+    END DO
+1000 CONTINUE
+CLOSE(inunit)
+!print*, ' nwM ', nwM
+
+IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(natmosfiles,nwM,20))
+
+OPEN(unit=inunit,file=atmosfile,status='old')
+REWIND inunit
+READ(inunit,*) header
+READ(inunit,*) header
+!print*, header
+
+DO i=1, nwM
+READ(inunit,*)xdata(iatmosfile,i,:)
+END DO
+CLOSE(inunit)
+
+END SUBROUTINE read_atm_files
+
  !function [M] = aggreg(atmfile,SCOPEspec)
 
  SUBROUTINE aggreg (atmosfile,nreg,streg,enreg,width) 
