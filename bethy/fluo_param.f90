@@ -2035,15 +2035,16 @@ CHARACTER(len=120)                           :: header
 
 ! Input variables 
 INTEGER, INTENT(IN)                          :: nreg 
-CHARACTER(len=80), INTENT(IN)                :: atmosfile 
+!CHARACTER(len=80), INTENT(IN)                :: atmosfile 
+INTEGER, INTENT(IN)                          :: iatmosfile
 REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width 
 
 !Output variables 
 !REAL, ALLOCATABLE,DIMENSION(:,:),INTENT(OUT) :: atmoM 
 
 ! Local variables 
-INTEGER                                      :: nwM 
-REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
+!INTEGER                                      :: nwM 
+!REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
 INTEGER,PARAMETER                            :: inunit = 2
 REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
 REAL,  ALLOCATABLE,DIMENSION(:,:)            :: U 
@@ -2051,7 +2052,7 @@ INTEGER                                      :: iwl,r,i,k
 INTEGER                                      :: nwS
 INTEGER, DIMENSION(3)                        :: nwreg,off  
 REAL, ALLOCATABLE,DIMENSION(:,:)             :: S 
-INTEGER, ALLOCATABLE,DIMENSION(:)            :: n 
+INTEGER, ALLOCATABLE,DIMENSION(:)            :: nk    ! counter
 INTEGER, ALLOCATABLE,DIMENSION(:)            :: j 
 REAL                                         :: w 
  
@@ -2065,31 +2066,31 @@ print*, 'width ', width
 
 !% Read .atm file with MODTRAN data
 !s   = importdata(atmfile);
-OPEN(unit=inunit,file=atmosfile,status='old')
-REWIND inunit
-READ(inunit,*) header
-READ(inunit,*) header
- nwM = 0
-    DO WHILE (.TRUE.)
-       READ(inunit,*,END=1000) header ! just skip data
-       nwM =  nwM+1
-    END DO
-1000 CONTINUE
-CLOSE(inunit)
-print*, ' nwM ', nwM 
+!OPEN(unit=inunit,file=atmosfile,status='old')
+!REWIND inunit
+!READ(inunit,*) header
+!READ(inunit,*) header
+! nwM = 0
+!    DO WHILE (.TRUE.)
+!       READ(inunit,*,END=1000) header ! just skip data
+!       nwM =  nwM+1
+!    END DO
+!1000 CONTINUE
+!CLOSE(inunit)
+!print*, ' nwM ', nwM 
 
 IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(nwM,20))
 
-OPEN(unit=inunit,file=atmosfile,status='old')
-REWIND inunit
-READ(inunit,*) header
-READ(inunit,*) header
+!OPEN(unit=inunit,file=atmosfile,status='old')
+!REWIND inunit
+!READ(inunit,*) header
+!READ(inunit,*) header
 !print*, header
 
-DO i=1, nwM
-READ(inunit,*)xdata(i,:)
-END DO
-CLOSE(inunit)
+!DO i=1, nwM
+!READ(inunit,*)xdata(i,:)
+!END DO
+!CLOSE(inunit)
 
 !print*, xdata(1,:)
 !print*
@@ -2097,7 +2098,7 @@ CLOSE(inunit)
 
 IF (.NOT.ALLOCATED(wlM)) ALLOCATE(wlM(nwM))
 
-wlM = xdata(:,2)
+wlM = xdata(iatmosfile,:,2)
 !T  = s.data(:,3:20);
 
 !% Extract 6 relevant columns from T
@@ -2109,14 +2110,14 @@ wlM = xdata(:,2)
 !% 16: <La(b)>
 
 !U     = [T(:,1) T(:,3) T(:,4) T(:,5) T(:,12) T(:,16)];
-IF (.NOT.ALLOCATED(U)) ALLOCATE(U(nwM,6))
+IF (.NOT.ALLOCATED(Udata)) ALLOCATE(Udata(nwM,6))
 !U     =  [xdata(:,3),xdata(:,5),xdata(:,6),xdata(:,7),xdata(:,14),xdata(:,18)]
-U(:,1) = xdata(:,3)
-U(:,2) = xdata(:,5)
-U(:,3) = xdata(:,6)
-U(:,4) = xdata(:,7)
-U(:,5) = xdata(:,14)
-U(:,6) = xdata(:,18)
+Udata(:,1) = xdata(iatmosfile,:,3)
+Udata(:,2) = xdata(iatmosfile,:,5)
+Udata(:,3) = xdata(iatmosfile,:,6)
+Udata(:,4) = xdata(iatmosfile,:,7)
+Udata(:,5) = xdata(iatmosfile,:,14)
+Udata(:,6) = xdata(iatmosfile,:,18)
 
 !DO  i=1,6
 !print*, ' U ',i, minval(U(:,i)), maxval(U(:,i)), sum(U(:,i))
@@ -2163,7 +2164,7 @@ print* , ' nwS ', nwS
 
 !n   = zeros(nwS,1);    !% Count of MODTRAN data contributing to a band
 IF (.NOT.ALLOCATED(n)) ALLOCATE(n(nwS))
-n = 0
+nk = 0
 
 
 !S   = zeros(nwS,6);    ! Intialize sums
@@ -2206,7 +2207,7 @@ DO iwl = 1,nwM
             !print*, 'BEFORE S ', S(k,:)
 
             S(k,:) = S(k,:)+U(iwl,:)           !    % Accumulate from contributing MODTRAN data
-            n(k)   = n(k)+1                    !    % Increment count 
+            nk(k)   = nk(k)+1                    !    % Increment count 
             !print*, '  U ', iwl,U(k,:) 
             !print*, 'AFTER S ', S(k,:) 
 
@@ -2219,14 +2220,14 @@ IF (.NOT.ALLOCATED(atmoM)) ALLOCATE(atmoM(nwS,6))
 atmoM = 0.
 DO  i = 1,6
 !print*, 'S ',  i,minval(S(:,i) ), maxval(S(:,i)), sum(S(:,i)) 
-    atmoM(:,i) = S(:,i)/n      !% Calculate averages per SCOPE band
+    atmoM(:,i) = S(:,i)/nk      !% Calculate averages per SCOPE band
 !print*, 'atmoM ',  i,minval(atmoM(:,i) ), maxval(atmoM(:,i)), sum(atmoM(:,i)) 
 !print*, 'n ',  i,minval(n), maxval(n), sum(n) 
 END DO 
 
 print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
-DEALLOCATE(xdata,wlM,S,U,j,n)
+DEALLOCATE(xdata,wlM,S,Udata,j,nk)
 
 END SUBROUTINE aggreg
 
