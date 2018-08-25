@@ -495,7 +495,7 @@ REAL, DIMENSION(vp), INTENT(in)            :: zlai       ! LAI data
 !Output variable from fluspect
 REAL, ALLOCATABLE, DIMENSION(:,:)            :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)              :: rho, tau, rs
-REAL, ALLOCATABLE, DIMENSION(:)              :: kClrel
+REAL, ALLOCATABLE, DIMENSION(:)              :: kChlrel
 
 !Output variable from leafangles
 REAL, ALLOCATABLE, DIMENSION(:)              :: lidf
@@ -602,7 +602,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
 !$OMP& SHARED (rpar_diurnal,vps,block_vps,vomf,rdf) &
-!$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kClrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
+!$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P)
 
@@ -704,7 +704,7 @@ pft_dominant_cell = -999
      ALLOCATE(rho(nwl))
      ALLOCATE(tau(nwl))
      ALLOCATE(rs(nwl))
-     ALLOCATE(kClrel(nwlP))
+     ALLOCATE(kChlrel(nwlP))
 
      ALLOCATE(lidf(nli))
 
@@ -783,7 +783,7 @@ if (pft == 10) option = 1  ! C4 crop plant only
            leafbio(8) = tau_thermal
 
 ! Computation of the fluorescence matrices 
-  CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kClrel)
+  CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel)
 
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
 ! WHICH DEPEND ON LAI
@@ -862,7 +862,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 CALL rtmo(Rin,Rli,Ta,LAI,tts,tto,psi,Ps,Po,Pso,km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto,Eoutt, Rnhs, Rnus, Rnhc, Rnuc, Pnhc, Pnuc,&
-        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf, q)
+        & Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kChlrel, lidf, q)
 
 ! Matrix containing values for 1-Ps and Ps of soil
         Fs_mat(1) = 1.-Ps(size(Ps))
@@ -1036,7 +1036,7 @@ DEALLOCATE(MbII)
 DEALLOCATE(rho)
 DEALLOCATE(tau)
 DEALLOCATE(rs)
-DEALLOCATE(kClrel)
+DEALLOCATE(kChlrel)
 
 !Deallocate leafangles output
 DEALLOCATE(lidf)

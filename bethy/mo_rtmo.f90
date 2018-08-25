@@ -7,7 +7,7 @@ CONTAINS
 SUBROUTINE rtmo(Rin,Rli,Ta,LAI,tts,tto,psi, Ps, Po, Pso, km, Kext, &
         & Esun_,Esky_,P, fEsuno,fEskyo,fEsunt,fEskyt, Eplu_, Emin_, &
         & Lo_, Eout_, Eouto, Eoutt, Rnhs, Rnus, Rnhc, Rnuc,&
-        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kClrel, lidf, q)
+        & Pnhc, Pnuc, Pnhc_Cab, Pnuc_Cab, rho, tau, rs, kChlrel, lidf, q)
 
 USE fluo_func
 
@@ -166,7 +166,7 @@ REAL, PARAMETER                             :: deg2rad = pi/180.
 ! Input variables 
 REAL, INTENT(IN)                            :: LAI,tts,tto,psi
 REAL, INTENT(IN)                            :: Rin,Rli,Ta 
-REAL, DIMENSION(:), INTENT(IN)              :: rho,tau,rs,kClrel    ! fluspect output
+REAL, DIMENSION(:), INTENT(IN)              :: rho,tau,rs,kChlrel    ! fluspect output
 REAL, DIMENSION(:), INTENT(IN)              :: lidf    ! leafangles output
 REAL, INTENT(IN)                            :: q    ! hotspot parameter (leafwidth/hc)
 
@@ -322,7 +322,7 @@ xl(2:nl+1) = xlay
 !print*, ' rho ', minval(rho), maxval(rho),sum(rho)
 !print*, ' tau ', minval(tau), maxval(tau), sum(tau)
 !print*, ' rs ', minval(rs), maxval(rs), sum(tau)
-!print*, ' kClrel ', minval(kClrel), maxval(kClrel)
+!print*, ' kChlrel ', minval(kChlrel), maxval(kChlrel)
 
 
 Rndif  = 0.
@@ -787,15 +787,15 @@ CALL e2phot(size(Ipar),wlPAR*1E-9,Esun_(Ipar)*epsc(Ipar),tempIpar)
 CALL Sint(size(Ipar),tempIpar,wlPAR,ap)
 Pnsun       = 0.001 *ap
                                                                              !  in PAR range in moles m-2 s-1
-!Pnsun_Cab   = 0.001 * Sint(e2phot(wlPAR*1E-9,kClrel(Ipar).*Esun_(Ipar).*epsc(Ipar)),wlPAR) ! % Absorbed solar 
-CALL e2phot(size(Ipar),wlPAR*1E-9,kClrel(Ipar)*Esun_(Ipar)*epsc(Ipar),tempIpar)
+!Pnsun_Cab   = 0.001 * Sint(e2phot(wlPAR*1E-9,kChlrel(Ipar).*Esun_(Ipar).*epsc(Ipar)),wlPAR) ! % Absorbed solar 
+CALL e2phot(size(Ipar),wlPAR*1E-9,kChlrel(Ipar)*Esun_(Ipar)*epsc(Ipar),tempIpar)
 CALL Sint(size(Ipar),tempIpar,wlPAR,ap)
 Pnsun_Cab       = 0.001 *ap
 
 !print*, 'Psun ', Psun 
 !print*, 'Asun ', Asun 
 !print*, 'Pnsun ', Pnsun 
-!print*, 'kClrel ', minval(kClrel), maxval(kClrel)
+!print*, 'kChlrel ', minval(kChlrel), maxval(kChlrel)
 !print*, 'Ipar ', minval(Ipar), maxval(Ipar)
 !print*, 'Pnsun_Cab ', Pnsun_Cab 
 
@@ -905,8 +905,8 @@ DO  j = 1,nl
     Pndif_(j,:)    =  0.001*Pndif_(j,:)
     
 
-    !Pndif_Cab_(j,:)     = .001 *(e2phot(wlPAR*1E-9,kClrel(Ipar).*Rndif_(j,Ipar)'))' !  % [nl,nwl]  Net (absorbed)
-    CALL e2phot(size(Ipar),wlPAR*1E-9,kClrel(Ipar)*Rndif_(j,Ipar),tempIpar)
+    !Pndif_Cab_(j,:)     = .001 *(e2phot(wlPAR*1E-9,kChlrel(Ipar).*Rndif_(j,Ipar)'))' !  % [nl,nwl]  Net (absorbed)
+    CALL e2phot(size(Ipar),wlPAR*1E-9,kChlrel(Ipar)*Rndif_(j,Ipar),tempIpar)
     Pndif_Cab_(j,:) = .001 *tempIpar
                                                                                    !  as PAR photons by Cab
 
