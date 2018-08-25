@@ -732,7 +732,7 @@ CALL  fluspect(leafbio)
 
 !% B.2 number of classes, leaf angle distribution, observation angles
 IF (.NOT.ALLOCATED(lidf)) ALLOCATE(lidf(nli))
-CALL leafangles(LIDFa,LIDFb)
+CALL leafangles(LIDFa,LIDFb,lidf)
 
 ! Define layers
 !IF (.NOT.ALLOCATED(xlay)) ALLOCATE(xlay(nl))
@@ -1788,7 +1788,7 @@ END SUBROUTINE calctav
 !function [lidf]=  leafangles(a,b)
 !% Subroutine FluorSail_dladgen
 
-SUBROUTINE leafangles(a,b)                                     
+SUBROUTINE leafangles(a,b,lidf)                                     
 
 !function [lidf]=  leafangles(a,b)                                     
 !% Subroutine FluorSail_dladgen
@@ -1811,6 +1811,9 @@ IMPLICIT NONE
 
 !Input variables 
 REAL, INTENT(IN)                    :: a,b
+
+!Output variables
+REAL, DIMENSION(:), INTENT(OUT)     :: lidf
 
 ! Local variables 
  REAL, DIMENSION(1,13)                :: F 
