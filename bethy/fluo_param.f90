@@ -78,7 +78,7 @@ MODULE fluo_param
 !    return    
 !end
 
-USE bio_func
+USE fluo_func
 
 IMPLICIT NONE 
 
