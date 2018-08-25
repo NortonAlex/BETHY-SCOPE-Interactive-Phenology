@@ -384,7 +384,7 @@ INTEGER                              :: ireg
 !Fluspect output
 REAL, ALLOCATABLE, DIMENSION(:,:)    :: MfI, MbI, MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:)      :: rho, tau, rs
-REAL, ALLOCATABLE, DIMENSION(:)      :: kClrel
+REAL, ALLOCATABLE, DIMENSION(:)      :: kChlrel
 
 !Leafangles output
 REAL, ALLOCATABLE, DIMENSION(:)      :: lidf
@@ -789,7 +789,7 @@ DEALLOCATE(MbII)
 DEALLOCATE(rho)
 DEALLOCATE(tau)
 DEALLOCATE(rs)
-DEALLOCATE(kClrel)
+DEALLOCATE(kChlrel)
 !Deallocate leafangles output
 DEALLOCATE(lidf)
 
