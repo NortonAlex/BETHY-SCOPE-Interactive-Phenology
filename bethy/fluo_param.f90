@@ -676,7 +676,7 @@ nwl = nwlS
 IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(nwlS))
 wl =  wlS
 
-IF (.NOT.ALLOCATED(tau)) ALLOCATE(rho(nwl))
+IF (.NOT.ALLOCATED(rho)) ALLOCATE(rho(nwl))
 IF (.NOT.ALLOCATED(tau)) ALLOCATE(tau(nwl))
 IF (.NOT.ALLOCATED(rs)) ALLOCATE(rs(nwl))
 
