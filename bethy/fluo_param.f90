@@ -109,12 +109,12 @@ REAL, ALLOCATABLE, DIMENSION(:)          :: wl,resolution,xlay
 REAL, ALLOCATABLE, DIMENSION(:)          :: psi_,tto_
 REAL, ALLOCATABLE, DIMENSION(:)          :: fEsun, fEsky
 REAL, ALLOCATABLE, DIMENSION(:)          :: wlfi,wlfo
-REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
-REAL, ALLOCATABLE, DIMENSION(:)          :: kChlrel, tran, refl 
-REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
+!REAL, ALLOCATABLE, DIMENSION(:)          :: lidf
+REAL, ALLOCATABLE, DIMENSION(:)          :: tran, refl 
+!REAL, ALLOCATABLE, DIMENSION(:)          :: rho,tau,rs 
 REAL, ALLOCATABLE, DIMENSION(:)          :: prm
-REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfI, MbI
-REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfII, MbII
+!REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfI, MbI
+!REAL, ALLOCATABLE, DIMENSION(:,:)        :: MfII, MbII
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: prm_
 
 INTEGER, ALLOCATABLE, DIMENSION(:)       :: iwlo,iwlt, litab,lazitab
@@ -1168,7 +1168,7 @@ END SUBROUTINE layers
 
 
 !function [refl,tran,Mb,Mf] = fluspect(leafpar, optipar)
-SUBROUTINE fluspect(leafpar)
+SUBROUTINE fluspect(leafpar,MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel)
 
 !% calculates reflection and transmission of a leaf using FLUSPECT
 !%
@@ -1216,6 +1216,9 @@ REAL, INTENT(IN), DIMENSION(:)                   :: leafpar
 
 ! Output variables 
 !REAL, INTENT(OUT),  DIMENSION(nwl)                :: tran,refl,kChrel
+REAL, DIMENSION(:,:), INTENT(OUT)                  :: MfI, MbI, MfII, MbII
+REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
+REAL, DIMENSION(:), INTENT(OUT)                    :: kChlrel
 
 ! Local variables 
 REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
@@ -1558,10 +1561,10 @@ if ((fqe1.GT.0) .and. (fqe2.gt.0.))  then
 !print*, ' size wle ', size(wle), ' size wlE ', size(wlE)
 !print*, ' size wlf ', size(wlf), ' size wlF ', size(wlF)
 
-IF (.NOT.ALLOCATED(MbI))  ALLOCATE(MbI(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MfI))  ALLOCATE(MfI(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
-IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
+!IF (.NOT.ALLOCATED(MbI))  ALLOCATE(MbI(size(wlf),size(wle)))
+!IF (.NOT.ALLOCATED(MfI))  ALLOCATE(MfI(size(wlf),size(wle)))
+!IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
+!IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
 
 print*, ' here 1 '
 
