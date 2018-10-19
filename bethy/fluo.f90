@@ -395,7 +395,7 @@ USE mo_grid
 ! Fluo 
 USE fluo_param, ONLY : aggreg,fluspect,leafangles,jatmos_file,atmos_file,spectral_nreg,spectral_start,spectral_end, &
                       & spectral_res,tts,tto,Rin,Rli,Ta,pa,ea,LAI,Vcmo,Oa,Cab,option, &
-                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe,avovc,ardvc, &
+                      & leafbio,Jmo,Cdm,Cw,Csm,N,fqe1,fqe2,avovc,ardvc, &
                       & rho_thermal,tau_thermal,nlazi,nli,nl,psi,Ps,Po,Pso, &
                       & km,Kext,Esun_,Esky_,P,fEsuno,fEskyo,fEsunt,fEskyt,Eplu_,Emin_, &
                       & Lo_,Eout_,Eouto,Eoutt,Rnhs,Rnus,Rnhc,Rnuc,Pnhc,Pnuc,Pnhc_Cab, &
@@ -596,7 +596,7 @@ CALL pb_hour_bethy(hm)
 !$OMP PARALLEL DO DEFAULT(FIRSTPRIVATE) SHARED(vp,gridp,ok,lat,lon,imonth) &
 !$OMP& SHARED(spectral_nreg,spectral_start,spectral_end,spectral_res,hm,doy) & 
 !$OMP& SHARED(irrin,lwd,temp,pres,ea0,zlai,vg_nv,vm,frac,Cca,COa) &
-!$OMP& SHARED(jmf,Cw,N,fqe) &
+!$OMP& SHARED(jmf,Cw,N,fqe1,fqe2) &
 !$OMP& SHARED(nl,nli,nlazi,faq,EC,EO,EV,ER,EK,kc0,ko0,gcmethod,rfluo,iyear) &
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
@@ -778,18 +778,25 @@ if (pft == 10) option = 1  ! C4 crop plant only
            leafbio(3) = Cw
            leafbio(4) = Csm_arr(jl)
            leafbio(5) = N
-           leafbio(6) = fqe
-           leafbio(7) = rho_thermal
-           leafbio(8) = tau_thermal
+           leafbio(6) = fqe1
+           leafbio(7) = fqe2
+           leafbio(8) = rho_thermal
+           leafbio(9) = tau_thermal
 
 ! Computation of the fluorescence matrices 
   CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel)
-
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
 ! WHICH DEPEND ON LAI
 !  CALL Nlayers(LAI)
 
-
+!print*,' MfI',minval(MfI),maxval(MfI),size(MfI)
+!print*,' MbI',minval(MbI),maxval(MbI),size(MbI)
+!print*,' MfII',minval(MfII),maxval(MfII),size(MfII)
+!print*,' MbII',minval(MbII),maxval(MbII),size(MbII)
+!print*,' rho',minval(rho),maxval(rho),size(rho)
+!print*,' tau',minval(tau),maxval(tau),size(tau)
+!print*,' rs ',minval(rs),maxval(rs),size(rs)
+!print*,' kChlrel ',minval(kChlrel),maxval(kChlrel),size(kChlrel)
 ! Deallocate field with layers 
 !CALL fieldlayer_deallocate
 
@@ -844,7 +851,7 @@ Tcu             = Ta+.3 ! %   Leaf temperature (sunlit leaves)
 
 !print*, 'VERIF ', ' Ca ', Cc, ' Oa ', Oa  
 !print*, 'VERIF ', ' Ta ', Ta, ' pa ', pa  
-!print*, 'VERIF ', ' ea ', ea, ' u ', u  
+!print*, 'VERIF ', ' ea ', ea!, ' u ', u  
 !print*, 'VERIF ', ' lam ', lam  
 !print*, 'VERIF ', ' Rin ', Rin, ' Rli ', Rli  
 !print*, 'VERIF ', ' LAI ', LAI, ' Vcmo ', Vcmo  
@@ -940,10 +947,10 @@ ENDIF
 
 ! Collatz used or GPP 
 ! Shaded leaves 
-CALL biochemical(nlh,Pnhc*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agh,Ah,Fh,rcwh,Cih,avovc,ardvc)
+CALL biochemical(nlh,Pnhc_Cab*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agh,Ah,Fh,rcwh,Cih,avovc,ardvc)
 
 ! Sunlit leaves 
-CALL  biochemical(nlu,reshape(Pnuc,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc)
+CALL  biochemical(nlu,reshape(Pnuc_Cab,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc)
 
 
 ! 3. Calculation of the fluorescence 

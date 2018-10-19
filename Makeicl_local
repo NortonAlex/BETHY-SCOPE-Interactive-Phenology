@@ -11,9 +11,9 @@ DEBUGFLAG       = -g -traceback -fpe0
 #DEBUGFLAG       = -traceback -fpe0 -O0 # -check all,noarg_temp_created,noformat
 RTECHECK        =# -C
 OPTFLAG         =-O3
-F90FLAGS        =  -static -openmp $(INCDIRS)  $(OPTFLAG)
-F90FLAGS       =    --static -openmp $(INCDIRS)  $(RTECHECK) $(OPTFLAG) $(DEBUGFLAG)
-LINKFLAGS      = -openmp $(RTECHECK) $(DEBUGFLAG) 
+F90FLAGS        =  -static $(INCDIRS)  $(OPTFLAG)
+F90FLAGS       =    --static $(INCDIRS)  $(RTECHECK) $(OPTFLAG) $(DEBUGFLAG)
+LINKFLAGS      = $(RTECHECK) $(DEBUGFLAG) 
 #
 NETCDFINCDIR	= 
 NETCDFLIBDIR	= 

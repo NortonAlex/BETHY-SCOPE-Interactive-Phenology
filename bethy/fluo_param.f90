@@ -97,6 +97,10 @@ IMPLICIT NONE
 !resolution
 !global psi tto tto_ psi_ noa 
 
+INTEGER, PARAMETER                       :: natmosfiles = 4
+REAL, ALLOCATABLE, DIMENSION(:,:,:)      :: xdata
+INTEGER                                  :: nwM
+
 INTEGER                                  :: nlazi,nli,noa,nwl,nl
 INTEGER                                  :: nwlfi,nwlfo,nwlt 
 INTEGER                                  :: nwlP,nwlF,nwlS,nwlO,nwlE,nwlPAR
@@ -225,7 +229,8 @@ REAL                                      :: atheta
 REAL                                      :: lam     ![]    Cowan's stomatal parameter (not used in this version of SCOPE) 
 REAL                                      :: Jmo     ! Jmax : maximum electron transport rate table  (not used in this version of scope)
 
-
+REAL                                      :: avovc   ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
+REAL                                      :: ardvc   ! ratio of Rd to Vcmax (equivalent to Rdparam in original SCOPE model)
 
 INTEGER                                   ::  model_choice    ! Fluorescence model_choice integer with
                                        !  0: with sustained quenching after
@@ -339,21 +344,20 @@ REAL, ALLOCATABLE, DIMENSION(:,:)        :: rsfile
 ! 10.3 MODTRAN output spectrum (used as input for SCOPE)
 CHARACTER(len=80)                        :: path_atmos_file = './input/scope/radiationdata/'
 CHARACTER(len=80)                        :: atmos_file
+CHARACTER(len=80)                        :: modtran_std   ! The atmosphere files, std for standard atmosphere
 CHARACTER(len=80)                        :: modtran_trop   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
 CHARACTER(len=80)                        :: modtran_wint   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
 CHARACTER(len=80)                        :: modtran_sum   ! The atmosphere files, sum for summer, wint for winter and trop for tropics
 
 REAL, ALLOCATABLE,DIMENSION(:,:)         :: atmoM
-
+INTEGER                                  :: jatmos_file
 
 ! 10.4 observation angles in case of BRDF calculation
 CHARACTER(len=80)                        :: brdf_file = './input/scope/directional/brdf_angles2.dat'
 INTEGER                                  :: nangles      ! lines brdf_file file
 REAL, ALLOCATABLE, DIMENSION(:,:)        :: angles
 
-
-
-
+!$OMP THREADPRIVATE(rho_thermal,tau_thermal,tran,refl,atmoM)
 
 ! ------------------------------------------------------------------------------------------------
 
@@ -434,6 +438,8 @@ Kd0          = 0.95                        !% [] rate constant for thermal deact
 Kpc0         = 4.0                         !% [] rate constant for photochemisty
 atheta       = 0.8
 lam          = 750.                        ![]    Cowan's stomatal parameter (not used in this version of SCOPE)
+avovc        = 0.22                        ! ratio of Vomax to Vcmax (assumed constant in original SCOPE model)
+ardvc        = 0.015                       ! ratio of Rd to Vcmax (equivalent to Rdparam but an input parameter from paramlist)
 
 model_choice = 0                       ! Fluorescence model_choice integer with
                                        !  0: with sustained quenching after
@@ -481,7 +487,7 @@ Ca           = 380.                        ! (ppm) Atmospheric concentration
 Oa           = 209.                        ! (ppm) Atmospheric O2 concentration
 
 !6. Canopy 
-LAI          = 2.                          ! (m2 m-2) Leaf area index  
+LAI          = 3.                          ! (m2 m-2) Leaf area index  
 hc           = 1.                          ! (m)Leaf vegetation height 
 LIDFa        = -0.35                       ! Leaf inclination 
 LIDFb        = -0.15                       ! Variation in leaf inclination 
@@ -505,7 +511,7 @@ SoilHeatMethod =1
 ! 8. Angles 
 tts          = 30.                         ! (deg) Solar zenith angle  
 tto          = 0.                          ! (deg) Observation zenith angle 
-psi          = 90.                          ! (deg) Azimuthal difference between solar and observations angles 
+psi          = 0.                          ! (deg) Azimuthal difference between solar and observations angles 
 
 ! 
 !%9. Energy balance 
@@ -754,6 +760,8 @@ CALL leafangles(LIDFa,LIDFb,lidf)
 !IF (.NOT.ALLOCATED(xlay)) ALLOCATE(xlay(nl))
 !CALL layers
 !dx     = abs(xlay(2)-xlay(1))                          !  %
+IF (.NOT.ALLOCATED(tto_)) ALLOCATE(tto_(nangles))
+IF (.NOT.ALLOCATED(psi_)) ALLOCATE(psi_(nangles))
 
 tto_   = angles(:,1)      ! %[deg]  Observation zenith Angles for calcbrdf
 psi_   = angles(:,2)      !  %[deg]  Observation zenith Angles for calcbrdf
@@ -804,6 +812,13 @@ ALLOCATE(Eout_(nwl))
 ALLOCATE(Lout_(nwl))
 ALLOCATE(Lo_(nwl))
 
+ALLOCATE(Esun_(nwl))
+ALLOCATE(Esky_(nwl))
+ALLOCATE(fEsuno(nwl))
+ALLOCATE(fEskyo(nwl))
+ALLOCATE(fEsunt(nwl))
+ALLOCATE(fEskyt(nwl))
+
 ! Output from rtmf 
 ALLOCATE(LoF(nwlfo))
 ALLOCATE(Fhem(nwlfo))
@@ -832,12 +847,12 @@ ALLOCATE(Ps(nl+1))
 ALLOCATE(Po(nl+1))
 ALLOCATE(Pso(nl+1))
 !print*, ' 1 '
-ALLOCATE(Esun_(nwl))
-ALLOCATE(Esky_(nwl))
-ALLOCATE(fEsuno(nwl))
-ALLOCATE(fEskyo(nwl))
-ALLOCATE(fEsunt(nwl))
-ALLOCATE(fEskyt(nwl))
+!ALLOCATE(Esun_(nwl))
+!ALLOCATE(Esky_(nwl))
+!ALLOCATE(fEsuno(nwl))
+!ALLOCATE(fEskyo(nwl))
+!ALLOCATE(fEsunt(nwl))
+!ALLOCATE(fEskyt(nwl))
 
  ! print*, ' 2'
 ! Output variables from rtmt 
@@ -865,9 +880,9 @@ IMPLICIT NONE
 DEALLOCATE(Rnuc,Pnuc,Pnuc_Cab)
 DEALLOCATE(Rnhc,Pnhc,Pnhc_Cab)
 DEALLOCATE(Eplu_,Emin_)
-DEALLOCATE(Esun_,Esky_)
-DEALLOCATE(fEsuno,fEskyo)
-DEALLOCATE(fEsunt,fEskyt)
+!DEALLOCATE(Esun_,Esky_)
+!DEALLOCATE(fEsuno,fEskyo)
+!DEALLOCATE(fEsunt,fEskyt)
 DEALLOCATE(Ps,Po,Pso)
 DEALLOCATE(xlay,Fc)
 
@@ -953,6 +968,7 @@ IF (.NOT.ALLOCATED(wl)) ALLOCATE(wl(ntot-1))
      wl =  wlS     
 !print*, ' min max wlS ', minval(wlS), maxval(wlS), sum(wlS)
 !print*, ' wlS ', wlS 
+!print*,'  size wlS ',size(wlS)
 
 !    % Other spectral (sub)regions
 IF (.NOT.ALLOCATED(wlP)) ALLOCATE(wlP(n1))
@@ -1004,7 +1020,12 @@ IF (.NOT. ALLOCATED(ilist_freq_sat)) ALLOCATE(ilist_freq_sat(nfreq))
  end do 
 
 
-
+!print*,' nF ',nF
+!print*,' ntot ',ntot
+!print*,' nfreq ',nfreq
+!print*,' freq0 ',freq0
+!print*,' dfreq ',dfreq
+!print*,' wlF ',minval(wlF),maxval(wlF),size(wlF)
 
 
 !print*, ' nF ', nF, ' ntot ', ntot, ' notot-1 ', ntot-1
@@ -1222,7 +1243,8 @@ REAL, DIMENSION(:), INTENT(OUT)                    :: rho, tau, rs
 REAL, DIMENSION(:), INTENT(OUT)                    :: kChlrel
 
 ! Local variables 
-REAL                                                :: Cab,Csm,Cw,Cdm,N,fqe,prat
+REAL                                                :: Cab,Csm,Cw,Cdm,N
+REAL                                                :: fqe1,fqe2,prat
 REAL, DIMENSION(nwlP)                               :: nr,Kdm,Kab,Kw, Ks 
 REAL, DIMENSION(nwlP)                               :: phiI, phiII, Kall,t1,t2,taut
 REAL, DIMENSION(nwlP)                               :: talf,ralf
@@ -1282,7 +1304,6 @@ REAL, DIMENSION(nwl)                               :: intexp
 !% fixed parameters for the fluorescence module
 ndub        = 15
 
-!print*, 'leafpar ', leafpar 
 
 
 !% Fluspect parameters
@@ -1392,9 +1413,16 @@ taut(j)      = t1(j)+t2(j)
 kChlrel     = 0.
 kChlrel(j)   = Cab*Kab(j)/(Kall(j)*N)
 
+!print*,'before 1st calctav call:'
+!print*,'   nr  ::',minval(nr), maxval(nr),sum(nr)
+!print*,'size(nr):',size(nr)
+!print*,' talf  ::',minval(talf), maxval(talf),sum(talf)
+!print*,'size(talf):',size(talf)
+!print*,'  t12  ::',minval(t12), maxval(t12),sum(t12)
+!print*,'size(t12):',size(t12)
 CALL  calctav(59,nr,talf)
 ralf        = 1.-talf
-
+!print*,'before 2nd calctav call:'
 CALL  calctav(90,nr,t12)
 r12         = 1.-t12
 t21         = t12/(nr**2)
@@ -1476,7 +1504,10 @@ Rsub(jj)     = 1.-Tsub(jj)
 
 
 ! Reflectance and transmisttance of the leaf: combine top layer with next N-1
-! layers 
+! layers
+IF (.NOT.ALLOCATED(tran)) ALLOCATE(tran(nwlP))
+IF (.NOT.ALLOCATED(refl)) ALLOCATE(refl(nwlP))
+
 denom      =  1.-Rsub*r 
  tran      =  Taf*Tsub/denom  
  refl      =  Ra+Taf*Rsub*t/denom 
@@ -1567,10 +1598,9 @@ if ((fqe1.GT.0) .and. (fqe2.gt.0.))  then
 !IF (.NOT.ALLOCATED(MbII)) ALLOCATE(MbII(size(wlf),size(wle)))
 !IF (.NOT.ALLOCATED(MfII)) ALLOCATE(MfII(size(wlf),size(wle)))
 
-print*, ' here 1 '
 
-wII         = prat/(1.+prat)
-wI          = 1.-wII
+!wII         = prat/(1.+prat)
+!wI          = 1.-wII
 eps         = 2.**(-ndub)
 
 !% initialisations
@@ -1582,7 +1612,6 @@ IF (.NOT.ALLOCATED(ren)) ALLOCATE(ren(size(wle)))
 IF (.NOT.ALLOCATED(Ih))  ALLOCATE(Ih(1,size(wle)))
 IF (.NOT.ALLOCATED(we))  ALLOCATE(we(1,size(wle)))
 
-!print*, ' here 11 '
 
 IF (.NOT.ALLOCATED(tf))  ALLOCATE(tf(size(wlf)))
 IF (.NOT.ALLOCATED(rf))  ALLOCATE(rf(size(wlf)))
@@ -1592,7 +1621,6 @@ IF (.NOT.ALLOCATED(rfn)) ALLOCATE(rfn(size(wlf)))
 IF (.NOT.ALLOCATED(Iv))  ALLOCATE(Iv(size(wlf),1))
 IF (.NOT.ALLOCATED(wf))  ALLOCATE(wf(size(wlf),1))
 
-!print*, ' here 12 '
 
 !print*, ' s ', size(s) , ' k ', size(k), ' te ', size(te)
 !print*, ' eps ', eps
@@ -1613,13 +1641,11 @@ we(1,:) = wle
 !wf(:,1) = wl(Iwlf)
 wf(:,1) = wlf
 
-
 !print*, ' here iiiii ' 
 IF (.NOT.ALLOCATED(siglelf)) ALLOCATE(siglelf(size(wlf),size(wle)))
 !siglelf     = 1./(1+exp((Iv*wl(wle)' - wl(wlf)*Ih)*1E2));
 siglelf   = 1./(1.+exp((matmul(Iv,we)- matmul(wf,Ih))*1E2))
 
-!print*, ' here 13 '
 !sigmoid     = 1./(1+exp(-wlf/10)*exp(wle'/10));  % matrix computed as an outproduct
 IF (.NOT.ALLOCATED(sigmoid)) ALLOCATE(sigmoid(size(wlf),size(wle)))
 sigmoid     = 1./(1+matmul(exp(-wf/10.),exp(we/10.)))   !  % matrix computed as an outproduct
@@ -1640,7 +1666,6 @@ wf(:,1) = 0.5*phiI(Iwlf)*eps
 MfI = fqe1* (matmul(wf,we)*sigmoid)
 MbI = MfI
 
-
 !wf(:,1) = (wII*phiII(Iwlf))*eps
 wf(:,1) = 0.5*phiII(Iwlf)*eps
 !MfII = .5*fqe* (matmul(wf,we)*sigmoid)
@@ -1653,20 +1678,16 @@ MbII = MfII
 !print*, ' in fluspect MfII ', minval(MfII), maxval(MfII), sum(MfII)
 
 
-!print*, ' here 21 '
 IF (.NOT.ALLOCATED(MbnI))  ALLOCATE(MbnI(size(wlf),size(wle)))
 IF (.NOT.ALLOCATED(MfnI))  ALLOCATE(MfnI(size(wlf),size(wle)))
 IF (.NOT.ALLOCATED(MbnII)) ALLOCATE(MbnII(size(wlf),size(wle)))
 IF (.NOT.ALLOCATED(MfnII)) ALLOCATE(MfnII(size(wlf),size(wle)))
 
-!print*, ' here 22 '
 IF (.NOT.ALLOCATED(wxe)) ALLOCATE(wxe(1,size(wle)))
 IF (.NOT.ALLOCATED(wre)) ALLOCATE(wre(1,size(wle)))
 IF (.NOT.ALLOCATED(wxf)) ALLOCATE(wxf(size(wlf),1))
 IF (.NOT.ALLOCATED(wrf)) ALLOCATE(wrf(size(wlf),1))
 
-!print*, ' here 3'
- 
 !% doubling routine
 DO i = 1,ndub
     xe      = te/(1-re*re)
@@ -1710,6 +1731,7 @@ DO i = 1,ndub
 
 
 END DO 
+
 
 DEALLOCATE(te,re,xe,ten,ren,Ih,we)
 DEALLOCATE(mask,j)
@@ -1769,16 +1791,16 @@ IMPLICIT NONE
 
 ! Input variables 
 INTEGER, INTENT(IN)                 :: alfa
-REAL, INTENT(IN), DIMENSION(nwl)    :: nr 
+REAL, INTENT(IN), DIMENSION(nwlP)   :: nr 
 
 ! Ouput variables 
-REAL, INTENT(OUT), DIMENSION(nwl)   :: tav 
+REAL, INTENT(OUT), DIMENSION(nwlP)  :: tav 
 
 ! Local variables  
 REAL, PARAMETER                     :: pi = 3.1415926535879 
-REAL, DIMENSION(nwl)                :: np,n2,nm,a,k
-REAL, DIMENSION(nwl)                :: b1,b2,b,b3,a3,ts
-REAL, DIMENSION(nwl)                :: tp1,tp2,tp3,tp4,tp5,tp
+REAL, DIMENSION(nwlP)               :: np,n2,nm,a,k
+REAL, DIMENSION(nwlP)               :: b1,b2,b,b3,a3,ts
+REAL, DIMENSION(nwlP)               :: tp1,tp2,tp3,tp4,tp5,tp
 REAL                                :: sa, rd
  
 INTEGER                             :: i
@@ -1792,7 +1814,16 @@ k           = -(n2-1)*(n2-1)/4
 sa          = sin(alfa*rd)
 
 
-
+!print*,'in calctav:'
+!print*,'  nr:',minval(nr),maxval(nr),sum(nr)
+!print*,'    size(nr):',size(nr)
+!print*,'  n2:',minval(n2),maxval(n2),sum(n2)
+!print*,'    size(n2):',size(n2)
+!print*,'  sa=',sa
+!print*,'  np:',minval(np),maxval(np),sum(np)
+!print*,'    size(np):',size(np)
+!print*,'  k::',minval(k),maxval(k),sum(k)
+!print*,'    size(k):',size(k)
 !b1          = (alfa~=90)*sqrt((sa**2-np/2)*(sa**2-np/2)+k)
 b1 = 0. 
 if (alfa.ne.90)  b1  = sqrt((sa**2-np/2)*(sa**2-np/2)+k)
@@ -1925,7 +1956,7 @@ END SUBROUTINE dcum
   SUBROUTINE Nlayers(LAI)
 
    REAL, INTENT(IN)         :: LAI
-   nl =anint(LAI) *10
+   nl = anint(LAI) *10
    if (nl ==0) nl =10
 
 END SUBROUTINE Nlayers
@@ -1937,7 +1968,7 @@ IMPLICIT NONE
 integer :: iatmosfile
 CHARACTER(len=80)                        :: atmfile
 
-print*,'In subroutine: read_modtran_files'
+!print*,'In subroutine: read_modtran_files'
 
 ! Use of standard atmosphere
 iatmosfile = 1
@@ -1991,8 +2022,8 @@ character(len = 300) :: header
 integer, parameter :: inunit = 1537
 integer              :: i
 
-print *,'In subroutine: read_atm_files'
-print *,'atmosfile: ', atmosfile
+!print *,'In subroutine: read_atm_files'
+!print *,'atmosfile: ', atmosfile
 
 OPEN(unit=inunit,file=atmosfile,status='old')
 REWIND inunit
@@ -2024,7 +2055,7 @@ END SUBROUTINE read_atm_files
 
  !function [M] = aggreg(atmfile,SCOPEspec)
 
- SUBROUTINE aggreg (atmosfile,nreg,streg,enreg,width) 
+ SUBROUTINE aggreg (iatmosfile,nreg,streg,enreg,width) 
 
  IMPLICIT NONE 
 
@@ -2047,7 +2078,7 @@ REAL, DIMENSION(3),INTENT(IN)                :: streg,enreg,width
 !REAL,   ALLOCATABLE,DIMENSION(:,:)           :: xdata
 INTEGER,PARAMETER                            :: inunit = 2
 REAL,  ALLOCATABLE,DIMENSION(:)              :: wlM
-REAL,  ALLOCATABLE,DIMENSION(:,:)            :: U 
+REAL,  ALLOCATABLE,DIMENSION(:,:)            :: Udata 
 INTEGER                                      :: iwl,r,i,k
 INTEGER                                      :: nwS
 INTEGER, DIMENSION(3)                        :: nwreg,off  
@@ -2059,10 +2090,10 @@ REAL                                         :: w
 !% Aggregate MODTRAN data over SCOPE bands by averaging (over rectangular band
 !% passes)
 
-print*, ' nreg ', nreg 
-print*,  'streg ', streg 
-print*, ' enreg ', enreg
-print*, 'width ', width
+!print*, ' nreg ', nreg 
+!print*,  'streg ', streg 
+!print*, ' enreg ', enreg
+!print*, 'width ', width
 
 !% Read .atm file with MODTRAN data
 !s   = importdata(atmfile);
@@ -2078,9 +2109,9 @@ print*, 'width ', width
 !1000 CONTINUE
 !CLOSE(inunit)
 !print*, ' nwM ', nwM 
-
-IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(nwM,20))
-
+!IF (.NOT.ALLOCATED(xdata)) ALLOCATE(xdata(nwM,20))
+IF (.NOT.ALLOCATED(xdata)) print*,'xdata not allocated'
+IF (.NOT.ALLOCATED(xdata)) stop 'xdata not available ....'
 !OPEN(unit=inunit,file=atmosfile,status='old')
 !REWIND inunit
 !READ(inunit,*) header
@@ -2143,7 +2174,7 @@ Udata(:,6) = xdata(iatmosfile,:,18)
 !nwreg = int32((enreg-streg)./width)+1;
 nwreg = int((enreg-streg)/width)+1
 
-print*, ' nwreg', nwreg 
+!print*, ' nwreg', nwreg 
 
 !off   = int32(zeros(nreg,1));
 off   =  0
@@ -2160,10 +2191,10 @@ END DO
 
 !nwS = sum(nwreg);
 nwS = sum(nwreg)
-print* , ' nwS ', nwS 
+!print* , ' nwS ', nwS 
 
 !n   = zeros(nwS,1);    !% Count of MODTRAN data contributing to a band
-IF (.NOT.ALLOCATED(n)) ALLOCATE(n(nwS))
+IF (.NOT.ALLOCATED(nk)) ALLOCATE(nk(nwS))
 nk = 0
 
 
@@ -2206,7 +2237,7 @@ DO iwl = 1,nwM
             !print*, ' k ', k, ' j r ', j(r), ' off ', off(r), ' n ', n(k) , iwl 
             !print*, 'BEFORE S ', S(k,:)
 
-            S(k,:) = S(k,:)+U(iwl,:)           !    % Accumulate from contributing MODTRAN data
+            S(k,:) = S(k,:)+Udata(iwl,:)           !    % Accumulate from contributing MODTRAN data
             nk(k)   = nk(k)+1                    !    % Increment count 
             !print*, '  U ', iwl,U(k,:) 
             !print*, 'AFTER S ', S(k,:) 
@@ -2225,9 +2256,9 @@ DO  i = 1,6
 !print*, 'n ',  i,minval(n), maxval(n), sum(n) 
 END DO 
 
-print*,minval(atmoM), maxval(atmoM), sum(atmoM)
+!print*,minval(atmoM), maxval(atmoM), sum(atmoM)
 
-DEALLOCATE(xdata,wlM,S,Udata,j,nk)
+DEALLOCATE(wlM,S,Udata,j,nk)
 
 END SUBROUTINE aggreg
 
