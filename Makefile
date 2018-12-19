@@ -152,8 +152,8 @@ CPP		= cpp
 CPPFLAGS	= -P -traditional -DNFTLMY=$(NFTLMY) -DNPADM=$(NPADM) -DNPROJ=$(NGRID) -DNPTLM=$(NPTLM) -DNITLM=$(NITLM) -D$(PCASE) -D$(FCASE) -D$(RESOLUTION) -D$(DIAGOUT) -D$(TAFTAPE) -D$(INPUT)
 #
 # Choose the compiler: either "NAG", "FUJITSU" or "INTEL"
-COMPILER        = FUJITSU
-#COMPILER        = INTEL
+#COMPILER        = FUJITSU
+COMPILER        = INTEL
 ifeq ($(COMPILER),FUJITSU)# Fujitsu Fortran90/95 Compiler
 	F90		= lf95 
 	FC              = $(F90)
@@ -173,7 +173,7 @@ ifeq ($(COMPILER),INTEL)# INTEL Compiler
 	DBL             = -autodouble# turn off double precision
 	DEBUGFLAG       = -g # -mp -C -inline_debug_info
 	RTECHECK        = -C
-	OPTFLAG         = -O3#-xW -tpp7 
+#	OPTFLAG         = -O3#-xW -tpp7 
 	F90FLAGS        =  $(INCDIRS) $(OPTFLAG)
 	F90FLAGS        =  $(INCDIRS) $(DEBUGFLAG) 
 	FFLAGS        	=  $(F90FLAGS)  

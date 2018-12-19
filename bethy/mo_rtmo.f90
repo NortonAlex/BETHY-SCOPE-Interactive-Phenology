@@ -481,7 +481,12 @@ w           = sob*rho + sof*tau            !% [nwl]     w,      p309{1} bidirect
 a           = 1-sigf                       !% [nwl]     attenuation
 !m           = sqrt(a.^2-sigb.^2);          !% [nwl]
 m           = sqrt(a**2-sigb**2)           !% [nwl]
-rinf        = (a-m)/sigb                  !% [nwl]
+!rinf        = (a-m)/sigb                  !% [nwl]
+where(sigb.eq.0)
+   rinf = (a-m)/1.0e-10
+elsewhere
+   rinf        = (a-m)/sigb                  !% [nwl]
+endwhere
 rinf2       = rinf*rinf                   !% [nwl]
 
 !print*, ' sigb ', minval(sigb), maxval(sigb), sum(sigb)

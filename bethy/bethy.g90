@@ -254,7 +254,7 @@ print *, 'tdays =', tdays
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
               ! option to give prescribed lai (from file) to fluorescence calculations
-              IF ( inho == 13 ) THEN
+!              IF ( inho == 13 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX, & 
                                 & zlai, &
@@ -265,7 +265,7 @@ print *, 'tdays =', tdays
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
-              ENDIF         ! for selected time of fluo computation
+!              ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 
