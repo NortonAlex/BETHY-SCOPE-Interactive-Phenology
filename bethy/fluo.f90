@@ -783,6 +783,27 @@ if (pft == 10) option = 1  ! C4 crop plant only
            leafbio(8) = rho_thermal
            leafbio(9) = tau_thermal
 
+!! Option for seasonal variation in parameters.
+!! - we give these parameters seasonal variability based on a sine function with
+!!   the maximum on the summer solstice and minimum on winter solstice.
+!IF (pft.eq.1.or.pft.eq.3.or.pft.eq.5.or.pft.eq.7.or.pft.eq.11.or.pft.eq.12) THEN
+!   IF (Lati.gt.0) THEN
+!      leafbio(1) = Cab + Cab * 0.1 * SIN(2*3.14159/365*(doy-81))
+!      Vcmo = Vcmo + Vcmo * 0.1 * SIN(2*3.14159/365*(doy-81))
+!   ELSE
+!      leafbio(1) = Cab + Cab * 0.1 * SIN(2*3.14159/365*(doy-264))
+!      Vcmo = Vcmo + Vcmo * 0.1 * SIN(2*3.14159/365*(doy-264))
+!   ENDIF
+!ELSE
+!   IF (Lati.gt.0) THEN
+!      leafbio(1) = Cab + Cab * 0.5 * SIN(2*3.14159/365*(doy-81))
+!      Vcmo = Vcmo + Vcmo * 0.5 * SIN(2*3.14159/365*(doy-81))
+!   ELSE
+!      leafbio(1) = Cab + Cab * 0.5 * SIN(2*3.14159/365*(doy-264))
+!      Vcmo = Vcmo + Vcmo * 0.5 * SIN(2*3.14159/365*(doy-264))
+!   ENDIF
+!ENDIF
+
 ! Computation of the fluorescence matrices 
   CALL fluspect(leafbio,MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel)
 ! ALLOCATE ARRAYS DEPENDING ON LAI THAT THEY ARE OK FOR THE SELECTED LAYERS
