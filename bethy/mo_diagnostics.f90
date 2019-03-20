@@ -35,6 +35,7 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rapar_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: raparcab_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpar_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rswdown_diurnal
 
 contains
 
@@ -120,6 +121,8 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   raparcab_diurnal = -999.9
   ALLOCATE( rpar_diurnal (0:nrun,365,tspd,vp) )
   rpar_diurnal = -999.9
+  ALLOCATE( rswdown_diurnal (0:nrun,365,tspd,vp) )
+  rswdown_diurnal = -999.9
   !WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
   ALLOCATE( raet(0:nrun,outt,ng) )
   raet = 0.
@@ -224,6 +227,7 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( rapar_diurnal )
   DEALLOCATE( raparcab_diurnal)
   DEALLOCATE( rpar_diurnal )
+  DEALLOCATE( rswdown_diurnal )
 
 
 END SUBROUTINE diagnostics_deallocate
