@@ -379,7 +379,8 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & jmf,vm,EC,EO,EV,ER,EK,kc0,ko0,vomf,rdf,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                   & rfluo_diurnal,rgppfluo_diurnal,&
-                  & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal)
+                  & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal,&
+                  & rswdown_diurnal,rpres_diurnal,rta_diurnal,rea_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -508,6 +509,7 @@ REAL, DIMENSION(0:nrun,outt,ng), INTENT(out) :: rfluo,rgppfluo
 REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rswdown_diurnal,rpres_diurnal,rta_diurnal,rea_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -601,7 +603,8 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
-!$OMP& SHARED (rpar_diurnal,vps,block_vps,vomf,rdf) &
+!$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rpres_diurnal,rta_diurnal,rea_diurnal) &
+!$OMP& SHARED(vps,block_vps,vomf,rdf) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P)
@@ -1051,6 +1054,10 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      rapar_diurnal(iyear,iday0,t,jl) = Pntot*1e6*frac1
      raparcab_diurnal(iyear,iday0,t,jl) = Pntot_Cab*1e6*frac1
      rpar_diurnal(iyear,iday0,t,jl) = P*1e3*frac1
+     rswdown_diurnal(iyear,iday0,t,jl) = Rin      ! units: W m-2
+     rpres_diurnal(iyear,iday0,t,jl) = pa      ! air pressure, units: hPa
+     rta_diurnal(iyear,iday0,t,jl) = Ta        ! air temperature, units: oC
+     rea_diurnal(iyear,iday0,t,jl) = ea        ! vapour pressure, units: hPa
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
