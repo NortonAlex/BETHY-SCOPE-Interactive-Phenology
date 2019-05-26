@@ -169,11 +169,13 @@ CONTAINS
     DEALLOCATE (iload)
 
     ! read prescribed LAI
+    ! note: plai_file must be a single space delimited ascii file with the
+    ! the rows=vp and columns=sdays (i.e. number of simulated days).
     ! assume unit number 79 unused
     open(unit=79,file=plai_file,form='formatted',status='old')
     rewind 79
     do i = 1,vp
-       read(79,*) (prescribed_lai(i,j),j=1,12)
+       read(79,*) (prescribed_lai(i,j),j=1,sdays)
     end do
     close(79)
 
@@ -196,7 +198,7 @@ CONTAINS
     ALLOCATE (coszen(ng), spds(ng), cpds(ng))
     ALLOCATE (htmp(ng,tspd))
     ALLOCATE (zrhos(vp))
-    ALLOCATE (prescribed_lai(vp,12))
+    ALLOCATE (prescribed_lai(vp,sdays))
 
     CALL climsubday_allocate(ng)
 
