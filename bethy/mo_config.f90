@@ -29,7 +29,7 @@ USE break_jobs
 
   ! ANorton ...load initialization fields for fluorescence calcs
   ALLOCATE (vg_nv(vp))
-  ALLOCATE (gridvp(ng,nv))
+  ALLOCATE (gridvp(npoint,nv))
 
 
   ! Load initialization fields
@@ -99,19 +99,19 @@ USE break_jobs
   ca=397.e-6  ! mol co2/mol air
   tmade=.FALSE.
 
-  !ANorton, for additional fluorescence fields.   
-  gridvp = -1
-  DO j=1,ng
-     DO vl=1,nv
-        CTYPE=vtype(j,vl)
-        IF (ctype /= 0) THEN
-           k=k+1
-           vg_nv(k) = CTYPE
-           gridvp(j,vl) = k
-           frac(k)=vfrac(j,vl)
-        ENDIF
-     ENDDO
-  ENDDO
+!  !ANorton, for additional fluorescence fields.   
+!  gridvp = -1
+!  DO j=1,npoint
+!     DO vl=1,nv
+!        CTYPE=vtype(j,vl)
+!        IF (ctype /= 0) THEN
+!           k=k+1
+!           vg_nv(k) = CTYPE
+!           gridvp(j,vl) = k
+!           frac(k)=vfrac(j,vl)
+!        ENDIF
+!     ENDDO
+!  ENDDO
 
 k=0
 

@@ -42,7 +42,7 @@ SUBROUTINE model( nvar, x, fc )
   INTEGER :: k, j, np, i, y, m
   INTEGER :: scale
   REAL :: h1, pnlty
-  print *, 'entered subroutine model.f90'
+
 !$taf init top_tape = static, 1
 ! maxscale = 2
 !$taf init scale_tape = static, 2
@@ -97,49 +97,48 @@ SUBROUTINE model( nvar, x, fc )
 ! first bethy call, global grid
 !------------------------------------------------------------------
      CALL bethy (nchk, dayint, ng, vp, nrun, outt, scale, netflux, faparg)
-     print *,'Passed bethy subroutine call in model.f90'
 
 !------------------------------------------------------------------
 ! do interpolation from bethy to TM grid
 !------------------------------------------------------------------
 !$taf store netflux = top_tape, rec = 1 
 ! netflux only needed for its 'size', should be improved
-!     CALL run_bethy2tm(f_tm) 
-!     print *,'Passed run_bethy2tm subroutine call in model.f90'
+     CALL run_bethy2tm(f_tm) 
+
 ! pjr 04/04/28 add parts for direct fluxes
-!     ALLOCATE( flux_magnitudes( COUNT( xpf == direct_flux)))
+     ALLOCATE( flux_magnitudes( COUNT( xpf == direct_flux)))
 ! collect all the direct_flux parameters from the param vector and scale them by their unc
-!     i_flux = 1
-!     DO i_x = 1, size(xpf)
-!        IF( xpf( i_x) == direct_flux) THEN
-!           flux_magnitudes( i_flux) = x( i_x) * p0su(  i_x) 
-!           i_flux = i_flux + 1
-!        ENDIF
-!     END DO
+     i_flux = 1
+     DO i_x = 1, size(xpf)
+        IF( xpf( i_x) == direct_flux) THEN
+           flux_magnitudes( i_flux) = x( i_x) * p0su(  i_x) 
+           i_flux = i_flux + 1
+        ENDIF
+     END DO
 
 !------------------------------------------------------------------
 ! add background fluxes
 !------------------------------------------------------------------
 !$taf store f_tm = top_tape, rec = 1 
 ! f_tm only needed for its 'size', should be improved
-!     CALL run_bgr ( f_tm , flux_magnitudes)
-!     DEALLOCATE( flux_magnitudes)
-     print *,'Passed run_bgr subroutine call in model.f90'
+     CALL run_bgr ( f_tm , flux_magnitudes)
+     DEALLOCATE( flux_magnitudes)
+
 !------------------------------------------------------------------
 ! now transport it
 !------------------------------------------------------------------
-!     CALL run_tm (glob_offset, f_tm, conc) 
-     print *,'Passed run_tm subroutine call in model.f90'
+     CALL run_tm (glob_offset, f_tm, conc) 
+
 !------------------------------------------------------------------
 ! deallocate climate variables
 !------------------------------------------------------------------
      CALL climate_deallocate (ng, vp, sdays)
-     print *,'Passed climate_deallocate subroutine call in model.f90'
+
 !------------------------------------------------------------------
 ! deallocate calendar variables
 !------------------------------------------------------------------
      CALL deallocate_cal  
-     print *,'Passed deallocate_cal subroutine call in model.f90'
+
 !      if (optpftg) then
 !!         fc = fc + cost_pft(x(nxp+1:nxp+vp),frac_u)
 !         call cost_pft(fc_pft,(x(nxp+1:nxp+vp),frac_u)
@@ -180,11 +179,11 @@ SUBROUTINE model( nvar, x, fc )
 ! deallocate init variables
 !------------------------------------------------------------------
 !     CALL config_deallocate
-!     CALL config_deallocate(ng,vp) ! note: use these if passing dimension to TAF
-!     CALL model_deallocate(outt, nrun, ng, vp)
-!     CALL hydro_deallocate(ng, vp)
-!     CALL pheno_deallocate(vp)
-     print *,'Passed other deallocate subroutine calls in model.f90'
+     CALL config_deallocate(ng,vp) ! note: use these if passing dimension to TAF
+     CALL model_deallocate(outt, nrun, ng, vp)
+     CALL hydro_deallocate(ng, vp)
+     CALL pheno_deallocate(vp)
+
 !------------------------------------------------------------------
 ! .. concentration and FAPAR costfunction global
 !------------------------------------------------------------------
@@ -203,6 +202,101 @@ SUBROUTINE model( nvar, x, fc )
 !==================================================================
 !==================================================================
 
+  IF (n_sites>0) THEN
+
+     PRINT*
+     PRINT*,' BETHY run at flux sites.'
+     scale = 2
+
+! initialise site specific values
+     CALL config_sites (site_file, n_sites) 
+     
+     CALL init_config (n_sites) 
+
+     CALL model_allocate(366, nrs, n_sites, sp)
+     CALL pheno_allocate(sp)
+     CALL hydro_allocate(n_sites,sp,scale)
+
+! distributes site specific physical parameter values
+     CALL mapping( par, nvar, nxp, scale) 
+
+! generates calender and time management
+     CALL calendar(year0_site,year1_site,yearin0,yearin1,nspin,1)
+
+     CALL init_faparl(n_sites, nrs, 366)
+
+! allocates variables for climate input data (dprecip, dtmin, dtmax, dswdown)
+     CALL climate_allocate (n_sites, sp, sdays)
+
+! reads in climate input data
+     CALL get_local_climate
+
+     ALLOCATE(faparl(nrs,366,n_sites))
+
+!------------------------------------------------------------------
+! add term to costfunction if PFT frac <0 or sum(PFT frac) >1, disallow negative fractions
+!------------------------------------------------------------------
+!$taf loop = parallel
+!      np = 1
+!      DO k=1,n_sites
+!         DO j=1,vg(k)
+!            IF (frac(np) < 0.) THEN
+!               fc = fc + mult*frac(np)**2
+!               print*,'Model: negative fraction of ',frac(np),' at sub-gridcell ',np, ' with penalty ',mult*frac(np)**2
+!            ENDIF
+!            sumfrac(k)=sumfrac(k)+frac(np)
+!            np = np + 1
+!         ENDDO
+!      ENDDO
+
+!      DO k=1,n_sites
+!         IF (sumfrac(k) > 1.) THEN
+!            print*,'Model: PFT sum of ',sumfrac(k),' with penalty ', 1.e+3*(1-sumfrac(k))**4
+!            fc = fc + 1.e+3*(1-sumfrac(k))**4
+!         ENDIF
+!      ENDDO
+
+! some diagnostic output for optimsing fractional cover frac
+!------------------------------------------------------------------
+! second bethy call, 1 sites
+!------------------------------------------------------------------
+     CALL bethy (nchk, 1, n_sites, sp, nrs, 366, scale, netflux, faparl)
+
+!------------------------------------------------------------------
+! handling of flux observations: add cost of fluxes
+!------------------------------------------------------------------
+     call cost_flux(fc_flux, netflux, nrs, outt, n_sites)
+     fc = fc + fc_flux
+
+!------------------------------------------------------------------
+! deallocate climate variables
+!------------------------------------------------------------------
+     CALL climate_deallocate(n_sites, sp, sdays)
+
+!------------------------------------------------------------------
+! deallocate calendar variables
+!------------------------------------------------------------------
+     CALL deallocate_cal  
+
+!------------------------------------------------------------------
+! deallocate init variables
+!------------------------------------------------------------------
+!     CALL config_deallocate
+     CALL config_deallocate(n_sites,sp) ! note: use this if passing dimension to TAF
+     CALL model_deallocate(366, nrs, n_sites, sp)
+     CALL hydro_deallocate(n_sites,sp)
+     CALL pheno_deallocate(sp)
+
+!------------------------------------------------------------------
+! .. fapar costfunction at site level: add cost of FAPAR
+!------------------------------------------------------------------
+
+!     fc = fc + cost_faparl(faparl,nrs,366,n_sites) 
+     call cost_faparl(fc_faparl,faparl,nrs,366,n_sites) 
+     fc = fc + fc_faparl 
+     DEALLOCATE(faparl,faparl_obs,faparl_unc)
+
+  ENDIF
 
 !------------------------------------------------------------------
 ! .. parameter contribution to costfunction

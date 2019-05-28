@@ -75,8 +75,8 @@ CASE		= bethy
 MODDIR		= $(TOP)/$(CASE)
 
 #RESOLUTION      = hires
-RESOLUTION      = lores
-#RESOLUTION      = local
+#RESOLUTION      = lores
+RESOLUTION      = local
 
 #* PCASE determines target quantities for prognostic mode
 #PCASE		= GRID# yet to be implemented
