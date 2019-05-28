@@ -1,0 +1,2 @@
+lat lon elev pft frac scene_x_from scene_x_to scene_y_from scene_y_to wmax rhosw rhosd des evap1 site_name
+  40.03-105.55  3050  5  0  0 1.00 0.00 0.00   8   8   8   8  101.0 0.10 0.20  5.01   12.1 ! US-NR1

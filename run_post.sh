@@ -3,7 +3,7 @@
 #PBS -q normal
 #PBS -l walltime=00:10:00
 #PBS -l mem=2GB 
-#PBS -l ncpus=16
+#PBS -l ncpus=1
 #PBS -l wd
 
 fluoro_folder=/home/563/ajn563/short/fluoro2

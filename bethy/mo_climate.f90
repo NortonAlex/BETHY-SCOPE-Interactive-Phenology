@@ -567,19 +567,19 @@ END SUBROUTINE climsubday1
   
     ny = year1_site - year0_site +1
 
-    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.sites.2000-2003.txt',form='formatted')
+    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.txt',form='formatted')
     READ(10,*) endyr
     close(10)
 
     If (year1_site <= endyr) then
-       
+
        DO n = 1,n_sites 
 
           i = 1
           j = 1
 
 !!MS$          IF (site_clim(n)==1) THEN
-             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.sites.2000-2003.txt',form='formatted')
+             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.txt',form='formatted')
              read(10,*) endyr
              READ(10,*) header
              DO WHILE (header .NE. site_names(n)) 
@@ -589,10 +589,10 @@ END SUBROUTINE climsubday1
                 READ(10,*)
                 READ(10,*) header
              END DO
-             READ(10,'(1461f8.2)') dtmax(n,:)
-             READ(10,'(1461f8.2)') dtmin(n,:)
-             READ(10,'(1461f8.2)') dprecip(n,:)
-             READ(10,'(1461f8.2)') dswdown(n,:)
+             READ(10,'(365f8.2)') dtmax(n,:)
+             READ(10,'(365f8.2)') dtmin(n,:)
+             READ(10,'(365f8.2)') dprecip(n,:)
+             READ(10,'(365f8.2)') dswdown(n,:)
              CLOSE(10)
 
 !!MS$          ELSE
@@ -690,7 +690,7 @@ END SUBROUTINE climsubday1
 !!MS$          ENDIF
        ENDDO
     else
-       
+
        do n = 1, n_sites
 
           ! .. allocate temporary memory
