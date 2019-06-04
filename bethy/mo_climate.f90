@@ -58,6 +58,7 @@ MODULE mo_climate
 ! declarations for daily climate input data
 ! precipitation in mm/day
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dprecip, dtmin, dtmax, dswdown, prescribed_lai
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: dlai
 
 CONTAINS
 
@@ -189,6 +190,7 @@ CONTAINS
 
 !$taf next required = ng, sdays
     ALLOCATE (dprecip(ng,sdays), dtmin(ng,sdays), dtmax(ng,sdays), dswdown(ng,sdays))
+    ALLOCATE (dlai(ng,sdays))
     ALLOCATE (motmp(12,ng))
     ALLOCATE (eamin(ng), pair(ng), wspeed(ng), swratio(ng), cloudf(ng), daylen(ng))
     daylen = 0.
@@ -212,7 +214,7 @@ CONTAINS
 
     INTEGER, INTENT(in) :: ng, vp, sdays
 
-    DEALLOCATE (dprecip, dtmin, dtmax, dswdown)
+    DEALLOCATE (dprecip, dtmin, dtmax, dswdown, dlai)
 !$taf next required = ng
     DEALLOCATE (motmp)
 !$taf next required = ng
@@ -483,6 +485,7 @@ END SUBROUTINE climsubday1
  
 ! .. compute various radiation components
     ih = REAL (hour + 0.5)
+
     DO i = 1,ng
       !     check if solar zenith angle > 89 degrees or not
       IF (mu(ih,i)<mutiny) THEN
@@ -567,7 +570,7 @@ END SUBROUTINE climsubday1
   
     ny = year1_site - year0_site +1
 
-    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.txt',form='formatted')
+    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.withlai.txt',form='formatted')
     READ(10,*) endyr
     close(10)
 
@@ -579,7 +582,7 @@ END SUBROUTINE climsubday1
           j = 1
 
 !!MS$          IF (site_clim(n)==1) THEN
-             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.txt',form='formatted')
+             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.withlai.txt',form='formatted')
              read(10,*) endyr
              READ(10,*) header
              DO WHILE (header .NE. site_names(n)) 
@@ -593,6 +596,7 @@ END SUBROUTINE climsubday1
              READ(10,'(365f8.2)') dtmin(n,:)
              READ(10,'(365f8.2)') dprecip(n,:)
              READ(10,'(365f8.2)') dswdown(n,:)
+             READ(10,'(365f8.2)') dlai(n,:)
              CLOSE(10)
 
 !!MS$          ELSE

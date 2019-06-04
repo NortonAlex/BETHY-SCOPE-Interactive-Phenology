@@ -119,6 +119,7 @@ SUBROUTINE numbmod( nx )
      help=0
      WHERE (vtype > 0) help=1
      sp = SUM(help)
+     vp = SUM(help)
 
      IF (optpftl) THEN
         IF (optbsml) THEN
@@ -135,6 +136,16 @@ SUBROUTINE numbmod( nx )
      ENDIF
 
      CALL init_site_mapping(mapping_file_site) ! read in mapping file for site runs 
+
+     ! ANorton.
+     ! Here we initialise the parameters for the calculation of the
+     ! fluoresecence...
+     ! They are linked to SCOPE model. 
+     CALL fluo_initparam
+
+     ! Here we read the fluorescence data and allocate the array for the BETHY
+     ! computed fluorescence 
+     CALL  init_fluobethy( year0, year1)
 
      ! allocate prog for jacobians here to make TAF happy I hope
      ALLOCATE( prog_sites(nrs,366,n_sites))

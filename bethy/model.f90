@@ -260,7 +260,7 @@ SUBROUTINE model( nvar, x, fc )
 !------------------------------------------------------------------
 ! second bethy call, 1 sites
 !------------------------------------------------------------------
-     CALL bethy (nchk, 1, n_sites, sp, nrs, 366, scale, netflux, faparl)
+     CALL bethy (nchk, dayint, n_sites, sp, nrs, 366, scale, netflux, faparl)
 
 !------------------------------------------------------------------
 ! handling of flux observations: add cost of fluxes

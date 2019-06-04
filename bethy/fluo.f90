@@ -1044,7 +1044,7 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      zgppfluo(jl) = zgppfluo(jl)*1.E-6*12.0
 
      ! Output data per vegetation point and per diurnal time-step 
-     it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
+     !it = MOD(t,24.)+1     ! diurnal (sub-day) time index. Allows time (t) 24 to be the first element in the output array
      rfluo_diurnal(iyear,iday0,t,jl) = LoF_jl*frac1
      rgppfluo_diurnal(iyear,iday0,t,jl) = Agtot*frac1
      rlai_diurnal(iyear,iday0,t,jl) = LAI
