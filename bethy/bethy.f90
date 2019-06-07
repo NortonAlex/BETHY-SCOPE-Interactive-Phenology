@@ -333,7 +333,7 @@ print *, 'dayint =',dayint
   !------------------------------------------------------------------
   ! .. write output  
   !------------------------------------------------------------------
-  CALL diagout (ng,vp,scale,outint)
+  CALL diagout (nrun,ng,vp,scale,outint)
   IF (scale == 1) THEN
      flux = rnep(1:,:,:)/1000.
      prog_global(1,:,:,:) = rnep(1:,:,:)/1000.

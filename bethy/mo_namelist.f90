@@ -296,13 +296,14 @@ CONTAINS
        WRITE(6,*) '# initial year for simulation: ', year0_site
        WRITE(6,*) '# end year for simulation:     ', year1_site
 
-       nruns = year1_site-year0_site+1
-       IF (nruns<nspin) THEN
+       nrun = year1_site-year0_site+1
+       IF (nrun<nspin) THEN
           PRINT*,'ATTENTION'
           PRINT*,'Number of spin-up years, ',nspin,', is larger than  number of simulation years, ',nrun
           PRINT*,' The simulation years will be recycled for the spin-up period.'
           PRINT*
        ENDIF
+       WRITE(6,*) '# number of simulation years:  ', nrun
        outt=12
     ENDIF
 

@@ -305,13 +305,14 @@ END SUBROUTINE closeio
 
 !MAS-ADD-040220 nppp
 !WOK-ADD-070725  various diagnostics from hydrology and phenology
-SUBROUTINE diagout (ng,vp,scale,outint)
+SUBROUTINE diagout (nrun,ng,vp,scale,outint)
 
 ! .. Use Statements ..
   USE mo_constants, ONLY: outt, nv, rdays
   USE mo_grid, ONLY: lon, lat, nrs
+  USE mo_climate, ONLY: n_sites
 !HEW-ADD: added nrun, ...
-  USE mo_namelist, ONLY: outdir, nrun, year0, year0_site
+  USE mo_namelist, ONLY: outdir, year0, year0_site
   USE mo_diagnostics, ONLY: rgpp,rnpp,rnep,raet,rpet,ress,resf,rgrw,rmnt,nppp, &
                        &   rrhos,rpasm,rlai,rfpar,rrunoff,rsevp,rsnmelt,rnppp, &
                        &   rgppp, rfparp, rnepp, rfluo, rgppfluo, rrad, rpar, &
@@ -322,7 +323,7 @@ SUBROUTINE diagout (ng,vp,scale,outint)
 
 
 ! .. Arguments ..
-  INTEGER, INTENT(in) :: ng, vp, scale, outint
+  INTEGER, INTENT(in) :: nrun, ng, vp, scale, outint
 
 !!MS$  REAL, DIMENSION(0:nrun,outt,ng), INTENT(inout) :: rgpp,rnpp,rnep,raet
 !!MS$  REAL, DIMENSION(0:nrun,outt,ng), INTENT(inout) :: rpet,ress,resf,rgrw,rmnt
@@ -441,6 +442,14 @@ SUBROUTINE diagout (ng,vp,scale,outint)
 !WOK-CHG-071031 additional output for actual and potential evapotranspiration
      CALL savefield(257,'f8.2',raet,lat,lon,nrs,outt,ng,year0_site)
      CALL savefield(258,'f8.2',rpet,lat,lon,nrs,outt,ng,year0_site)
+! Fluorescence hourly netcdf output
+     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc',rfluo_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc',rgppfluo_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rlai_diurnal.nc',rlai_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rapar_diurnal.nc',rapar_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'raparcab_diurnal.nc',raparcab_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rpar_diurnal.nc',rpar_diurnal,nrs,366,24,vp,sp)
+
   ENDIF
 
 
