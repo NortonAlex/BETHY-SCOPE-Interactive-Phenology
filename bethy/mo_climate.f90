@@ -11,6 +11,7 @@ MODULE mo_climate
 
   INTEGER n_sites ! number of sites including sub_sites
   INTEGER r_sites ! number of sites
+  INTEGER force_lai_flag   ! flag that switches on (=1) if a site LAI file is given
   INTEGER, ALLOCATABLE, DIMENSION(:) :: sub_sites ! number of sub_sites per site
   INTEGER n_stats ! number of stations
   INTEGER, ALLOCATABLE, DIMENSION(:) :: site_clim
@@ -170,14 +171,19 @@ CONTAINS
 
     DEALLOCATE (iload)
 
-    ! read prescribed LAI
-    ! assume unit number 79 unused
-    open(unit=79,file=plai_file,form='formatted',status='old')
-    rewind 79
-    do i = 1,vp
-       read(79,*) (prescribed_lai(i,j),j=1,12)
-    end do
-    close(79)
+    ! Read global-level LAI data if provided.
+    IF (plai_file .ne. 'no_file') THEN
+        print*,'# Using forced LAI data from plai_file'
+        force_lai_flag = 1
+        OPEN(unit=79,file=plai_file,form='formatted',status='old')
+        REWIND 79
+        DO i = 1,vp
+           READ(79,*) (prescribed_lai(i,j),j=1,12)
+        END DO
+        CLOSE(79)
+    ELSE    ! no site LAI file provided in control namelist, so setting it to zero
+        force_lai_flag = 0
+    END IF
 
   END SUBROUTINE get_global_climate
 
@@ -601,6 +607,8 @@ END SUBROUTINE climsubday1
 
              ! Read site-level LAI data if provided.
              IF (site_file_lai .ne. 'no_file') THEN
+                 print*,'# Using forced LAI data from site_file_lai'
+                 force_lai_flag = 1
                  OPEN(unit=80,file=TRIM(site_file_lai),form='formatted')
                  READ(80,*) endyr
                  READ(80,*) header
@@ -616,6 +624,7 @@ END SUBROUTINE climsubday1
                  END DO
                  CLOSE(80)
              ELSE    ! no site LAI file provided in control namelist, so setting it to zero
+                 force_lai_flag = 0
                  dlai = 0.
              END IF
 

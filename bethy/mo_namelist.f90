@@ -80,7 +80,7 @@ MODULE mo_namelist
 
   ! prescribed lai
   ! - global simulations 
-  CHARACTER(len=80) :: plai_file = "inputs/prescribed_lai/modislai_yuan_2015_vp.txt"
+  CHARACTER(len=80) :: plai_file = "no_file"
   ! - site simulations (default is no_file)
   CHARACTER(len=80) :: site_file_lai = "no_file"
 
