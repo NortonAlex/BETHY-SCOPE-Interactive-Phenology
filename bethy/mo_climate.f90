@@ -55,9 +55,10 @@ MODULE mo_climate
 
 !  variables for zenith ankle, used in climin, rad, daytemp
 
-! declarations for daily climate input data
+! declarations for daily climate input data, with dimensions (ng, time)
 ! precipitation in mm/day
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dprecip, dtmin, dtmax, dswdown, prescribed_lai
+! LAI input (sites only), with dimension (vp, time)
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dlai
 
 CONTAINS
@@ -190,7 +191,7 @@ CONTAINS
 
 !$taf next required = ng, sdays
     ALLOCATE (dprecip(ng,sdays), dtmin(ng,sdays), dtmax(ng,sdays), dswdown(ng,sdays))
-    ALLOCATE (dlai(ng,sdays))
+    ALLOCATE (dlai(vp,sdays))
     ALLOCATE (motmp(12,ng))
     ALLOCATE (eamin(ng), pair(ng), wspeed(ng), swratio(ng), cloudf(ng), daylen(ng))
     daylen = 0.
@@ -543,9 +544,9 @@ END SUBROUTINE climsubday1
     USE mo_netcdf
 !txk    USE costf, ONLY: site_names, n_sites, site_clim
     USE mo_constants
-    USE mo_namelist, ONLY : year0_site, year1_site
+    USE mo_namelist, ONLY : year0_site, year1_site, site_file_lai
     USE mo_calendar
-
+    USE mo_grid, ONLY : vp
     IMPLICIT NONE
 
 ! .. Local Arrays ..
@@ -596,8 +597,27 @@ END SUBROUTINE climsubday1
              READ(10,'(365f8.2)') dtmin(n,:)
              READ(10,'(365f8.2)') dprecip(n,:)
              READ(10,'(365f8.2)') dswdown(n,:)
-             READ(10,'(365f8.2)') dlai(n,:)
              CLOSE(10)
+
+             ! Read site-level LAI data if provided.
+             IF (site_file_lai .ne. 'no_file') THEN
+                 OPEN(unit=80,file=TRIM(site_file_lai),form='formatted')
+                 READ(80,*) endyr
+                 READ(80,*) header
+                 DO WHILE (header .NE. site_names(n))
+                    READ(80,*)
+                    READ(80,*)
+                    READ(80,*)
+                    READ(80,*)
+                    READ(80,*) header
+                 END DO
+                 DO i = 1,vp
+                    READ(80,'(365f8.2)') dlai(i,:)
+                 END DO
+                 CLOSE(80)
+             ELSE    ! no site LAI file provided in control namelist, so setting it to zero
+                 dlai = 0.
+             END IF
 
 !!MS$          ELSE
 !!MS$             IF (site_names(n)=='hainich') THEN

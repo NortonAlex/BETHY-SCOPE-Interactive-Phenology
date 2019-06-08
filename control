@@ -41,6 +41,7 @@
  year1_site   = 2003
  site_file    = './control_bethy/site_specs_US-NR1.dat'	
  mapping_file_site = './control_bethy/site_specs_US-NR1_scope.dat.map'
+ site_file_lai = './input/eddy_sites/lai.US-NR1.2003.txt'
  optpftg      = .false.
  optpftl      = .false.
  optbsmg      = .false.
