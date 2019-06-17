@@ -445,13 +445,13 @@ SUBROUTINE diagout (nrun,ng,vp,scale,outint)
      CALL savefield(257,'f8.2',raet,lat,lon,nrs,outt,ng,year0_site)
      CALL savefield(258,'f8.2',rpet,lat,lon,nrs,outt,ng,year0_site)
 ! Fluorescence hourly netcdf output
-     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc',rfluo_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc',rgppfluo_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rlai_diurnal.nc',rlai_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rapar_diurnal.nc',rapar_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'raparcab_diurnal.nc',raparcab_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rpar_diurnal.nc',rpar_diurnal,nrs,366,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rswdown_diurnal.nc',rpar_diurnal,nrs,366,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rfluo_diurnal.nc',rfluo_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rgppfluo_diurnal.nc',rgppfluo_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rlai_diurnal.nc',rlai_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rapar_diurnal.nc',rapar_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'raparcab_diurnal.nc',raparcab_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rpar_diurnal.nc',rpar_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rswdown_diurnal.nc',rpar_diurnal,nrs,365,24,vp,sp)
 
   ENDIF
 
