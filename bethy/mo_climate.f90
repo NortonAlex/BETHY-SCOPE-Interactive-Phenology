@@ -56,10 +56,10 @@ MODULE mo_climate
 
 !  variables for zenith ankle, used in climin, rad, daytemp
 
-! declarations for daily climate input data, with dimensions (ng, time)
+! declarations for daily climate input data, with dimensions (ng, time) 
 ! precipitation in mm/day
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dprecip, dtmin, dtmax, dswdown, prescribed_lai
-! LAI input (sites only), with dimension (vp, time)
+! ! LAI input (sites only), with dimensions (vp, time)
   REAL, ALLOCATABLE, DIMENSION (:,:) :: dlai
 
 CONTAINS
@@ -492,7 +492,6 @@ END SUBROUTINE climsubday1
  
 ! .. compute various radiation components
     ih = REAL (hour + 0.5)
-
     DO i = 1,ng
       !     check if solar zenith angle > 89 degrees or not
       IF (mu(ih,i)<mutiny) THEN
@@ -553,6 +552,7 @@ END SUBROUTINE climsubday1
     USE mo_namelist, ONLY : year0_site, year1_site, site_file_lai
     USE mo_calendar
     USE mo_grid, ONLY : vp
+
     IMPLICIT NONE
 
 ! .. Local Arrays ..
@@ -574,25 +574,25 @@ END SUBROUTINE climsubday1
 
     in_fluxdir = "input/eddy_sites/"
 
-  
+
     ny = year1_site - year0_site +1
 
-    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.withlai.txt',form='formatted')
+    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2015.txt',form='formatted')
     READ(10,*) endyr
     close(10)
 
     If (year1_site <= endyr) then
 
-       DO n = 1,n_sites 
+       DO n = 1,n_sites
 
           i = 1
           j = 1
 
 !!MS$          IF (site_clim(n)==1) THEN
-             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2003.withlai.txt',form='formatted')
+             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing.US-NR1.2015.txt',form='formatted')
              read(10,*) endyr
              READ(10,*) header
-             DO WHILE (header .NE. site_names(n)) 
+             DO WHILE (header .NE. site_names(n))
                 READ(10,*)
                 READ(10,*)
                 READ(10,*)
@@ -723,7 +723,7 @@ END SUBROUTINE climsubday1
 !!MS$          ENDIF
        ENDDO
     else
-
+       
        do n = 1, n_sites
 
           ! .. allocate temporary memory

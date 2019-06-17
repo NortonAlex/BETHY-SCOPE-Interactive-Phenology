@@ -37,11 +37,11 @@
  datdir       = './input/gv04/'
  bgrdir       = './input/background/'
  outdir       = 'output/'
- year0_site   = 2003
- year1_site   = 2003
+ year0_site   = 2015
+ year1_site   = 2015
  site_file    = './control_bethy/site_specs_US-NR1.dat'	
  mapping_file_site = './control_bethy/site_specs_US-NR1_scope.dat.map'
- site_file_lai = './input/eddy_sites/lai.US-NR1.2003.txt'
+ site_file_lai = './input/eddy_sites/lai.US-NR1.constant.txt'
  optpftg      = .false.
  optpftl      = .false.
  optbsmg      = .false.
