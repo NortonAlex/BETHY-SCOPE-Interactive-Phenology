@@ -263,18 +263,19 @@ print *, 'dayint =',dayint
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
               ! .. do diurnal diagnostics 
               ! option to give prescribed lai (from file) to fluorescence calculations
-!              IF ( inho == 13 ) THEN
-!              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
-!                                & tmp(inho,:),pair,eamin,ca,OX, & 
-!                                & zlai, &
-!                                & jmf,vms,EC,EO,EV,ER,EK,kc0s,ko0s,vomf,rdf,&
-!                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
-!                                & rfluo_diurnal,rgppfluo_diurnal,&
-!                                & rlai_diurnal,rapar_diurnal,raparcab_diurnal,rpar_diurnal)             
-!              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
-!!              print *,'SCOPE FLUO::', rfluo
-!!              print *,'SCOPE GPP::', rgppfluo
-!              ENDIF         ! for selected time of fluo computation
+              IF ( inho == 13 ) THEN
+              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
+                                & tmp(inho,:),pair,eamin,ca,OX, & 
+                                & zlai, &
+                                & jmf,vms,EC,EO,EV,ER,EK,kc0s,ko0s,vomf,rdf,&
+                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
+                                & rfluo_diurnal,rgppfluo_diurnal,&
+                                & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
+                                & rpar_diurnal,rswdown_diurnal)             
+              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
+!              print *,'SCOPE FLUO::', rfluo
+!              print *,'SCOPE GPP::', rgppfluo
+              ENDIF         ! for selected time of fluo computation
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 
