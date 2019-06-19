@@ -462,8 +462,8 @@ prat         = 1.                        ! %  PSI/PSII peak ratio
 !freq_Fsmin   = 755.                      ! Minimum frequeency to compute Fs
 !freq_Fsmax   = 755.                      ! Maximum frequency to compute Fs 
 
-freq_Fsmin   = 755.                      ! Minimum frequeency to compute Fs
-freq_Fsmax   = 757.                      ! Maximum frequency to compute Fs
+freq_Fsmin   = 640.                      ! Minimum frequeency to compute Fs
+freq_Fsmax   = 850.                      ! Maximum frequency to compute Fs
 
 
 !4. Soil 
@@ -555,9 +555,9 @@ CALL read_modtran_files
 freq_sat =  757.                      
 
 ! To compute the sensibility of  Fs to the frequency 
-nfreq=31       ! number of frequency 
-dfreq =5       ! step of frequency 
-freq0=650.     ! freq from which we save the fluorescence
+nfreq=211       ! number of frequency 
+dfreq =1       ! step of frequency 
+freq0=640.     ! freq from which we save the fluorescence
 
 ! ============================================================================
 !%% Appendix A. Fixed parameters (not to be changed)
@@ -998,26 +998,31 @@ IF (.NOT.ALLOCATED(wlP)) ALLOCATE(wlP(n1))
   nF = int((freq_Fsmax -freq_Fsmin)/1)+1
   ntot =  1
  IF (.NOT.ALLOCATED(wlF)) ALLOCATE(wlF(nF))
+! Find the index for the fluorescence frequency of freq_sat 
+ do kf=1,nF
+    wlF(kf) = freq_Fsmin + (kf-1)
+    IF (wlF(kf) .EQ. freq_sat) ifreq_sat = kf
+ end do
 
 
-
+! Optional setup to calculate fluorescence at multiple frequencies
+!!! not sure if working correctly
 IF (.NOT. ALLOCATED(list_freq_sat)) ALLOCATE(list_freq_sat(nfreq))
 IF (.NOT. ALLOCATED(ilist_freq_sat)) ALLOCATE(ilist_freq_sat(nfreq))
-
-  do kf=1,nfreq 
-   list_freq_sat(kf) = freq0+(kf-1)*dfreq 
-
-   do k=1,nF
-   wlF(k) = freq_Fsmin+(k-1)*1.
-      ntot = ntot +1
-      
-! Find the indice for the frequency freq_gosat (here 755nm) used for fluo data retrieval
-      IF (wlF(k) .EQ. freq_sat) ifreq_sat = k 
-      IF (wlF(k) .EQ.  list_freq_sat(kf)) ilist_freq_sat(kf) = k 
-     
-    end do
-
- end do 
+!
+!  do kf=1,nF
+!   list_freq_sat(kf) = freq0+(kf-1)*dfreq 
+!
+!   do k=1,nF
+!   wlF(k) = freq_Fsmin+(k-1)*1.
+!      ntot = ntot +1
+!     
+!! Find the indice for the frequency freq_gosat (here 755nm) used for fluo data retrieval
+!      IF (wlF(k) .EQ. freq_sat) ifreq_sat = k 
+!      IF (wlF(k) .EQ.  list_freq_sat(kf)) ilist_freq_sat(kf) = k 
+!    end do
+!
+! end do 
 
 
 !print*,' nF ',nF
@@ -1025,6 +1030,7 @@ IF (.NOT. ALLOCATED(ilist_freq_sat)) ALLOCATE(ilist_freq_sat(nfreq))
 !print*,' nfreq ',nfreq
 !print*,' freq0 ',freq0
 !print*,' dfreq ',dfreq
+!print*,' ifreq_sat ',ifreq_sat
 !print*,' wlF ',minval(wlF),maxval(wlF),size(wlF)
 
 
