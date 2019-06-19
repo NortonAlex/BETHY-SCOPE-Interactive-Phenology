@@ -552,7 +552,7 @@ modtran_sum = trim(path_atmos_file)//'FLEX-S3_Mar.atm'
 CALL read_modtran_files
 
 ! Here select SIF frequency (nm) to write to output (e.g. SIF retrieval wavelength)
-freq_sat =  757.                      
+freq_sat =  740.                      
 
 ! To compute the sensibility of  Fs to the frequency 
 nfreq=211       ! number of frequency 
@@ -1650,7 +1650,7 @@ wf(:,1) = wlf
 !print*, ' here iiiii ' 
 IF (.NOT.ALLOCATED(siglelf)) ALLOCATE(siglelf(size(wlf),size(wle)))
 !siglelf     = 1./(1+exp((Iv*wl(wle)' - wl(wlf)*Ih)*1E2));
-siglelf   = 1./(1.+exp((matmul(Iv,we)- matmul(wf,Ih))*1E2))
+!siglelf   = 1./(1.+exp((matmul(Iv,we)- matmul(wf,Ih))*1E2))
 
 !sigmoid     = 1./(1+exp(-wlf/10)*exp(wle'/10));  % matrix computed as an outproduct
 IF (.NOT.ALLOCATED(sigmoid)) ALLOCATE(sigmoid(size(wlf),size(wle)))
