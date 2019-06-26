@@ -451,7 +451,7 @@ SUBROUTINE diagout (nrun,ng,vp,scale,outint)
      CALL savefnc_diurnal(TRIM(outdir)//'rapar_diurnal.nc',rapar_diurnal,nrs,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'raparcab_diurnal.nc',raparcab_diurnal,nrs,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rpar_diurnal.nc',rpar_diurnal,nrs,365,24,vp,sp)
-     CALL savefnc_diurnal(TRIM(outdir)//'rswdown_diurnal.nc',rpar_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rswdown_diurnal.nc',rswdown_diurnal,nrs,365,24,vp,sp)
 
   ENDIF
 
