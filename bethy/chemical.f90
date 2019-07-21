@@ -74,7 +74,8 @@ IMPLICIT NONE
 
 CONTAINS 
 
-SUBROUTINE biochemical(npts,Q,T1,Csi,ea,Oa,p,akc,ako,Vcmo,option,Ag,A,eta,rcw,Ci,avovc,ardvc)
+SUBROUTINE biochemical(npts,Q,T1,Csi,ea,Oa,p,akc,ako,Vcmo,option,Ag,A,&
+                     & eta,rcw,Ci,avovc,ardvc,phi_p,phi_fs,phi_npq)
 
 USE fluo_param, ONLY : Rdparam,Tparams,m,tempcor,stressfactor
 USE fluo_param, ONLY :  Kcopt, Koopt,Kf0,Kd0,Kpc0,atheta
@@ -93,6 +94,7 @@ REAL, INTENT(IN)                     :: avovc,ardvc      ! avovc = ratio of Voma
 ! Output variables 
 REAL, DIMENSION(npts),INTENT(OUT)    :: A,eta,rcw, Ag
 REAL, DIMENSION(npts),INTENT(OUT)    :: Ci
+REAL, DIMENSION(npts),INTENT(OUT)    :: phi_p,phi_fs,phi_npq
 REAL, DIMENSION(npts)                :: qE,Vcmax,Vomax
 
 ! Local variables 
@@ -107,6 +109,7 @@ REAL, DIMENSION(npts)                :: ps,qQ,fm,Kn
 REAL, DIMENSION(npts)                :: Kpc,Kd,po0,Kf
 REAL, DIMENSION(npts)                :: effcon,a1,a2,fo
 REAL, DIMENSION(npts)                :: temp
+REAL, DIMENSION(npts)                :: Kp_s,Knpq
 REAL                                 :: Kcopt1,Koopt1 
 REAL                                 :: Tref,slti,shti,Thl,Thh,Trdm 
 INTEGER                              :: C4
@@ -395,6 +398,17 @@ ENDWHERE
 ! To see 
 ![eta,qE,qQ,fs,fo,fm,fo0,fm0,Kn]    = TB12(ps,Kp,Kf,Kd)
 CALL TB12 (npts,ps,Kpc,Kf,Kd,eta,qE,qQ,fs,fo,fm,Kn)
+
+! Calculate PSII quantum yields
+! - derived steady-state (light-adapted) photochemistry
+! rate constant van der Tol et al. (2014)
+Kp_s      = (fm/fs - 1.0)*(Kf+Kd+Kn)
+! - non-photochemical quenching rate constant (combined Kn+Kd)
+Knpq      = Kn+Kd
+! - quantum yields expressed by rate constants (Butler, 1978; van der Tol et al., 2014)
+phi_fs    = Kf / (Kn+Kp_s+Kd+Kf)
+phi_p     = Kp_s / (Kn+Kp_s+Kd+Kf)
+phi_npq   = Knpq / (Kn+Kp_s+Kd+Kf)
 
 !print*, ' eta ', minval(eta), maxval(eta), sum(eta)
 !print*, 'qE', minval(qE), maxval(qE), sum(qE) 

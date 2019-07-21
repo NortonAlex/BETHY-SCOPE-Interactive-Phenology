@@ -519,6 +519,9 @@ REAL, DIMENSION(2)                           :: Fs_mat                      ! ma
 REAL, ALLOCATABLE,DIMENSION(:)               :: Agh,Ah,rcwh,Fh,Cih,Cch       ! brown leaves
 REAL, ALLOCATABLE,DIMENSION(:)               :: Agu,Au,rcwu,Fu,Ciu,Ccu       ! green leaves
 
+REAL, ALLOCATABLE,DIMENSION(:)               :: phi_p_h,phi_fs_h,phi_npq_h   ! shaded
+REAL, ALLOCATABLE,DIMENSION(:)               :: phi_p_u,phi_fs_u,phi_npq_u   ! sunlit
+
 REAL, ALLOCATABLE,DIMENSION(:)               :: A0,Ag0,rcw0,F0a,W0,F0            ! brown leaves
 REAL, ALLOCATABLE,DIMENSION(:)               :: A1,Ag1,rcw1,F1a,W1,F1            ! green leaves
 
@@ -526,7 +529,7 @@ REAL, ALLOCATABLE,DIMENSION(:)               :: A1,Ag1,rcw1,F1a,W1,F1           
 REAL, ALLOCATABLE,DIMENSION(:)               :: Tch       ! brown leaves
 REAL, ALLOCATABLE,DIMENSION(:)               :: Tcu       ! green leaves
 REAL, ALLOCATABLE,DIMENSION(:)               :: Ccs
-REAL, ALLOCATABLE,DIMENSION(:)               :: Fout
+REAL, ALLOCATABLE,DIMENSION(:)               :: Fout,Fout_profile
 
 REAL                                         :: Actot,Agtot 
 REAL                                         :: Actot_faq,Agtot_faq 
@@ -609,8 +612,9 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rf_etau_toc_diurnal,rf_etah_toc_diurnal) &
 !$OMP& SHARED(vps,block_vps,vomf,rdf) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
-!$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
-!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P)
+!$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Fout_profile,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
+!$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P) &
+!$OMP& PRIVATE(phi_p_h,phi_fs_h,phi_npq_h,phi_p_u,phi_fs_u,phi_npq_u)
 
   DO j = 1,vps
       jl = block_vps(j)   ! jl = vp  
@@ -852,7 +856,7 @@ ALLOCATE(Agh(nlh))
 ALLOCATE(Ah(nlh),rcwh(nlh),Fh(nlh))
 ALLOCATE(Cih(nlh),Cch (nlh),Tch(nlh))
 ALLOCATE(A0(nlh),Ag0(nlh),rcw0(nlh),F0a(nlh),W0(nlh),F0(nlh))
-
+ALLOCATE(phi_p_h(nlh),phi_fs_h(nlh),phi_npq_h(nlh))
 
 ! For sunlight leaves
                 nlu = nli*nlazi*nl
@@ -860,6 +864,7 @@ ALLOCATE(Agu(nlu))
 ALLOCATE(Au(nlu),rcwu(nlu),Fu(nlu))
 ALLOCATE(Ciu(nlu),Ccu(nlu),Tcu(nlu))
 ALLOCATE(A1(nlu),Ag1(nlu),rcw1(nlu),F1a(nlu),W1(nlu),F1(nlu))
+ALLOCATE(phi_p_u(nlu),phi_fs_u(nlu),phi_npq_u(nlu))
 
 
 !%% 1. Solar and sky radiation
@@ -975,13 +980,29 @@ ENDIF
 
 ! Collatz used or GPP 
 ! Shaded leaves 
-CALL biochemical(nlh,Pnhc_Cab*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agh,Ah,Fh,rcwh,Cih,avovc,ardvc)
+CALL biochemical(nlh,Pnhc_Cab*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,&
+               & option,Agh,Ah,Fh,rcwh,Cih,avovc,ardvc,phi_p_h,phi_fs_h,phi_npq_h)
 
 ! Sunlit leaves 
-CALL  biochemical(nlu,reshape(Pnuc_Cab,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc)
+CALL  biochemical(nlu,reshape(Pnuc_Cab,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,&
+                & option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc,phi_p_u,phi_fs_u,phi_npq_u)
 
 print*,' Fh:',shape(Fh),minval(Fh),maxval(Fh)
 print*,' Fu:',shape(Fu),minval(Fu),maxval(Fu)
+print*,'shaded'
+print*,'   sum'
+print*,'   min=',minval(phi_p_h+phi_fs_h+phi_npq_h)
+print*,'   max=',maxval(phi_p_h+phi_fs_h+phi_npq_h)
+print*,' phi_p_h:',shape(phi_p_h),minval(phi_p_h),maxval(phi_p_h)
+print*,' phi_fs_h:',shape(phi_fs_h),minval(phi_fs_h),maxval(phi_fs_h)
+print*,' phi_npq_h:',shape(phi_npq_h),minval(phi_npq_h),maxval(phi_npq_h)
+print*,'sunlit'
+print*,'   sum'
+print*,'   min=',minval(phi_p_u+phi_fs_u+phi_npq_u)
+print*,'   max=',maxval(phi_p_u+phi_fs_u+phi_npq_u)
+print*,' phi_p_u:',shape(phi_p_u),minval(phi_p_u),maxval(phi_p_u)
+print*,' phi_fs_u:',shape(phi_fs_u),minval(phi_fs_u),maxval(phi_fs_u)
+print*,' phi_npq_u:',shape(phi_npq_u),minval(phi_npq_u),maxval(phi_npq_u)
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
            & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,MfI,MbI,MfII,MbII,rho,tau,rs,lidf)
@@ -1008,16 +1029,21 @@ CALL integration(1,reshape(Pnuc,(/nlu/)),type_integration,Ps(1:nl),lidf,Fout)
 CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),lidf,Fout)
         Pntot_Cab = LAI*(dot_product(Fc,Pnhc_Cab) + Fout(1))
 
+! Vertical profile calculations
+ type_integration = 'angles'
+ np = nl
+IF (.NOT.ALLOCATED(Fout_profile)) ALLOCATE(Fout_profile(np))
+             Fout_profile = 0.
 ! Sunlit fluorescence yield per layer
-! type_integration = 'angles'
-CALL integration(1,reshape(Fu,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout)
+CALL integration(1,reshape(Fu,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
 print*,'  sunlit etau'
-print*,'    shape(Fout):',shape(Fout)
-print*,'        Fout(1):',Fout(1)
-!print*,'       Fout(nl):',Fout(nl)
+print*,'    shape(Fout):',shape(Fout_profile)
+print*,'        Fout(1):',Fout_profile(1)
+print*,'       Fout(nl):',Fout_profile(nl)
 !print*,'  reshaped Fu:',SHAPE(RESHAPE(Fu,(/nli,nlazi,nl/)))
             
-        Fetau_toc = Fout(1)  !SUM(RESHAPE(Fu,(/nli*nlazi*nl/))(:,:,nl))/(nli*nlazi)
+        Fetau_toc = Fout_profile(nl)
+        !Fetau_toc = Fout(1)  !SUM(RESHAPE(Fu,(/nli*nlazi*nl/))(:,:,nl))/(nli*nlazi)
 ! Shaded fluorescence yield at top-of-canopy
         Fetah_toc = SUM(Fh)/SIZE(Fh)  !Fh(nl)
 
@@ -1028,7 +1054,9 @@ print*,'        Fout(1):',Fout(1)
 DEALLOCATE(Agh,Ah,rcwh,Fh)
 DEALLOCATE(A0,Ag0,rcw0,F0a,F0,W0)
 DEALLOCATE(Cih,Cch,Tch)
-DEALLOCATE(Fout)
+DEALLOCATE(Fout,Fout_profile)
+DEALLOCATE(phi_p_h,phi_fs_h,phi_npq_h)
+DEALLOCATE(phi_p_u,phi_fs_u,phi_npq_u)
 
 DEALLOCATE(Agu,Au,rcwu,Fu)
 DEALLOCATE(A1,Ag1,rcw1,F1a,F1,W1)
