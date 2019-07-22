@@ -381,7 +381,7 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & rfluo_diurnal,rgppfluo_diurnal,&
                   & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
                   & rpar_diurnal,rswdown_diurnal,&
-                  & rf_etau_toc_diurnal,rf_etah_toc_diurnal)
+                  & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -511,7 +511,7 @@ REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rapar_diurnal,raparcab_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rpar_diurnal,rswdown_diurnal
-REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rf_etau_toc_diurnal,rf_etah_toc_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -534,7 +534,7 @@ REAL, ALLOCATABLE,DIMENSION(:)               :: Fout,Fout_profile
 REAL                                         :: Actot,Agtot 
 REAL                                         :: Actot_faq,Agtot_faq 
 REAL                                         :: Pntot, Pntot_Cab   !% Radiative fluxes, spectrally integrated
-REAL                                         :: Fetau_toc,Fetah_toc   ! Fluorescence eta (sunlit and shaded) at top-of-canopy
+REAL                                         :: fs_yieldu_toc,fs_yieldh_toc   ! Fluorescence eta (sunlit and shaded) at top-of-canopy
 REAL                                         :: LoF_jl
 REAL                                         :: Cc
 REAL                                         :: Ccc,Occ
@@ -609,7 +609,7 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
-!$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rf_etau_toc_diurnal,rf_etah_toc_diurnal) &
+!$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal) &
 !$OMP& SHARED(vps,block_vps,vomf,rdf) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Fout_profile,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
@@ -696,8 +696,8 @@ pft_dominant_cell = -999
            Actot = 0.
        Actot_faq = 0.
           LoF_jl = 0.
-       Fetau_toc = 0.
-       Fetah_toc = 0.
+       fs_yieldu_toc = 0.
+       fs_yieldh_toc = 0.
             
              LAI = -1.
              Cab = -1. 
@@ -990,9 +990,12 @@ CALL  biochemical(nlu,reshape(Pnuc_Cab,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6
 print*,' Fh:',shape(Fh),minval(Fh),maxval(Fh)
 print*,' Fu:',shape(Fu),minval(Fu),maxval(Fu)
 print*,'shaded'
-print*,'   sum'
-print*,'   min=',minval(phi_p_h+phi_fs_h+phi_npq_h)
-print*,'   max=',maxval(phi_p_h+phi_fs_h+phi_npq_h)
+print*,' phi_p, (1)=',phi_p_h(1),' (nl)=',phi_p_h(nl)
+print*,' phi_npq, (1)=',phi_npq_h(1),' (nl)=',phi_npq_h(nl)
+
+!print*,'   sum'
+!print*,'   min=',minval(phi_p_h+phi_fs_h+phi_npq_h)
+!print*,'   max=',maxval(phi_p_h+phi_fs_h+phi_npq_h)
 print*,' phi_p_h:',shape(phi_p_h),minval(phi_p_h),maxval(phi_p_h)
 print*,' phi_fs_h:',shape(phi_fs_h),minval(phi_fs_h),maxval(phi_fs_h)
 print*,' phi_npq_h:',shape(phi_npq_h),minval(phi_npq_h),maxval(phi_npq_h)
@@ -1035,17 +1038,10 @@ CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),
 IF (.NOT.ALLOCATED(Fout_profile)) ALLOCATE(Fout_profile(np))
              Fout_profile = 0.
 ! Sunlit fluorescence yield per layer
-CALL integration(1,reshape(Fu,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-print*,'  sunlit etau'
-print*,'    shape(Fout):',shape(Fout_profile)
-print*,'        Fout(1):',Fout_profile(1)
-print*,'       Fout(nl):',Fout_profile(nl)
-!print*,'  reshaped Fu:',SHAPE(RESHAPE(Fu,(/nli,nlazi,nl/)))
-            
-        Fetau_toc = Fout_profile(nl)
-        !Fetau_toc = Fout(1)  !SUM(RESHAPE(Fu,(/nli*nlazi*nl/))(:,:,nl))/(nli*nlazi)
+CALL integration(1,reshape(phi_fs_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
+        fs_yieldu_toc = Fout_profile(1)
 ! Shaded fluorescence yield at top-of-canopy
-        Fetah_toc = SUM(Fh)/SIZE(Fh)  !Fh(nl)
+        fs_yieldh_toc = phi_fs_h(1)
 
 ! Fluo per jl and for the wavelenght of the studied satellite 
                   LoF_jl = LoF(ifreq_sat)
@@ -1102,8 +1098,8 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      rpar_diurnal(iyear,iday0,t,jl) = P*1e3*frac1
      rswdown_diurnal(iyear,iday0,t,jl) = Rin
 
-     rf_etau_toc_diurnal(iyear,iday0,t,jl) = Fetau_toc 
-     rf_etah_toc_diurnal(iyear,iday0,t,jl) = Fetah_toc
+     rfsyieldu_toc_diurnal(iyear,iday0,t,jl) = fs_yieldu_toc
+     rfsyieldh_toc_diurnal(iyear,iday0,t,jl) = fs_yieldh_toc
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1
