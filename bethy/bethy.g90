@@ -271,7 +271,7 @@ print *, 'dayint =',dayint
                                 & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                                 & rfluo_diurnal,rgppfluo_diurnal,&
                                 & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
-                                & rpar_diurnal,rswdown_diurnal,&
+                                & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
                                 & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
                                 & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
                                 & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal)

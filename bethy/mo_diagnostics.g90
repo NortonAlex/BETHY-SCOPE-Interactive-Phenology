@@ -36,6 +36,7 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: raparcab_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpar_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rswdown_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rta_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfsyieldu_toc_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfsyieldh_toc_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpyieldu_toc_diurnal
@@ -129,6 +130,8 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   rpar_diurnal = -999.9
   ALLOCATE( rswdown_diurnal (0:nrun,365,tspd,vp) )
   rswdown_diurnal = -999.9
+  ALLOCATE( rta_diurnal (0:nrun,365,tspd,vp) )
+  rta_diurnal = -999.9
   ! Top-of-canopy PSII quantum yields
   ALLOCATE( rfsyieldu_toc_diurnal (0:nrun,365,tspd,vp) )
   rfsyieldu_toc_diurnal = -999.9
@@ -247,6 +250,7 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( raparcab_diurnal)
   DEALLOCATE( rpar_diurnal )
   DEALLOCATE( rswdown_diurnal )
+  DEALLOCATE( rta_diurnal )
   DEALLOCATE( rfsyieldu_toc_diurnal )
   DEALLOCATE( rfsyieldh_toc_diurnal )
   DEALLOCATE( rpyieldu_toc_diurnal )

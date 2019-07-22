@@ -380,7 +380,7 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
                   & rfluo_diurnal,rgppfluo_diurnal,&
                   & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
-                  & rpar_diurnal,rswdown_diurnal,&
+                  & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
                   & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
                   & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
                   & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal)
@@ -513,6 +513,7 @@ REAL, DIMENSION(vp)                          :: daygpp, dayfluo
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfluo_diurnal,rgppfluo_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rlai_diurnal,rapar_diurnal,raparcab_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rpar_diurnal,rswdown_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rta_diurnal
 ! Output for top-of-canopy PSII quantum yields
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rpyieldu_toc_diurnal,rpyieldh_toc_diurnal
@@ -616,7 +617,8 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rgppfluo,zgppfluo,PAR_scope,PAR_scope_cab,ifreq_sat,psi,tto) & 
 !$OMP& SHARED(nwl,wlf,nwlP,Chl,Cdm_arr,Csm_arr,LIDFa_arr,LIDFb_arr,hc_arr,leafwidth_arr) &
 !$OMP& SHARED(ihour,iday,rfluo_diurnal,rgppfluo_diurnal,rlai_diurnal,rapar_diurnal,raparcab_diurnal) & 
-!$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal) &
+!$OMP& SHARED(rpar_diurnal,rswdown_diurnal,rta_diurnal) &
+!$OMP& SHARED(rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal) &
 !$OMP& SHARED(rpyieldu_toc_diurnal,rpyieldh_toc_diurnal) &
 !$OMP& SHARED(rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal) &
 !$OMP& SHARED(vps,block_vps,vomf,rdf) &
@@ -1123,7 +1125,8 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      rapar_diurnal(iyear,iday0,t,jl) = Pntot*1e6*frac1
      raparcab_diurnal(iyear,iday0,t,jl) = Pntot_Cab*1e6*frac1
      rpar_diurnal(iyear,iday0,t,jl) = P*1e3*frac1
-     rswdown_diurnal(iyear,iday0,t,jl) = Rin
+     rswdown_diurnal(iyear,iday0,t,jl) = Rin    ! hourly shortwave radiation down
+     rta_diurnal(iyear,iday0,t,jl) = Ta         ! hourly air temperature
 
      rfsyieldu_toc_diurnal(iyear,iday0,t,jl) = fs_yieldu_toc
      rfsyieldh_toc_diurnal(iyear,iday0,t,jl) = fs_yieldh_toc
