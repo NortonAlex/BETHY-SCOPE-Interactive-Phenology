@@ -51,17 +51,13 @@ SELECT CASE (trim(choice))
 !%% integration over leaf angles
 ! Not test for the moment ... EK 5/03/2013
     CASE ('angles')
-        print*,'integrating over angles'
         DO j =1, nli 
              Fout0(j,:,:)    = F(j,:,:)*lidf(j)       !  % [nli, nlazi,nl]
         END DO  
 
-        print*,'Fout0:',shape(Fout0)
     !!!    Fout            = permute(Fout,[3 1 2])  !  % [nl]
         Fout1 = sum( Fout0, dim=1 )
-        print*,'Fout1:',shape(Fout1)
         Fout2 = sum( Fout1, dim=1 )
-        print*,'Fout2:',shape(Fout2)
         DO j=1,nl
             Fout(j) = Fout2(j)/nlazi
         END DO
@@ -69,7 +65,6 @@ SELECT CASE (trim(choice))
 !             Fout(j) =  sum(Fout0(:,:,j))/nlazi   !  [1,1,nl]
 !        END DO    
 
-        print*,'Fout:',shape(Fout)
 !%% integration over layers only         
    CASE ('layers')
         !%not implemented

@@ -1002,25 +1002,6 @@ CALL biochemical(nlh,Pnhc_Cab*1E6,Tch,Cch,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,
 CALL  biochemical(nlu,reshape(Pnuc_Cab,(/nlu/))*1E6,Tcu,Ccu,ea,Oa,pa,kc0(jl)*1e6,ko0(jl)*1e3,Vcmo,&
                 & option,Agu,Au,Fu,rcwu,Ciu,avovc,ardvc,phi_p_u,phi_fs_u,phi_npq_u)
 
-print*,' Fh:',shape(Fh),minval(Fh),maxval(Fh)
-print*,' Fu:',shape(Fu),minval(Fu),maxval(Fu)
-print*,'shaded'
-print*,' phi_p, (1)=',phi_p_h(1),' (nl)=',phi_p_h(nl)
-print*,' phi_npq, (1)=',phi_npq_h(1),' (nl)=',phi_npq_h(nl)
-
-!print*,'   sum'
-!print*,'   min=',minval(phi_p_h+phi_fs_h+phi_npq_h)
-!print*,'   max=',maxval(phi_p_h+phi_fs_h+phi_npq_h)
-print*,' phi_p_h:',shape(phi_p_h),minval(phi_p_h),maxval(phi_p_h)
-print*,' phi_fs_h:',shape(phi_fs_h),minval(phi_fs_h),maxval(phi_fs_h)
-print*,' phi_npq_h:',shape(phi_npq_h),minval(phi_npq_h),maxval(phi_npq_h)
-print*,'sunlit'
-print*,'   sum'
-print*,'   min=',minval(phi_p_u+phi_fs_u+phi_npq_u)
-print*,'   max=',maxval(phi_p_u+phi_fs_u+phi_npq_u)
-print*,' phi_p_u:',shape(phi_p_u),minval(phi_p_u),maxval(phi_p_u)
-print*,' phi_fs_u:',shape(phi_fs_u),minval(phi_fs_u),maxval(phi_fs_u)
-print*,' phi_npq_u:',shape(phi_npq_u),minval(phi_npq_u),maxval(phi_npq_u)
 ! 3. Calculation of the fluorescence 
 CALL rtmf(Esun_, transpose(Emin_), transpose(Eplu_),Fh,reshape(Fu,(/nli,nlazi,nl/)),&
            & LAI,Po,Ps,Pso,tts,tto,psi,LoF,Fhem,Fiprof,MfI,MbI,MfII,MbII,rho,tau,rs,lidf)
