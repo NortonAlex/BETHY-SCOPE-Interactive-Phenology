@@ -321,7 +321,10 @@ SUBROUTINE diagout (nrun,ng,vp,scale,outint)
                        &   rswdown_diurnal,rta_diurnal, &
                        &   rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal, &
                        &   rpyieldu_toc_diurnal,rpyieldh_toc_diurnal, &
-                       &   rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal
+                       &   rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal, &
+                       &   rfsyieldu_diurnal,rfsyieldh_diurnal, &
+                       &   rpyieldu_diurnal,rpyieldh_diurnal, &
+                       &   rnpqyieldu_diurnal,rnpqyieldh_diurnal
 
   IMPLICIT NONE
 
@@ -463,6 +466,12 @@ SUBROUTINE diagout (nrun,ng,vp,scale,outint)
      CALL savefnc_diurnal(TRIM(outdir)//'rpyieldu_toc_diurnal.nc',rpyieldu_toc_diurnal,nrs,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rnpqyieldh_toc_diurnal.nc',rnpqyieldh_toc_diurnal,nrs,365,24,vp,sp)
      CALL savefnc_diurnal(TRIM(outdir)//'rnpqyieldu_toc_diurnal.nc',rnpqyieldu_toc_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rfsyieldh_diurnal.nc',rfsyieldh_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rfsyieldu_diurnal.nc',rfsyieldu_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rpyieldh_diurnal.nc',rpyieldh_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rpyieldu_diurnal.nc',rpyieldu_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rnpqyieldh_diurnal.nc',rnpqyieldh_diurnal,nrs,365,24,vp,sp)
+     CALL savefnc_diurnal(TRIM(outdir)//'rnpqyieldu_diurnal.nc',rnpqyieldu_diurnal,nrs,365,24,vp,sp)
   ENDIF
 
 

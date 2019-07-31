@@ -274,7 +274,10 @@ print *, 'dayint =',dayint
                                 & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
                                 & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
                                 & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
-                                & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal)
+                                & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal,&
+                                & rfsyieldu_diurnal,rfsyieldh_diurnal,&
+                                & rpyieldu_diurnal,rpyieldh_diurnal,&
+                                & rnpqyieldu_diurnal,rnpqyieldh_diurnal)
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo

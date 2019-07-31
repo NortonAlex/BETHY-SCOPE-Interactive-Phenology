@@ -383,7 +383,10 @@ SUBROUTINE fluorescence(iyear,imonth,iday,ihour,iday0,iday1,irrin,par,&
                   & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
                   & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
                   & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
-                  & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal)
+                  & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal,&
+                  & rfsyieldu_diurnal,rfsyieldh_diurnal,&
+                  & rpyieldu_diurnal,rpyieldh_diurnal,&
+                  & rnpqyieldu_diurnal,rnpqyieldh_diurnal)
 
 !CALL fluorescence(ryear,rmonth,iday,its,irrin,par,&
 !                    & temp,p,ea0,ca,OX,zlai,fracs, &
@@ -518,6 +521,10 @@ REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rta_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rpyieldu_toc_diurnal,rpyieldh_toc_diurnal
 REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal
+! Output for canopy average PSII quantum yields
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rfsyieldu_diurnal,rfsyieldh_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rpyieldu_diurnal,rpyieldh_diurnal
+REAL, DIMENSION(0:nrun,365,tspd,vp), INTENT(out) :: rnpqyieldu_diurnal,rnpqyieldh_diurnal
 
 ! Local fields 
 REAL, DIMENSION(2)                           :: Fs_mat                      ! matrix containing values for probabilities of viewing sunlit/shaded leaves/soil 
@@ -543,6 +550,9 @@ REAL                                         :: Pntot, Pntot_Cab   !% Radiative 
 REAL                                         :: fs_yieldu_toc,fs_yieldh_toc !Fluorescence quantum yield (sunlit and shaded) at top-of-canopy
 REAL                                         :: p_yieldu_toc,p_yieldh_toc   !Photochemical quantum yield (sunlit and shaded) at top-of-canopy
 REAL                                         :: npq_yieldu_toc,npq_yieldh_toc !NPQ (basal+regulated) quantum yield (sunlit and shaded) at top-of-canopy
+REAL                                         :: fs_yieldu,fs_yieldh !Fluorescence quantum yield (sunlit and shaded) at top-of-canopy
+REAL                                         :: p_yieldu,p_yieldh   !Photochemical quantum yield (sunlit and shaded) at top-of-canopy
+REAL                                         :: npq_yieldu,npq_yieldh !NPQ (basal+regulated) quantum yield (sunlit and shaded) at top-of-canopy
 REAL                                         :: LoF_jl
 REAL                                         :: Cc
 REAL                                         :: Ccc,Occ
@@ -621,6 +631,9 @@ CALL pb_hour_bethy(hm)
 !$OMP& SHARED(rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal) &
 !$OMP& SHARED(rpyieldu_toc_diurnal,rpyieldh_toc_diurnal) &
 !$OMP& SHARED(rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal) &
+!$OMP& SHARED(rfsyieldu_diurnal,rfsyieldh_diurnal) &
+!$OMP& SHARED(rpyieldu_diurnal,rpyieldh_diurnal) &
+!$OMP& SHARED(rnpqyieldu_diurnal,rnpqyieldh_diurnal) &
 !$OMP& SHARED(vps,block_vps,vomf,rdf) &
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Fout_profile,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
@@ -713,6 +726,12 @@ pft_dominant_cell = -999
         p_yieldh_toc = 0.
         npq_yieldu_toc = 0.
         npq_yieldh_toc = 0.
+       fs_yieldu = 0.
+       fs_yieldh = 0.
+        p_yieldu = 0.
+        p_yieldh = 0.
+        npq_yieldu = 0.
+        npq_yieldh = 0.
             
              LAI = -1.
              Cab = -1. 
@@ -1033,24 +1052,33 @@ CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),
  np = nl
 IF (.NOT.ALLOCATED(Fout_profile)) ALLOCATE(Fout_profile(np))
              Fout_profile = 0.
-!PSII fluorescence yields
-! Sunlit fluorescence yield per layer
+
+! PSII Quantum Yields: Canopy average and top-of-canopy
+
+! PSII fluorescence yields
+! - Sunlit: integrate over angles first
 CALL integration(1,reshape(phi_fs_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        fs_yieldu_toc = Fout_profile(1)
-! Shaded fluorescence yield at top-of-canopy
-        fs_yieldh_toc = phi_fs_h(1)
-!PSII photochemical yields
-! Sunlit photochemical yield per layer
+        fs_yieldu_toc = Fout_profile(1)                   ! top-of-canopy
+        fs_yieldu = SUM(Fout_profile)/SIZE(Fout_profile)  ! canopy average
+! - Shaded
+        fs_yieldh_toc = phi_fs_h(1)                       ! top-of-canopy
+        fs_yieldh = SUM(phi_fs_h)/SIZE(phi_fs_h)          ! canopy average
+! PSII photochemical yields
+! - Sunlit: integrate over angles first
 CALL integration(1,reshape(phi_p_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        p_yieldu_toc = Fout_profile(1)
-! Shaded photochemical yield at top-of-canopy
-        p_yieldh_toc = phi_p_h(1)
-!PSII non-photchemical quenching yields
-! Sunlit NPQ yield per layer
+        p_yieldu_toc = Fout_profile(1)                    ! top-of-canopy
+        p_yieldu = SUM(Fout_profile)/SIZE(Fout_profile)   ! canopy average
+! - Shaded
+        p_yieldh_toc = phi_p_h(1)                         ! top-of-canopy
+        p_yieldh = SUM(phi_p_h)/SIZE(phi_p_h)             ! canopy average
+! PSII non-photchemical quenching yields
+! - Sunlit: integrate over angles first
 CALL integration(1,reshape(phi_npq_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        npq_yieldu_toc = Fout_profile(1)
-! Shaded NPQ yield at top-of-canopy
-        npq_yieldh_toc = phi_npq_h(1)
+        npq_yieldu_toc = Fout_profile(1)                  ! top-of-canopy
+        npq_yieldu = SUM(Fout_profile)/SIZE(Fout_profile) ! canopy average
+! - Shaded
+        npq_yieldh_toc = phi_npq_h(1)                     ! top-of-canopy
+        npq_yieldh = SUM(phi_npq_h)/SIZE(phi_npq_h)       ! canopy average
 
 
 ! Fluo per jl and for the wavelenght of the studied satellite 
@@ -1115,6 +1143,13 @@ ENDIF      ! Test on LAI if > 0 then calculation made
      rpyieldh_toc_diurnal(iyear,iday0,t,jl) = p_yieldh_toc
      rnpqyieldu_toc_diurnal(iyear,iday0,t,jl) = npq_yieldu_toc
      rnpqyieldh_toc_diurnal(iyear,iday0,t,jl) = npq_yieldh_toc
+
+     rfsyieldu_diurnal(iyear,iday0,t,jl) = fs_yieldu
+     rfsyieldh_diurnal(iyear,iday0,t,jl) = fs_yieldh
+     rpyieldu_diurnal(iyear,iday0,t,jl) = p_yieldu
+     rpyieldh_diurnal(iyear,iday0,t,jl) = p_yieldh
+     rnpqyieldu_diurnal(iyear,iday0,t,jl) = npq_yieldu
+     rnpqyieldh_diurnal(iyear,iday0,t,jl) = npq_yieldh
 
 !INCIDENT PAR computed from mo_rtmo for the selected grid cell
    PAR_scope(iyear,imonth,jj)  =  PAR_scope(iyear,imonth,jj) + Pntot*1e6*frac1

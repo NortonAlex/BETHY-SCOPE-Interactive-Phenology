@@ -43,6 +43,12 @@ MODULE mo_diagnostics
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpyieldh_toc_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rnpqyieldu_toc_diurnal
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rnpqyieldh_toc_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfsyieldu_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rfsyieldh_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpyieldu_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rpyieldh_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rnpqyieldu_diurnal
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rnpqyieldh_diurnal
 
 contains
 
@@ -145,6 +151,19 @@ SUBROUTINE diagnostics_allocate(nrun, outint, ng, vp)
   rnpqyieldu_toc_diurnal = -999.9
   ALLOCATE( rnpqyieldh_toc_diurnal (0:nrun,365,tspd,vp) )
   rnpqyieldh_toc_diurnal = -999.9
+  ! Canopy average PSII quantum yields
+  ALLOCATE( rfsyieldu_diurnal (0:nrun,365,tspd,vp) )
+  rfsyieldu_diurnal = -999.9
+  ALLOCATE( rfsyieldh_diurnal (0:nrun,365,tspd,vp) )
+  rfsyieldh_diurnal = -999.9
+  ALLOCATE( rpyieldu_diurnal (0:nrun,365,tspd,vp) )
+  rpyieldu_diurnal = -999.9
+  ALLOCATE( rpyieldh_diurnal (0:nrun,365,tspd,vp) )
+  rpyieldh_diurnal = -999.9
+  ALLOCATE( rnpqyieldu_diurnal (0:nrun,365,tspd,vp) )
+  rnpqyieldu_diurnal = -999.9
+  ALLOCATE( rnpqyieldh_diurnal (0:nrun,365,tspd,vp) )
+  rnpqyieldh_diurnal = -999.9
   !WOK-CHG-071031 renamed variables for actual and potential evapotranspiration
   ALLOCATE( raet(0:nrun,outt,ng) )
   raet = 0.
@@ -257,6 +276,12 @@ SUBROUTINE diagnostics_deallocate(nrun, outint, ng, vp)
   DEALLOCATE( rpyieldh_toc_diurnal )
   DEALLOCATE( rnpqyieldu_toc_diurnal )
   DEALLOCATE( rnpqyieldh_toc_diurnal )
+  DEALLOCATE( rfsyieldu_diurnal )
+  DEALLOCATE( rfsyieldh_diurnal )
+  DEALLOCATE( rpyieldu_diurnal )
+  DEALLOCATE( rpyieldh_diurnal )
+  DEALLOCATE( rnpqyieldu_diurnal )
+  DEALLOCATE( rnpqyieldh_diurnal )
 #endif
 
 END SUBROUTINE diagnostics_deallocate
