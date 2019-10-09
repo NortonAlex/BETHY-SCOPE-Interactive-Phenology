@@ -560,6 +560,9 @@ REAL                                         :: Ccc,Occ
 INTEGER                                      :: jl,jj
 INTEGER                                      :: gcmethod
 
+REAL                                         :: Ps_vegmean  ! layer-average sunlit portion of vegetation (excluding soil layer)
+REAL                                         :: Ph_vegmean  ! layer-average shaded portion of vegetation (excluding soil layer)
+
 CHARACTER(len=30)                            :: type_integration
 INTEGER                                      :: nlh,nlu,np
 
@@ -638,7 +641,8 @@ CALL pb_hour_bethy(hm)
 !$OMP& PRIVATE(MfI,MbI,MfII,MbII,rho,tau,rs,kChlrel,lidf,Agh,Ah,rcwh,Fh,A0,Ag0,rcw0) &
 !$OMP& PRIVATE(F0a,F0,W0,Cih,Cch,Tch,Fout,Fout_profile,Agu,Au,rcwu,Fu,A1,Ag1,rcw1,F1a,F1,W1) &
 !$OMP& PRIVATE(Ciu,Ccu,Tcu,jl,jj,j,P) &
-!$OMP& PRIVATE(phi_p_h,phi_fs_h,phi_npq_h,phi_p_u,phi_fs_u,phi_npq_u)
+!$OMP& PRIVATE(phi_p_h,phi_fs_h,phi_npq_h,phi_p_u,phi_fs_u,phi_npq_u) &
+!$OMP& PRIVATE(Ps_vegmean,Ph_vegmean)
 
   DO j = 1,vps
       jl = block_vps(j)   ! jl = vp  
@@ -1047,38 +1051,73 @@ CALL integration(1,reshape(Pnuc,(/nlu/)),type_integration,Ps(1:nl),lidf,Fout)
 CALL integration(1,reshape(Pnuc_Cab,(/nli*nlazi*nl/)),type_integration,Ps(1:nl),lidf,Fout)
         Pntot_Cab = LAI*(dot_product(Fc,Pnhc_Cab) + Fout(1))
 
-! Vertical profile calculations
- type_integration = 'angles'
- np = nl
-IF (.NOT.ALLOCATED(Fout_profile)) ALLOCATE(Fout_profile(np))
-             Fout_profile = 0.
 
 ! PSII Quantum Yields: Canopy average and top-of-canopy
+! This calculates the average of the leaf level yields. This is 
+! not the same as the fraction of canopy aPAR directed to each
+! PSII quenching process. For that calculation, we would do something
+! like: 
+! integration(nl,Pnuc_Cab.*yield,'angles_and_layers',Ps,lidf,Fout)) / & 
+! integration(nl,Pnuc_Cab,'angles_and_layers',Ps,lidf,Fout))
+! i.e. (APAR*yield) / APAR
 
-! PSII fluorescence yields
-! - Sunlit: integrate over angles first
-CALL integration(1,reshape(phi_fs_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        fs_yieldu_toc = Fout_profile(1)                   ! top-of-canopy
-        fs_yieldu = SUM(Fout_profile)/SIZE(Fout_profile)  ! canopy average
-! - Shaded
-        fs_yieldh_toc = phi_fs_h(1)                       ! top-of-canopy
-        fs_yieldh = SUM(phi_fs_h)/SIZE(phi_fs_h)          ! canopy average
-! PSII photochemical yields
-! - Sunlit: integrate over angles first
-CALL integration(1,reshape(phi_p_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        p_yieldu_toc = Fout_profile(1)                    ! top-of-canopy
-        p_yieldu = SUM(Fout_profile)/SIZE(Fout_profile)   ! canopy average
-! - Shaded
-        p_yieldh_toc = phi_p_h(1)                         ! top-of-canopy
-        p_yieldh = SUM(phi_p_h)/SIZE(phi_p_h)             ! canopy average
-! PSII non-photchemical quenching yields
-! - Sunlit: integrate over angles first
-CALL integration(1,reshape(phi_npq_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
-        npq_yieldu_toc = Fout_profile(1)                  ! top-of-canopy
-        npq_yieldu = SUM(Fout_profile)/SIZE(Fout_profile) ! canopy average
-! - Shaded
-        npq_yieldh_toc = phi_npq_h(1)                     ! top-of-canopy
-        npq_yieldh = SUM(phi_npq_h)/SIZE(phi_npq_h)       ! canopy average
+! First, calculate the layer-average sunlit (Ps) and 
+! shaded (Ph) portion of vegetation (excluding the soil layer)
+    Ps_vegmean = 0.
+    Ph_vegmean = 0.
+    DO k=1,nl
+       Ps_vegmean = Ps_vegmean + Ps(k)
+       Ph_vegmean = Ph_vegmean + (1.0 - Ps(k))
+    END DO
+    Ps_vegmean = Ps_vegmean/nl
+    Ph_vegmean = Ph_vegmean/nl
+
+! Canopy average sunlit yields:
+! - integrate over angles_and_layers then divide by layer-average 
+!   sunlit portion of the vegetation
+
+CALL integration(1,reshape(phi_fs_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout)
+        fs_yieldu = Fout(1) / Ps_vegmean
+CALL integration(1,reshape(phi_p_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout)
+        p_yieldu = Fout(1) / Ps_vegmean
+CALL integration(1,reshape(phi_npq_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout)
+        npq_yieldu = Fout(1) / Ps_vegmean
+
+! Top-of-canopy sunlit yields:
+! - integrate over the angles, take the top layer value
+    type_integration = 'angles'
+    np = nl
+    IF (.NOT.ALLOCATED(Fout_profile)) ALLOCATE(Fout_profile(np))
+                Fout_profile = 0.
+CALL integration(np,reshape(phi_fs_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
+        fs_yieldu_toc = Fout_profile(1)                ! top-of-canopy
+CALL integration(np,reshape(phi_p_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
+        p_yieldu_toc = Fout_profile(1)                 ! top-of-canopy
+CALL integration(np,reshape(phi_npq_u,(/nli,nlazi,nl/)),type_integration,Ps(1:nl),lidf,Fout_profile)
+        npq_yieldu_toc = Fout_profile(1)               ! top-of-canopy
+
+! Shaded quantum yields, calculated as average of leaf-level yields
+! From Christiaan van der Tol personal communication:
+!  - for the shaded yields, you need to 
+!    take mean(yield*(1-gap.Ps(1:60))) / mean(1-gap.Ps(1:60))
+! - shaded fluorescence yield
+    DO k=1,nl
+       Fout_profile(k) = phi_fs_h(k) * (1.0 - Ps(k))
+    END DO
+    fs_yieldh = (SUM(Fout_profile)/SIZE(Fout_profile)) / Ph_vegmean ! canopy average
+    fs_yieldh_toc = phi_fs_h(1)                   ! top-of-canopy
+! - shaded photochemical yield
+    DO k=1,nl
+       Fout_profile(k) = phi_p_h(k) * (1.0 - Ps(k))
+    END DO
+    p_yieldh = (SUM(Fout_profile)/SIZE(Fout_profile)) / Ph_vegmean ! canopy average
+    p_yieldh_toc = phi_p_h(1)                     ! top-of-canopy
+! - shaded non-photochemical quenching yield
+    DO k=1,nl
+       Fout_profile(k) = phi_npq_h(k) * (1.0 - Ps(k))
+    END DO
+    npq_yieldh = (SUM(Fout_profile)/SIZE(Fout_profile)) / Ph_vegmean ! canopy average
+    npq_yieldh_toc = phi_npq_h(1)                 ! top-of-canopy
 
 
 ! Fluo per jl and for the wavelenght of the studied satellite 
