@@ -31,9 +31,9 @@ MODULE mo_climate
   REAL, ALLOCATABLE, DIMENSION (:) :: pardown, swdown, fdirpar!FastOpt, fdirsw
 ! original names:         par,     irrin,  pdir,   ,fdir
 
-! Variables for optionaly hourly forcing in site runs
+! Variables for optional sub-daily forcing in site runs
 ! shape = (tspd,n_sites) = (time-steps per day, number of sites i.e. ng)
-  REAL, ALLOCATABLE, DIMENSION (:,:) :: hswdown,hta,hea,hpair
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: hswdown,hta,hea,hpair  
 
 ! .. Variables set by subroutine climsubday1, for module-internal use
   REAL, PRIVATE :: dbodsq
@@ -240,7 +240,6 @@ CONTAINS
 !$taf next required = vp
     DEALLOCATE (zrhos) 
     DEALLOCATE (prescribed_lai)
-    DEALLOCATE (hta,hswdown,hea,hpair)
 
     CALL climsubday_deallocate
     
@@ -757,6 +756,7 @@ END SUBROUTINE climsubday1
     
   END SUBROUTINE get_local_climate
 
+
   SUBROUTINE get_local_climate_subday
 
   !----------------------------------------------------------------------
@@ -848,67 +848,7 @@ END SUBROUTINE climsubday1
 
 
     DEALLOCATE (iload)
-!    DO i = nlat,1,-1
-!       DO j = 1,nlon
-!          IF (iload(j,i,1).gt.-1000) THEN
-!             n=n+1
-!             dprecip(n,:) = iload(j,i,:)
-!          ENDIF
-!       ENDDO
-!    ENDDO
-
-
-
-!    IF (year1_site <= endyr) then
-!
-!       DO n = 1,n_sites
-!
-!          i = 1
-!          j = 1
-!
-!             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing-hourly-ta.US-NR1.2017.txt',form='formatted')
-!             read(10,*) endyr
-!             READ(10,*) header
-!             DO WHILE (header .NE. site_names(n))
-!                READ(10,*)
-!                READ(10,*)
-!                READ(10,*)
-!                READ(10,*)
-!                READ(10,*) header
-!             END DO
-!             READ(10,'(365f8.2)') hta(n,:)
-!             !READ(10,'(365f8.2)') dtmin(n,:)
-!             !READ(10,'(365f8.2)') dprecip(n,:)
-!             !READ(10,'(365f8.2)') hswdown(n,:)
-!             CLOSE(10)
-!
-!             ! Read site-level LAI data if provided.
-!             IF (site_file_lai .ne. 'no_file') THEN
-!                 print*,'# Using forced LAI data from site_file_lai'
-!                 force_lai_flag = 1
-!                 OPEN(unit=80,file=TRIM(site_file_lai),form='formatted')
-!                 READ(80,*) endyr
-!                 READ(80,*) header
-!                 DO WHILE (header .NE. site_names(n))
-!                    READ(80,*)
-!                    READ(80,*)
-!                    READ(80,*)
-!                    READ(80,*)
-!                    READ(80,*) header
-!                 END DO
-!                 DO i = 1,vp
-!                    READ(80,'(365f8.2)') dlai(i,:)
-!                 END DO
-!                 CLOSE(80)
-!             ELSE    ! no site LAI file provided in control namelist, so setting it to zero
-!                 force_lai_flag = 0
-!                 dlai = 0.
-!             END IF
-!       END DO
-!    END IF
-
 
     END SUBROUTINE
-
 
 END MODULE mo_climate
