@@ -30,7 +30,10 @@ MODULE mo_climate
 ! .. Variables set by subroutine climsubday2, intended for output
   REAL, ALLOCATABLE, DIMENSION (:) :: pardown, swdown, fdirpar!FastOpt, fdirsw
 ! original names:         par,     irrin,  pdir,   ,fdir
-  
+
+! Variables for optionaly hourly forcing in site runs
+! shape = (tspd,n_sites) = (time-steps per day, number of sites i.e. ng)
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: hswdown,hta,hea,hpair
 
 ! .. Variables set by subroutine climsubday1, for module-internal use
   REAL, PRIVATE :: dbodsq
@@ -206,6 +209,8 @@ CONTAINS
     ALLOCATE (htmp(ng,tspd))
     ALLOCATE (zrhos(vp))
     ALLOCATE (prescribed_lai(vp,12))
+    ALLOCATE (hta(sdays*tspd,ng),hswdown(sdays*tspd,ng))
+    ALLOCATE (hea(sdays*tspd,ng),hpair(sdays*tspd,ng))
 
     CALL climsubday_allocate(ng)
 
@@ -235,6 +240,7 @@ CONTAINS
 !$taf next required = vp
     DEALLOCATE (zrhos) 
     DEALLOCATE (prescribed_lai)
+    DEALLOCATE (hta,hswdown,hea,hpair)
 
     CALL climsubday_deallocate
     
@@ -750,5 +756,159 @@ END SUBROUTINE climsubday1
     endif
     
   END SUBROUTINE get_local_climate
+
+  SUBROUTINE get_local_climate_subday
+
+  !----------------------------------------------------------------------
+  !    READS SUB-DAILY FORCING FOR SITE LEVEL RUNS FROM NETCDF FILES
+  !---------------------------------------------------------------------- 
+
+    ! .. Use Statements ..
+    USE mo_netcdf
+    USE mo_constants
+    USE mo_namelist, ONLY : year0_site, year1_site, site_file_lai
+    USE mo_calendar
+    USE mo_grid, ONLY : vp
+
+    IMPLICIT NONE
+
+! .. Local Scalars ..
+    TYPE(ncfile) :: infile
+    TYPE(ncvar) :: ncta, ncsw, ncea, ncps
+    INTEGER :: i, j, n, ny, endyr
+
+! .. Local Arrays ..
+    REAL, ALLOCATABLE, DIMENSION(:,:) :: iload
+    INTEGER, DIMENSION(2) :: ncstart
+
+! .. Local Characters ..
+    CHARACTER(len=80) :: site_file, header
+    CHARACTER(len=80) :: in_fluxdir
+
+    in_fluxdir = "input/eddy_sites/"
+    ny = year1_site - year0_site +1
+
+!    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing-hourly-ta.US-NR1.2017.txt',form='formatted')
+!    READ(10,*) endyr
+!    close(10)
+
+    ! READ FROM NETCDF FILE
+    ! .. allocate temporary memory
+    ALLOCATE (iload(n_sites,sdays*tspd))
+    !ncstart=(/1,1/)
+
+    ! Air temperature
+    infile%name=TRIM(in_fluxdir)//'forcing-hourly-ta.US-NR1.2015.nc'
+    CALL ncopen(infile)
+    ncta%name='ta'
+    !CALL ncread (infile,ncta,iload,start=ncstart)
+    CALL ncread (infile,ncta,iload)
+    CALL ncclose(infile)
+    n=0
+
+    DO i = 1,n_sites
+       hta(:,i) = iload(i,:)
+    END DO
+
+    ! Shortwave down radiation
+    infile%name=TRIM(in_fluxdir)//'forcing-hourly-sw.US-NR1.2015.nc'
+    CALL ncopen(infile)
+    ncsw%name='sw'
+    CALL ncread (infile,ncsw,iload)
+    CALL ncclose(infile)
+    n=0
+
+    DO i = 1,n_sites
+       hswdown(:,i) = iload(i,:)
+    END DO
+
+    ! Actual vapor pressure
+    infile%name=TRIM(in_fluxdir)//'forcing-hourly-ea.US-NR1.2015.nc'
+    CALL ncopen(infile)
+    ncea%name='ea'
+    CALL ncread (infile,ncea,iload)
+    CALL ncclose(infile)
+    n=0
+
+    DO i = 1,n_sites
+       hea(:,i) = iload(i,:)
+    END DO
+
+    ! Air pressure
+    infile%name=TRIM(in_fluxdir)//'forcing-hourly-ps.US-NR1.2015.nc'
+    CALL ncopen(infile)
+    ncps%name='ps'
+    CALL ncread (infile,ncps,iload)
+    CALL ncclose(infile)
+    n=0
+
+    DO i = 1,n_sites
+       hpair(:,i) = iload(i,:)
+    END DO
+
+
+    DEALLOCATE (iload)
+!    DO i = nlat,1,-1
+!       DO j = 1,nlon
+!          IF (iload(j,i,1).gt.-1000) THEN
+!             n=n+1
+!             dprecip(n,:) = iload(j,i,:)
+!          ENDIF
+!       ENDDO
+!    ENDDO
+
+
+
+!    IF (year1_site <= endyr) then
+!
+!       DO n = 1,n_sites
+!
+!          i = 1
+!          j = 1
+!
+!             OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing-hourly-ta.US-NR1.2017.txt',form='formatted')
+!             read(10,*) endyr
+!             READ(10,*) header
+!             DO WHILE (header .NE. site_names(n))
+!                READ(10,*)
+!                READ(10,*)
+!                READ(10,*)
+!                READ(10,*)
+!                READ(10,*) header
+!             END DO
+!             READ(10,'(365f8.2)') hta(n,:)
+!             !READ(10,'(365f8.2)') dtmin(n,:)
+!             !READ(10,'(365f8.2)') dprecip(n,:)
+!             !READ(10,'(365f8.2)') hswdown(n,:)
+!             CLOSE(10)
+!
+!             ! Read site-level LAI data if provided.
+!             IF (site_file_lai .ne. 'no_file') THEN
+!                 print*,'# Using forced LAI data from site_file_lai'
+!                 force_lai_flag = 1
+!                 OPEN(unit=80,file=TRIM(site_file_lai),form='formatted')
+!                 READ(80,*) endyr
+!                 READ(80,*) header
+!                 DO WHILE (header .NE. site_names(n))
+!                    READ(80,*)
+!                    READ(80,*)
+!                    READ(80,*)
+!                    READ(80,*)
+!                    READ(80,*) header
+!                 END DO
+!                 DO i = 1,vp
+!                    READ(80,'(365f8.2)') dlai(i,:)
+!                 END DO
+!                 CLOSE(80)
+!             ELSE    ! no site LAI file provided in control namelist, so setting it to zero
+!                 force_lai_flag = 0
+!                 dlai = 0.
+!             END IF
+!       END DO
+!    END IF
+
+
+    END SUBROUTINE
+
 
 END MODULE mo_climate

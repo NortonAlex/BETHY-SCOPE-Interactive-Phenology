@@ -93,6 +93,9 @@ MODULE mo_namelist
   ! file to describe mapping from params to sites
   CHARACTER(len=80) :: mapping_file_site = "./input/test_mapping" 
 
+  ! flag option to provide forcing directly (e.g. hourly) for site runs
+  LOGICAL :: siteforceflag = .FALSE.
+
   ! flags for pft frac optimisation
   LOGICAL :: optpftg = .FALSE.
   LOGICAL :: optpftl = .FALSE.
@@ -129,7 +132,7 @@ MODULE mo_namelist
        & grid_file, interp_file, faparfile,faparfile_global, &
        & yearin0, yearin1, dprecip_file, dtmax_file, dtmin_file, dswdown_file, plai_file, &
        & dummyfluxes, jacdir, outdir, year0_site, year1_site, mapping_file_site, &
-       & site_file, site_file_lai, pattern_file, flux_temp_file,&
+       & site_file, site_file_lai, siteforceflag, pattern_file, flux_temp_file,&
        & datdir, fluxdir, bgrdir, optpftg, optpftl, optbsmg, optbsml, &
        & p1start, p1end, p2start, p2end, nblocks, iblock, blockvpfile
 
@@ -299,6 +302,7 @@ CONTAINS
        WRITE(6,*) '# mapping file site:           ',mapping_file_site
        WRITE(6,*) '# initial year for simulation: ', year0_site
        WRITE(6,*) '# end year for simulation:     ', year1_site
+       WRITE(6,*) '# siteforceflag:               ',siteforceflag
 
        nrun = year1_site-year0_site+1
        IF (nrun<nspin) THEN

@@ -7,7 +7,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   USE mo_constants
   !HEW-ADD-050307:
   USE mo_namelist, ONLY : dtime, nspin, &
-       & p1start, p1end, p2start, p2end
+       & p1start, p1end, p2start, p2end, siteforceflag
   USE mo_carparams
   USE mo_carvar
   USE mo_carbon
@@ -42,6 +42,7 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
   INTEGER :: iflgph, i, j, a, b, c
   REAL :: fx
   INTEGER ::  mday, nyears, its, iday0, iday1, ryear0, adayint
+  INTEGER :: isubday0, isubday1
   REAL, DIMENSION(ng) :: area
   REAL, DIMENSION(nrun,12) :: diagh1,diagh2,diagh3,diagh4,diagh5
   REAL,  DIMENSION(vp) :: sfac
@@ -97,6 +98,9 @@ SUBROUTINE bethy( nchk, dayint, ng, vp, nrun, outint, scale, flux, fapar)
 print *, 'nchk =', nchk
 print *, 'tdays =', tdays
 print *, 'dayint =',dayint
+IF (siteforceflag == .TRUE.) THEN
+   print*,'site forcing diurnal cycle given directly, not derived'
+END IF
 !$taf store pasmmax = scale_tape, rec = scale
 !------------------------------------------------------------------
 ! .. outer daily time loop (for checkpointing)
@@ -175,8 +179,6 @@ print *, 'dayint =',dayint
    print*,"rday,iday0,iday1,sdays,aday"
    PRINT*,rday,iday0,iday1,sdays,aday
 
-        print*,'shapes of: dtmin,dlai'
-        print*,shape(dtmin),shape(dlai)
         ! Option to use monthly prescribed LAI.
         !  - lai is forced for simulated period, not spin-up.
         !IF (rday > sdays) lai = prescribed_lai(:,rmonth)
@@ -261,27 +263,33 @@ print *, 'dayint =',dayint
                    & zrhos,pardown,fdirpar,zlai,zgc,pgs,zfpar,zfc,zassc,zraut,inho, &
                    & c4flg,ph,class,vm,jmf,zrphc,fautleaf,ccost, &
                    & EC,EO,EV,ER,EK,tgam,alpha,alc4,kc0,ko0,zgrowth,zmaint)
-              ! .. do diurnal diagnostics 
-              ! option to give prescribed lai (from file) to fluorescence calculations
-              IF ( inho == 13 ) THEN
-              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
-                                & tmp(inho,:),pair,eamin,ca,OX, & 
-                                & zlai, &
-                                & jmf,vms,EC,EO,EV,ER,EK,kc0s,ko0s,vomf,rdf,&
-                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
-                                & rfluo_diurnal,rgppfluo_diurnal,&
-                                & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
-                                & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
-                                & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
-                                & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
-                                & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal,&
-                                & rfsyieldu_diurnal,rfsyieldh_diurnal,&
-                                & rpyieldu_diurnal,rpyieldh_diurnal,&
-                                & rnpqyieldu_diurnal,rnpqyieldh_diurnal)
-              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
-!              print *,'SCOPE FLUO::', rfluo
-!              print *,'SCOPE GPP::', rgppfluo
-              ENDIF         ! for selected time of fluo computation
+              ! Option to prescribe sub-daily forcing (1/site runs only) to fluorescence 
+              ! instead of derived sub-daily forcing based on daily averages
+              IF (siteforceflag == .TRUE.) THEN
+                   CALL get_local_climate_subday
+                   isubday0=(iday0-1) * tspd + 1
+                   isubday1=(iday0-1) * tspd + (iday1-iday0+1)*tspd
+              END IF
+!              IF ( inho == 13 ) THEN
+!              CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
+!                                & tmp(inho,:),pair,eamin,ca,OX, & 
+!                                & zlai, &
+!                                & jmf,vms,EC,EO,EV,ER,EK,kc0s,ko0s,vomf,rdf,&
+!                                & rfluo,rgppfluo,PAR_scope,PAR_scope_cab,&
+!                                & rfluo_diurnal,rgppfluo_diurnal,&
+!                                & rlai_diurnal,rapar_diurnal,raparcab_diurnal,&
+!                                & rpar_diurnal,rswdown_diurnal,rta_diurnal,&
+!                                & rfsyieldu_toc_diurnal,rfsyieldh_toc_diurnal,&
+!                                & rpyieldu_toc_diurnal,rpyieldh_toc_diurnal,&
+!                                & rnpqyieldu_toc_diurnal,rnpqyieldh_toc_diurnal,&
+!                                & rfsyieldu_diurnal,rfsyieldh_diurnal,&
+!                                & rpyieldu_diurnal,rpyieldh_diurnal,&
+!                                & rnpqyieldu_diurnal,rnpqyieldh_diurnal)
+!              zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
+!!              print *,'SCOPE FLUO::', rfluo
+!!              print *,'SCOPE GPP::', rgppfluo
+!              ENDIF         ! for selected time of fluo computation
+              ! .. do diurnal diagnostics
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
 	   ENDDO ! end diurnal timestep loop 
