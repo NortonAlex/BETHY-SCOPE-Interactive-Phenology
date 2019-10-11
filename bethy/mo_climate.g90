@@ -29,14 +29,15 @@ MODULE mo_climate
 
 ! .. Variables set by subroutine climsubday2, intended for output
   REAL, ALLOCATABLE, DIMENSION (:) :: pardown, swdown, fdirpar!FastOpt, fdirsw
+  REAL, ALLOCATABLE, DIMENSION (:) :: lwdown    ! Only used in fluorescence
 ! original names:         par,     irrin,  pdir,   ,fdir
 
 ! Variables for optional sub-daily forcing in site runs
 ! shape = (tspd,n_sites) = (time-steps per day, number of sites i.e. ng)
 ! time series of forcing data
-  REAL, ALLOCATABLE, DIMENSION (:,:) :: hswdown,hta,hea,hpair  
+  REAL, ALLOCATABLE, DIMENSION (:,:) :: hlwdown,hswdown,hta,hea,hpair  
 ! the current diurnal time step loop forcing data
-  REAL, ALLOCATABLE, DIMENSION (:)   :: ctswdown,ctta,ctea,ctpair
+  REAL, ALLOCATABLE, DIMENSION (:)   :: ctlwdown,ctswdown,ctta,ctea,ctpair
 
 ! .. Variables set by subroutine climsubday1, for module-internal use
   REAL, PRIVATE :: dbodsq
@@ -276,14 +277,17 @@ CONTAINS
     ALLOCATE (eamin(ng), pair(ng), wspeed(ng), swratio(ng), cloudf(ng), daylen(ng))
     daylen = 0.
     ALLOCATE (pardown(ng), swdown(ng), fdirpar(ng))!FastOpt, fdirsw(ng))
+    ALLOCATE (lwdown(ng))
     ALLOCATE (coszen(ng), spds(ng), cpds(ng))
     ALLOCATE (htmp(ng,tspd))
     ALLOCATE (zrhos(vp))
     ALLOCATE (prescribed_lai(vp,12))
     ALLOCATE (hta(sdays*tspd,ng),hswdown(sdays*tspd,ng))
     ALLOCATE (hea(sdays*tspd,ng),hpair(sdays*tspd,ng))
+    ALLOCATE (hlwdown(sdays*tspd,ng))
     ALLOCATE (ctswdown(ng),ctta(ng))
     ALLOCATE (ctea(ng),ctpair(ng))
+    ALLOCATE (ctlwdown(ng))
 
     CALL climsubday_allocate(ng)
 
@@ -306,6 +310,7 @@ CONTAINS
     DEALLOCATE (eamin, pair, wspeed, swratio, cloudf, daylen)
 !$taf next required = ng
     DEALLOCATE (pardown, swdown, fdirpar)!FastOpt, fdirsw)
+    DEALLOCATE (lwdown)
 !$taf next required = ng
     DEALLOCATE (coszen, spds, cpds)
 !$taf next required = tspd
@@ -313,8 +318,8 @@ CONTAINS
 !$taf next required = vp
     DEALLOCATE (zrhos) 
     DEALLOCATE (prescribed_lai)
-    DEALLOCATE (hta,hswdown,hea,hpair)
-    DEALLOCATE (ctswdown,ctta,ctea,ctpair)
+    DEALLOCATE (hta,hswdown,hea,hpair,hlwdown)
+    DEALLOCATE (ctswdown,ctta,ctea,ctpair,ctlwdown)
 
     CALL climsubday_deallocate
     
@@ -848,7 +853,7 @@ END SUBROUTINE climsubday1
 
 ! .. Local Scalars ..
     TYPE(ncfile) :: infile
-    TYPE(ncvar) :: ncta, ncsw, ncea, ncps
+    TYPE(ncvar) :: ncta, ncsw, ncea, ncps, nclw
     INTEGER :: i, j, n, ny, endyr
 
 ! .. Local Arrays ..
@@ -890,6 +895,18 @@ END SUBROUTINE climsubday1
 
     DO i = 1,n_sites
        hswdown(:,i) = iload(i,:)
+    END DO
+
+    ! Longwave down radiation
+    infile%name=TRIM(in_fluxdir)//'forcing-hourly-lw.US-NR1.2015.nc'
+    CALL ncopen(infile)
+    nclw%name='lw'
+    CALL ncread (infile,nclw,iload)
+    CALL ncclose(infile)
+    n=0
+
+    DO i = 1,n_sites
+       hlwdown(:,i) = iload(i,:)
     END DO
 
     ! Actual vapor pressure
@@ -946,7 +963,7 @@ END SUBROUTINE climsubday1
     INTEGER :: isubday0, isubday1
     INTEGER :: i, j, it
     REAL    :: ntsteps    ! number of days in current dayint period
-    REAL    :: xswdown, xta, xea, xpair  ! sum of current time steps climate variables
+    REAL    :: xlwdown, xswdown, xta, xea, xpair  ! sum of current time steps climate variables
 
     isubday0=(iday0-1) * tspd + 1
     isubday1=(iday0-1) * tspd + (iday1-iday0+1)*tspd
@@ -955,6 +972,7 @@ END SUBROUTINE climsubday1
 
     ! Loop over sites (ng)
     DO i = 1,n_sites
+       xlwdown = 0.
        xswdown = 0.
        xta     = 0.
        xea     = 0.
@@ -964,6 +982,7 @@ END SUBROUTINE climsubday1
        DO j = 1,ntsteps
           ! Get index of all curent hours
           it = (24*(iday0-1)+inho) + 24*(j-1)
+          xlwdown = xlwdown + hlwdown(it,i)
           xswdown = xswdown + hswdown(it,i)
           xta     = xta + hta(it,i)
           xea     = xea + hea(it,i)
@@ -971,6 +990,7 @@ END SUBROUTINE climsubday1
        END DO
        ! Calculate average of x* variable
        ! i.e. divide sum by number of values
+       ctlwdown(i) = xlwdown/ntsteps
        ctswdown(i) = xswdown/ntsteps
        ctta(i)     = xta/ntsteps
        ctea(i)     = xea/ntsteps
