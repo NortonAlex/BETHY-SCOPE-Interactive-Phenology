@@ -4,7 +4,8 @@ SUBROUTINE model( nvar, x, fc )
   USE mo_constants
   USE mo_carparams
   USE mo_namelist, ONLY : nrun, year0, year1, yearin0, yearin1, nspin, dayint, &
-       & year0_site, year1_site, site_file, grid_file, optpftl, optpftg, optbsmg, optbsml
+       & year0_site, year1_site, site_file, grid_file, optpftl, optpftg, optbsmg, &
+       & optbsml, siteforceflag
   USE tm ! transport moduleOD
   USE bgr ! background fluxes
   USE costf
@@ -246,6 +247,12 @@ SUBROUTINE model( nvar, x, fc )
 
 ! reads in climate input data
      CALL get_local_climate
+
+! reads in climate input data if using sub-daily forcing
+! note: must provide appropriate netcdf forcing files
+     IF (siteforceflag == .true.) THEN
+        CALL get_local_climate_subday
+     END IF
 
      ALLOCATE(faparl(nrs,366,n_sites))
 

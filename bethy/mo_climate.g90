@@ -33,7 +33,10 @@ MODULE mo_climate
 
 ! Variables for optional sub-daily forcing in site runs
 ! shape = (tspd,n_sites) = (time-steps per day, number of sites i.e. ng)
+! time series of forcing data
   REAL, ALLOCATABLE, DIMENSION (:,:) :: hswdown,hta,hea,hpair  
+! the current diurnal time step loop forcing data
+  REAL, ALLOCATABLE, DIMENSION (:)   :: ctswdown,ctta,ctea,ctpair
 
 ! .. Variables set by subroutine climsubday1, for module-internal use
   REAL, PRIVATE :: dbodsq
@@ -279,6 +282,8 @@ CONTAINS
     ALLOCATE (prescribed_lai(vp,12))
     ALLOCATE (hta(sdays*tspd,ng),hswdown(sdays*tspd,ng))
     ALLOCATE (hea(sdays*tspd,ng),hpair(sdays*tspd,ng))
+    ALLOCATE (ctswdown(ng),ctta(ng))
+    ALLOCATE (ctea(ng),ctpair(ng))
 
     CALL climsubday_allocate(ng)
 
@@ -308,6 +313,8 @@ CONTAINS
 !$taf next required = vp
     DEALLOCATE (zrhos) 
     DEALLOCATE (prescribed_lai)
+    DEALLOCATE (hta,hswdown,hea,hpair)
+    DEALLOCATE (ctswdown,ctta,ctea,ctpair)
 
     CALL climsubday_deallocate
     
@@ -836,7 +843,6 @@ END SUBROUTINE climsubday1
     USE mo_constants
     USE mo_namelist, ONLY : year0_site, year1_site, site_file_lai
     USE mo_calendar
-    USE mo_grid, ONLY : vp
 
     IMPLICIT NONE
 
@@ -855,10 +861,6 @@ END SUBROUTINE climsubday1
 
     in_fluxdir = "input/eddy_sites/"
     ny = year1_site - year0_site +1
-
-!    OPEN(unit=10,file=TRIM(in_fluxdir)//'forcing-hourly-ta.US-NR1.2017.txt',form='formatted')
-!    READ(10,*) endyr
-!    close(10)
 
     ! READ FROM NETCDF FILE
     ! .. allocate temporary memory
@@ -918,5 +920,63 @@ END SUBROUTINE climsubday1
     DEALLOCATE (iload)
 
     END SUBROUTINE
+
+  SUBROUTINE climsubdayforce (n_sites, iday0, iday1, inho)
+
+  !----------------------------------------------------------------------
+  !   GETS SUB-DAILY FORCING FOR SITE LEVEL RUNS FOR CURRENT TIME-STEP
+  !----------------------------------------------------------------------
+  !     CALCULATE THE AVERAGE FORCING OF THE CURRENT TIME-STEP (inho)
+  !     ACROSS THE CURRENT RUN PERIOD.
+  !     E.G. IF CURRENT HOUR TO RUN IS 10AM AND DAYINT IS 5 DAYS,
+  !     TAKE THE AVERAGE FORCING OF ALL 10AM VALUES OVER THE 5-DAY 
+  !     PERIOD. IF DAYINT=1 DAY, THEN JUST GET FORCING FOR THAT HOUR.
+  !-----------------------------------------------------------------
+
+! .. Use Statements ..
+    USE mo_constants, ONLY: tspd
+
+    IMPLICIT NONE
+
+! .. Arguments
+    INTEGER, INTENT(in) :: n_sites, iday0, iday1, inho
+
+! .. Local scalars ..
+    ! indexes for forcing arrays for current dayint run period
+    INTEGER :: isubday0, isubday1
+    INTEGER :: i, j, it
+    REAL    :: ntsteps    ! number of days in current dayint period
+    REAL    :: xswdown, xta, xea, xpair  ! sum of current time steps climate variables
+
+    isubday0=(iday0-1) * tspd + 1
+    isubday1=(iday0-1) * tspd + (iday1-iday0+1)*tspd
+
+    ntsteps = REAL(iday1 - iday0 + 1)
+
+    ! Loop over sites (ng)
+    DO i = 1,n_sites
+       xswdown = 0.
+       xta     = 0.
+       xea     = 0.
+       xpair   = 0.
+       ! Loop over days in current dayint period 
+       ! and sum them up into x* variables
+       DO j = 1,ntsteps
+          ! Get index of all curent hours
+          it = (24*(iday0-1)+inho) + 24*(j-1)
+          xswdown = xswdown + hswdown(it,i)
+          xta     = xta + hta(it,i)
+          xea     = xea + hea(it,i)
+          xpair   = xpair + hpair(it,i)
+       END DO
+       ! Calculate average of x* variable
+       ! i.e. divide sum by number of values
+       ctswdown(i) = xswdown/ntsteps
+       ctta(i)     = xta/ntsteps
+       ctea(i)     = xea/ntsteps
+       ctpair(i)   = xpair/ntsteps
+    END DO
+
+  END SUBROUTINE
 
 END MODULE mo_climate
