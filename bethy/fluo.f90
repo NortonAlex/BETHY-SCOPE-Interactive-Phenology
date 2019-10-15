@@ -681,7 +681,12 @@ CALL aggreg (jatmos_file,spectral_nreg,spectral_start,spectral_end,spectral_res)
 
 ! Removed a dependency of SCOPE sub-day timestep on BETHY looping var "its". 
 !   BETHY var "inho" (fluor ihour argument) corresponds to: actual_time (in 24hr time) = inho+1
-     t = MOD(ihour,24)+1     
+      t = ihour
+!     IF (ihour == 24) THEN
+!         t = 24
+!     ELSE
+!         t = MOD(ihour,24)     
+!     END IF
 
 ! Computation of the sun zenith angle in radians
 ! We have the time at which the sun reaches its maximum
