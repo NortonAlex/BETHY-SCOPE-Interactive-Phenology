@@ -272,7 +272,8 @@ END IF
                   pair   = ctpair
                   eamin  = ctea
               END IF
-              IF ( inho == 13 ) THEN
+              ! Only run fluorescence after spinup (it is not determined by spin up)
+!              IF ( inho == 14 ) THEN
               CALL fluorescence (ryear,rmonth,iday,inho,iday0,iday1,swdown,pardown,&
                                 & tmp(inho,:),pair,eamin,ca,OX, & 
                                 & zlai, &
@@ -290,7 +291,7 @@ END IF
               zassc = zgppfluo               ! ANorton. To allow SCOPE-GPP to pass onto subsequent c-balance equations
 !              print *,'SCOPE FLUO::', rfluo
 !              print *,'SCOPE GPP::', rgppfluo
-              ENDIF         ! for selected time of fluo computation
+!              ENDIF         ! for selected time of fluo computation
               ! .. do diurnal diagnostics
               CALL diagnostics (ng,vp,zassc,zraut,zgrowth,zmaint,ztrans,zptrans,zpcevp,zpsevp)
 
