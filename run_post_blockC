@@ -1,0 +1,36 @@
+#!/bin/bash
+#PBS -P w22
+#PBS -q normal
+#PBS -l walltime=02:00:00
+#PBS -l mem=20GB 
+#PBS -l ncpus=320
+#PBS -l wd
+
+fluoro_folder=/home/563/ajn563/short/fluoro2
+cd $fluoro_folder
+
+export OMP_NUM_THREADS=16
+## lift any arbitrary limits on the per-process stack-size
+ulimit -s unlimited
+## raise the limit for the OpenMP per-thread stack-size
+export OMP_STACKSIZE=100MB
+
+# make post
+
+nsplits=20 ##
+
+for iserver in `seq $nsplits` ; do
+  server=`cat $PBS_NODEFILE | sort -u | head -n $iserver | tail -n1`
+  iserver02=`printf '%0.2i' $iserver `
+  outfile="job_output_blockC_${iserver02}.txt"
+  infile="control_script_blockC_${iserver02}.nml" 
+  pbsdsh -n $(($iserver*16)) -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+##  rsh $server "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+done
+
+wait
+
+
+output_folder=/home/563/ajn563/short/fluoro2/output
+cd $output_folder
+qsub merge_outputs_blockC.sh

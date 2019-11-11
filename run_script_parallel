@@ -1,0 +1,156 @@
+#!/bin/bash
+#PBS -P w22
+#PBS -q normal
+#PBS -l walltime=10:00:00
+#PBS -l mem=640GB
+#PBS -l ncpus=320
+#PBS -l wd
+
+## Parallelization flags. Note that:
+## - with OpenMP and block parallelization: 
+##   mem=nsplits*32GB, ncpus=nsplits*16
+## - with OpenMP parallelization only:
+##   mem=32GB, ncpus=16
+## - with block parallelization only:
+##   mem=nsplits*128GB, ncpus=nsplits
+## - with no parallelization:
+##   mem=32GB, ncpus=1
+option_openmp=true
+option_blocks=true
+
+## Experiment name
+expname=H_xn06_p3077_gpp
+
+## Optional: Run selected PFTs only (e.g. for parameter sensitivities)
+option_pftspecific=false
+parameter_number=77
+
+## Root path to parameter file
+parameter_file="/home/563/ajn563/short/fluoro2/plist_xn_05"
+
+## Number of block splits:
+## - the number of cluster nodes/servers across which
+##   the job will run. 
+nsplits=20
+
+## BETHY-SCOPE grid resolution (hires or lores)
+resolution=hires
+
+## Root path to control folder (i.e. where post program is located)
+control_folder=/home/563/ajn563/short/fluoro2
+
+## Root path to output folder
+output_folder=/home/563/ajn563/short/fluoro2/output
+
+
+echo "Experiment name  : $expname"
+echo ""
+echo "  Parameter file : $parameter_file"
+echo "  Grid resolution: $resolution"
+echo "  Blocks         : $nsplits"
+echo ""
+cd $control_folder
+
+
+#####
+if [ "$option_pftspecific" = true ]
+then
+  ## Get PFTs relevant to the selected parameter
+  echo "  Running on selected grid points"
+  pft_s=1
+  #pft_s=$((python get_pfts.py -i $parameter_file -n ${parameter_number}) 2>&1)
+  echo "  PFT(s): $pft_s"
+else
+  echo "  Running on all grid points"
+  ## If not PFT-specific, then run all grid points (i.e. pft_s=-1)
+  pft_s=-1
+fi
+
+## Create veg-point file for each block: These are the veg-points the model runs over.
+#python ./control_blockruns/create_blockvpfile.py $resolution $nsplits "$pft_s"
+echo "  ..created veg-point file for model"
+
+## Create block control files
+#python ./control_blockruns/write_block_control_files.py $nsplits control_script_default_hires.nml control_script_block
+echo "  ..created control file for each block"
+
+cd $control_folder
+
+
+## Determine the parallelization setup and run the model
+if [[ ( "$option_openmp" = true ) && ( "$option_blocks" = true ) ]]
+then
+  echo "Using OpenMP and block parallelization"
+  
+  ## Loop over blocks/servers
+  for iserver in `seq $nsplits` ; do
+    iserver02=`printf '%0.2i' $iserver `
+    outfile="${fluoro_folder}/control_blockruns/job_output_${iserver02}.txt"
+    infile="${fluoro_folder}/control_blockruns/control_script_block_${iserver02}.nml"
+    icpu=$(( iserver * 16))
+    echo "running program on server $iserver and cpu $icpu"
+    echo "pbsdsh -n $icpu -- /bin/bash -c export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; ${fluoro_folder}/post $infile >& $outfile"
+    #pbsdsh -n $icpu -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; ${fluoro_folder}/post $infile >& $outfile" &
+  done
+  
+  wait
+
+elif [[ ( "$option_openmp" = true ) && ( "$option_blocks" = false ) ]]
+then
+  echo "Using OpenMP parallelization only"
+  echo "...not setup yet"
+
+elif [[ ( "$option_openmp" = false ) && ( "$option_blocks" = true ) ]]
+then
+  echo "Using block parallelization only"
+  echo "...not working yet"
+#  ## Loop over blocks/servers
+#  for iserver in `seq $nsplits` ; do
+#    iserver02=`printf '%0.2i' $iserver `
+#    outfile="${fluoro_folder}/control_blockruns/job_output_${iserver02}.txt"
+#    infile="${fluoro_folder}/control_blockruns/control_script_block_${iserver02}.nml"
+#    icpu=$(( iserver ))
+#    echo "running program on cpu $icpu"
+#    echo "pbsdsh -n $icpu -- /bin/bash -c ${fluoro_folder}/post $infile >& $outfile"
+#    #pbsdsh -n $icpu -- /bin/bash -c "${fluoro_folder}/post $infile >& $outfile" &
+#  done
+#
+#  wait
+
+else
+  echo "No parallelization, exiting in case we blow up Raijin"
+  exit
+
+fi 
+
+## Merge the separate block output files into a single netcdf file
+cd $output_folder
+
+expdir=${expname}
+
+if [ -e $expdir ] ; then
+  echo "oops, directory $expdir exists - exiting now rather than overwriting anything..."
+  exit
+else
+  echo "Creating output directory: $expdir"
+  mkdir $expdir
+  ## Copy parameter file to the output directory
+  cp $parameter_file $expdir
+  for block in $(seq -f "%02g" 1 $nsplits) ; do
+     echo "  copying files in job$block/" 
+     cp -pr job$block/ $expdir
+     ## Remove any .dat files
+     rm -r $expdir/job*/*.dat
+  done
+fi
+
+# Call python script to stitch each jobs output netcdf files (diurnal) together
+# Pass parameter name (number) as command line argument
+#python concat_write_netcdf_selvp.py ${expname} ${resolution} ${nsplits}
+python concat_write_netcdf_selvp_inclapar.py ${expname} ${resolution} ${nsplits}
+
+# Stitch together gridded outputs (e.g. pasm)
+python concat_write_gridnetcdf_selvp.py ${expname} ${resolution} ${nsplits}
+
+rm -r $expdir/job??/
+

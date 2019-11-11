@@ -1,0 +1,229 @@
+#!/bin/bash
+#PBS -P w22
+#PBS -q normal
+#PBS -l walltime=10:00:00
+#PBS -l mem=960GB
+#PBS -l ncpus=480
+#PBS -l wd
+
+### nodes = nsplits
+### mem = nsplits * 32GB
+### ncpus = nsplits * 16cpus
+
+defparamfile="/home/563/ajn563/short/fluoro2/118_scope_paramslist_bg2018"
+newparamfile="/home/563/ajn563/short/fluoro2/118_scope_paramslist_bg2018_dx"
+nsplits=30
+resolution=hires
+control_folder=/home/563/ajn563/short/fluoro2
+output_folder=/home/563/ajn563/short/fluoro2/output
+
+## Set OpenMP parallelisation variables
+export OMP_NUM_THREADS=16
+## lift any arbitrary limits on the per-process stack-size
+ulimit -s unlimited
+## raise the limit for the OpenMP per-thread stack-size
+export OMP_STACKSIZE=100MB
+
+
+## Set loop over parameters you want to run
+for param_n in {112,117}; 
+    do
+    echo "Parameter number: $param_n"
+    echo "         nsplits: $nsplits"
+    expnum=`printf %03d $param_n`
+    expname="H_p3${expnum}_gpp"
+    echo "          expnum: $expnum" 
+    echo "         expname: $expname"
+
+    cd $control_folder   
+ 
+    ## Wiggle selected parameter value in parameter file
+    python ./paramfile_delx.py -n $param_n -i $defparamfile -o $newparamfile
+    
+    ## Get PFTs relevant to the selected parameter
+    pft_s=$((python get_pfts.py -i $defparamfile -n $param_n) 2>&1)
+    
+    echo "   PFT(s): $pft_s"
+    
+    ## Create veg-point file for selected parameter. These are the veg-points the model runs over.
+    python ./control_blockruns/create_blockvpfile.py $resolution $nsplits "$pft_s"
+    echo "..created veg-point file for model"
+    
+    ## Create block control files
+    python ./control_blockruns/write_block_control_files.py $nsplits control_script_default_hires.nml control_script_block
+    echo "..created control file for each block"
+
+    ## Loop over blocks/servers
+    for iserver in `seq $nsplits` ; do
+      server=`cat $PBS_NODEFILE | sort -u | head -n $iserver | tail -n1`
+      iserver02=`printf '%0.2i' $iserver `
+      outfile="./control_blockruns/job_output_par${param_n}_${iserver02}.txt"
+      infile="./control_blockruns/control_script_block_${iserver02}.nml" 
+      #pbsdsh -n $(($iserver*16)) -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $control_folder/post $infile >& $outfile" &
+      icpu=$(( iserver * 16))
+      #echo "running program on server $iserver and cpu $icpu"
+      pbsdsh -n $icpu -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; ${control_folder}/post $infile >& $outfile" &
+    done
+    
+    wait
+    
+    ## Merge the separate block output files into a single netcdf file
+    cd $output_folder
+    
+    expdir=${expname}
+    
+    if [ -e $expdir ] ; then
+      echo "oops, directory $expdir exists - exiting now rather than overwriting anything..."
+      exit
+    else
+      echo "Creating output directory: $expdir"
+      mkdir $expdir
+      cp $newparamfile $expdir
+      for block in $(seq -f "%02g" 1 $nsplits) ; do
+         echo "  copying files in job$block/" 
+         cp -pr job$block/ $expdir
+         # remove any .dat files
+         rm -r $expdir/job*/*.dat
+      done
+    fi
+    
+    # Call python script to stitch job diurnal netcdf files together
+    # Pass parameter name (number) as command line argument
+    ##python concat_write_netcdf_selvp.py ${expname} ${resolution} ${nsplits}
+    python concat_write_netcdf_selvp_inclapar.py ${expname} ${resolution} ${nsplits}
+
+    # Stitch together gridded outputs (e.g. pasm)
+    python concat_write_gridnetcdf_selvp.py ${expname} ${resolution} ${nsplits}
+    
+    rm -r $expdir/job??/
+
+
+done
+
+
+## BLOCK
+#
+#expname=par4001
+#pft_s='1'
+#
+### Create control files
+##control_folder=/home/563/ajn563/short/fluoro2/control_blockruns
+##cd $control_folder
+##python write_block_control_files.py ${nsplits} 
+#
+### Create file specifying which veg-points per block (e.g. if you only want to run selected pft(s))
+##python create_blockvpfile.py ${resolution} ${nsplits} ${pft_s}
+#
+#
+### Run model in blocks over multiple servers 
+#
+#fluoro_folder=/home/563/ajn563/short/fluoro2
+#cd $fluoro_folder
+#
+### Set OpenMP parallelisation variables
+#export OMP_NUM_THREADS=16
+### lift any arbitrary limits on the per-process stack-size
+#ulimit -s unlimited
+### raise the limit for the OpenMP per-thread stack-size
+#export OMP_STACKSIZE=100MB
+#
+### Loop over blocks/servers
+#for iserver in `seq $nsplits` ; do
+#  server=`cat $PBS_NODEFILE | sort -u | head -n $iserver | tail -n1`
+#  iserver02=`printf '%0.2i' $iserver `
+#  outfile="./control_blockruns/job_output_${iserver02}.txt"
+#  infile="./control_blockruns/control_script_block_${iserver02}.nml" 
+#  pbsdsh -n $(($iserver*16)) -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+##  /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+#done
+#
+#wait
+#
+### Merge the separate block output files into a single netcdf file
+#output_folder=/home/563/ajn563/short/fluoro2/output
+#cd $output_folder
+#
+#expdir=${expname}
+#
+#if [ -e $expdir ] ; then
+#  echo "oops, directory $expdir exists - exiting now rather than overwriting anything..."
+#  exit
+#else
+#  echo "Creating output directory: $expdir"
+#  mkdir $expdir
+#  cp ../control_bethy/101_paramslist $expdir
+#  for block in $(seq -f "%02g" 1 $nsplits) ; do
+#     echo "  copying files in job$block/" 
+#     cp -pr job$block/ $expdir
+#     # remove any .dat files
+#     rm -r $expdir/job*/*.dat
+#  done
+#fi
+#
+## Call python script to stitch job diurnal netcdf files together
+## Pass parameter name (number) as command line argument
+#python concat_write_netcdf_selvp.py ${expname} ${resolution} ${nsplits}
+#
+## Stitch together gridded outputs (e.g. pasm)
+#python concat_write_gridnetcdf_selvp.py ${expname} ${resolution} ${nsplits}
+#
+#rm -r $expdir/job??/
+
+
+### BLOCK A
+#expname=par4064
+#pft_s='5,6,11'
+#
+## Run model in blocks over multiple servers 
+#
+#fluoro_folder=/home/563/ajn563/short/fluoro2
+#cd $fluoro_folder
+#
+### Set OpenMP parallelisation variables
+#export OMP_NUM_THREADS=16
+### lift any arbitrary limits on the per-process stack-size
+#ulimit -s unlimited
+### raise the limit for the OpenMP per-thread stack-size
+#export OMP_STACKSIZE=100MB
+#
+### Loop over blocks/servers
+#for iserver in `seq $nsplits` ; do
+#  server=`cat $PBS_NODEFILE | sort -u | head -n $iserver | tail -n1`
+#  iserver02=`printf '%0.2i' $iserver `
+#  outfile="./control_blockruns/job_output_${iserver02}.txt"
+#  infile="./control_blockruns/control_script_blockA_${iserver02}.nml"
+#  pbsdsh -n $(($iserver*16)) -- /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+##  /bin/bash -c "export OMP_NUM_THREADS=16 ; ulimit -s unlimited ; export OMP_STACKSIZE=100MB ; $fluoro_folder/post $infile >& $outfile" &
+#done
+#
+#wait
+#
+### Merge the separate block output files into a single netcdf file
+#output_folder=/home/563/ajn563/short/fluoro2/output
+#cd $output_folder
+#
+#expdir=${expname}
+#
+#if [ -e $expdir ] ; then
+#  echo "oops, directory $expdir exists - exiting now rather than overwriting anything..."
+#  exit
+#else
+#  echo "Creating output directory: $expdir"
+#  mkdir $expdir
+#  cp ../control_bethy/101_paramslist_blockA $expdir
+#  for block in $(seq -f "%02g" 1 $nsplits) ; do
+#     echo "  copying files in job$block/" 
+#     cp -pr job$block/ $expdir
+#     # remove any .dat files
+#     rm -r $expdir/job*/*.dat
+#  done
+#fi
+#
+## Call python script to stitch job diurnal netcdf files together
+## Pass parameter name (number) as command line argument
+#python concat_write_netcdf_selvp.py ${expname} ${resolution} ${nsplits}
+#
+## Stitch together gridded outputs (e.g. pasm)
+#python concat_write_gridnetcdf_selvp.py ${expname} ${resolution} ${nsplits}
+#
+#rm -r $expdir/job??/
